@@ -53,10 +53,10 @@ export async function downloadDecryptedFile(fileId: string, userKey: string) {
 
     const filePath = `encrypted-files/${fileId}.enc`;
 
-    const { data, error } = await supabase.storage.from("encrypted-data").download(`${filePath}?nocache=${Date.now()}`);
+    const { data, error: downloadError } = await supabase.storage.from("encrypted-data").download(`${filePath}?nocache=${Date.now()}`);
     // ?nocache=${Date.now()} helps preventing querying cached files from Supabase CDN
 
-    if (error) {
+    if (downloadError) {
         // throw new Error("Failed to download file: " + error.message);
         return "Unable to Locate File";
     }

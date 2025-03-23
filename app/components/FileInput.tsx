@@ -77,7 +77,7 @@ export const FileInput = () => {
                 onDragOver={handleDragOver}
             >
                 <FaRegFile size={60} className="text-neutral-300 group-active:scale-90 transition-[scale]" />
-                <span className="text-xl">Drag and drop a file or click to browse</span>
+                <span className="text-xl text-center">Drag and drop a file or click to browse</span>
                 <span className="text-neutral-300">PDF, image, video, or audio</span>
             </div>
 

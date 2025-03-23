@@ -5,7 +5,7 @@ export default function Send() {
 
     return (
         <div className='bg-black h-[100dvh] w-screen flex flex-col gap-15 items-center justify-center p-4 text-white'>
-           <div className='border border-neutral-500 w-120 h-auto rounded-xl flex flex-col items-center px-8 py-8 max-lg:scale-75'>
+           <div className='border border-neutral-500 w-120 h-auto rounded-xl flex flex-col items-center px-8 py-8 max-lg:w-80'>
                 <FileInput />
            </div>
         </div>

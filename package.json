@@ -19,7 +19,6 @@
         "next": "15.2.3",
         "node-cron": "^3.0.3",
         "react": "^19.0.0",
-        "react-animated-cursor": "^2.11.2",
         "react-dom": "^19.0.0",
         "react-icons": "^5.5.0"
     },
@@ -36,5 +35,8 @@
         "tailwindcss": "^4",
         "ts-node": "^10.9.2",
         "typescript": "^5.8.2"
+    },
+    "optionalDependencies": {
+        "react-animated-cursor": "^2.11.2"
     }
 }

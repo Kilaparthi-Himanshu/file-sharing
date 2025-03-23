@@ -103,8 +103,8 @@ export const FileInput = () => {
                 <span className={`text-lg ${errorMessage == "Success!" ? 'text-green-400' : 'text-red-400'}`}>{errorMessage}</span>
             </div>
 
-            {showFileIdDisplay && (
-                <FileIdDisplay fileId={fileId} />
+            {true && (
+                <FileIdDisplay fileId={"12334"} />
             )}
 
            {isUploadPending &&  <SpinnerRenderer />}

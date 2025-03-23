@@ -1,27 +1,39 @@
 {
-  "name": "file-sharing",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
-  },
-  "dependencies": {
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "next": "15.2.3"
-  },
-  "devDependencies": {
-    "typescript": "^5",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4",
-    "eslint": "^9",
-    "eslint-config-next": "15.2.3",
-    "@eslint/eslintrc": "^3"
-  }
+    "name": "file-sharing",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "dev": "next dev --turbopack",
+        "build": "next build",
+        "start": "next start",
+        "lint": "next lint"
+    },
+    "dependencies": {
+        "@supabase/ssr": "^0.6.1",
+        "@supabase/supabase-js": "^2.49.1",
+        "@tanstack/react-query": "^5.69.0",
+        "dotenv": "^16.4.7",
+        "framer-motion": "^12.5.0",
+        "jotai": "^2.12.2",
+        "next": "15.2.3",
+        "node-cron": "^3.0.3",
+        "react": "^19.0.0",
+        "react-animated-cursor": "^2.11.2",
+        "react-dom": "^19.0.0",
+        "react-icons": "^5.5.0"
+    },
+    "devDependencies": {
+        "@eslint/eslintrc": "^3",
+        "@tailwindcss/postcss": "^4",
+        "@types/node": "^20.17.25",
+        "@types/node-cron": "^3.0.11",
+        "@types/react": "^19",
+        "@types/react-dom": "^19",
+        "eslint": "^9",
+        "eslint-config-next": "15.2.3",
+        "supabase": "^2.19.7",
+        "tailwindcss": "^4",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.8.2"
+    }
 }

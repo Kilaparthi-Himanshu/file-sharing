@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import AnimatedCursor from "react-animated-cursor"
+import { ReactQueryProvider } from "./components/ReactQueryProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,11 +26,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
+        <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
-      </body>
+        >
+            <AnimatedCursor 
+                color="255, 255, 255"
+            />
+             <ReactQueryProvider>
+                {children}
+            </ReactQueryProvider>
+        </body>
     </html>
   );
 }

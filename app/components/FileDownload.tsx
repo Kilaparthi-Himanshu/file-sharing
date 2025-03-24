@@ -58,7 +58,7 @@ export const FileDownload = () => {
                     Download
                 </button>
 
-                <span className={`text-lg ${errorMessage === 'Success!' ? 'text-green-400' : 'text-red-400'}`}>{errorMessage}</span>
+                <span className={`text-lg ${errorMessage === 'Success!' ? 'text-green-400' : 'text-red-400'} ml-2`}>{errorMessage}</span>
             </div>
 
             {isDownloadPending &&  <SpinnerRenderer />}

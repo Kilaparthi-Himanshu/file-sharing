@@ -49,6 +49,7 @@ export const FileDownload = () => {
         if (message === "Wrong Secret Key!" || message === "Unable to Locate File/Text" || message === "Success!") {
             setErrorMessage(message);
         } else {
+            setTextIsCopied(false);
             setTextAreaOpen(true);
             setText(message);
         }

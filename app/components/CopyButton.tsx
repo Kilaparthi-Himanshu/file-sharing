@@ -9,7 +9,7 @@ export const CopyButton = ({ textIsCopied, handleCopy }: {textIsCopied: boolean,
             {!textIsCopied ? (
                 <motion.div
                     key="copyIcon"
-                    className="absolute bg-neutral-900 rounded-full w-max h-max right-2 bottom-2 p-2 active:scale-95 cursor-pointer"
+                    className="absolute bg-neutral-900 rounded-full w-max h-max right-2 bottom-2 p-2 active:scale-95"
                     title="Copy Text"
                     onClick={handleCopy}
                     initial={{ opacity: 0, y: 10 }}

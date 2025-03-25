@@ -8,3 +8,26 @@
 .input-border-animation {
     @apply transition-colors transition-shadow duration-200 ease-in-out;
 }
+
+@layer utilities {
+    /* styles.module.css */
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 10px !important;  /* Width of vertical scrollbar */
+        padding-right: 2px !important;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;  /* Scrollbar track */
+        border-radius: 6px !important;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: rgb(207, 207, 207) !important;  /* Scrollbar handle */
+        border-radius: 6px !important;
+    }
+
+    /* Hover effects */
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: rgb(110, 110, 110) !important;
+    }
+}

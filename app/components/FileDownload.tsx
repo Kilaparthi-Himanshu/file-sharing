@@ -5,6 +5,8 @@ import { downloadDecryptedFile } from "../functions/decrypt";
 import { useMutation } from "@tanstack/react-query";
 import { SpinnerRenderer } from "./Spinner";
 import { FaRegCopy } from "react-icons/fa";
+import { AnimatePresence, motion } from "framer-motion";
+import { CopyButton } from "./CopyButton";
 
 export const FileDownload = () => {
     const [secretKey, SetSecretKey] = useState<string>('')
@@ -67,14 +69,14 @@ export const FileDownload = () => {
     return(
         <>
             {textAreaOpen && (
-                <div className='relative border border-neutral-600 w-full h-80 max-lg:h-60 rounded-xl flex flex-col items-center gap-6 p-2 group focus:border-neutral-300 overflow-hidden mt-4'>
-                    <div className="absolute bg-neutral-800 rounded-full w-max h-max right-2 bottom-2 p-2 active:scale-95" title="Copy Text" onClick={handleCopy}>
-                        {!textIsCopied ? <FaRegCopy size={20} /> : <span className="text-green-400">Text Copied!</span>}
-                    </div>
-                    <textarea 
-                    className="outline-0 resize-none custom-scrollbar w-full h-full p-2"
-                    defaultValue={text}
-                    readOnly
+                <div className='relative border border-neutral-600 rounded-xl w-full h-80 max-lg:h-60 flex flex-col items-center gap-6 p-2 group focus:border-neutral-300 overflow-hidden mt-4'>
+
+                    <CopyButton textIsCopied={textIsCopied} handleCopy={handleCopy} />
+
+                    <textarea
+                        className="outline-0 resize-none custom-scrollbar w-full h-full p-2"
+                        value={text}
+                        readOnly
                     ></textarea>
                 </div>
             )}

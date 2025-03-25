@@ -47,11 +47,12 @@ export const FileDownload = () => {
         const message = await getFile({fileId, secretKey});
 
         if (message === "Wrong Secret Key!" || message === "Unable to Locate File/Text" || message === "Success!") {
+            setTextAreaOpen(false);
             setErrorMessage(message);
         } else {
-            setTextIsCopied(false);
             setTextAreaOpen(true);
             setText(message);
+            setErrorMessage("Success!");
         }
 
         setTimeout(() => {

@@ -19,7 +19,9 @@ export const TextInput = () => {
     });
 
     const handleUpload = async () => {
-        if (!text) {
+        const trimmedText = text.trim(); // Trim spaces
+
+        if (!trimmedText) {
             setErrorMessage("Please Enter some Text");
             return;
         }
@@ -56,6 +58,7 @@ export const TextInput = () => {
                     className="outline-0 resize-none custom-scrollbar w-full h-full p-2"
                     onChange={(e) => setText(e.target.value)}
                     placeholder="Enter Some Text ....."
+                    required
                 ></textarea>
             </div>
 

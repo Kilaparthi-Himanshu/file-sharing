@@ -4,6 +4,7 @@ import { useState } from "react";
 import { downloadDecryptedFile } from "../functions/decrypt";
 import { useMutation } from "@tanstack/react-query";
 import { SpinnerRenderer } from "./Spinner";
+import { FaRegCopy } from "react-icons/fa";
 
 export const FileDownload = () => {
     const [secretKey, SetSecretKey] = useState<string>('')
@@ -11,6 +12,7 @@ export const FileDownload = () => {
     const [errorMessage, setErrorMessage] = useState<string>("");
     const [text, setText] = useState<string>("");
     const [textAreaOpen, setTextAreaOpen] = useState<boolean>(false);
+    const [textIsCopied, setTextIsCopied] = useState<boolean>(false);
 
     const { mutateAsync: getFile, isPending: isDownloadPending } = useMutation({
         mutationFn: async (data: { fileId: string, secretKey: string }) => downloadDecryptedFile(data.fileId, data.secretKey)
@@ -54,14 +56,25 @@ export const FileDownload = () => {
         }, 5000);
     }
 
+    const handleCopy = () => {
+        setTextIsCopied(true);
+        navigator.clipboard.writeText(text);
+        setTimeout(() => {
+            setTextIsCopied(false);
+        }, 2000);
+    }
+
     return(
         <>
             {textAreaOpen && (
-                <div className='border border-neutral-600 w-full h-80 max-lg:h-60 rounded-xl flex flex-col items-center gap-6 p-2 group focus:border-neutral-300 overflow-hidden mt-4'>
+                <div className='relative border border-neutral-600 w-full h-80 max-lg:h-60 rounded-xl flex flex-col items-center gap-6 p-2 group focus:border-neutral-300 overflow-hidden mt-4'>
+                    <div className="absolute bg-neutral-800 rounded-full w-max h-max right-2 bottom-2 p-2 active:scale-95" title="Copy Text" onClick={handleCopy}>
+                        {!textIsCopied ? <FaRegCopy size={20} /> : <span className="text-green-400">Text Copied!</span>}
+                    </div>
                     <textarea 
                     className="outline-0 resize-none custom-scrollbar w-full h-full p-2"
                     defaultValue={text}
-                    placeholder="Enter Some Text ....."
+                    readOnly
                     ></textarea>
                 </div>
             )}

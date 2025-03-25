@@ -47,20 +47,20 @@ export const ModeSelect = () => {
 
             <AnimatePresence>
                 {openModeModal && (
-                    <motion.div className='w-30 h-full border border-neutral-700 rounded-lg flex justify-center p-2 flex-col gap-2 text-xl bg-black' 
+                    <motion.div className='w-30 h-full border border-neutral-700 rounded-lg flex justify-center flex-col px-2 text-xl bg-black' 
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.1 }}
                     >
-                        <div className='flex items-center justify-between px-2' onClick={() => handleModeChange("File")}>
+                        <div className='flex items-center justify-between p-2' onClick={() => handleModeChange("File")}>
                             File
                             {mode == "File" && <FaCheck size={18} />}
                         </div>
 
                         <div className='border-b border-neutral-700'></div>
 
-                        <div className='flex items-center justify-between px-2' onClick={() => handleModeChange("Text")}>
+                        <div className='flex items-center justify-between p-2' onClick={() => handleModeChange("Text")}>
                             Text
                             {mode == "Text" && <FaCheck size={18} />}
                         </div>

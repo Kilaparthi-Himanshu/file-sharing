@@ -26,6 +26,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+        <link rel="icon" href="/icon.png" sizes="any"></link>
+        <link rel="icon" type="image/png" href="/icon.png" sizes="32x32"></link>
+        <link rel="apple-touch-icon" href="/icon.png"></link>
         <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-hidden`}
         >

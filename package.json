@@ -27,13 +27,14 @@
     "devDependencies": {
         "@eslint/eslintrc": "^3",
         "@tailwindcss/postcss": "^4",
+        "@types/deno": "^2.2.0",
         "@types/node": "^20.17.25",
         "@types/node-cron": "^3.0.11",
         "@types/react": "^19",
         "@types/react-dom": "^19",
         "eslint": "^9",
         "eslint-config-next": "15.2.3",
-        "supabase": "^2.19.7",
+        "supabase": "^2.20.3",
         "tailwindcss": "^4",
         "ts-node": "^10.9.2",
         "typescript": "^5.8.2"

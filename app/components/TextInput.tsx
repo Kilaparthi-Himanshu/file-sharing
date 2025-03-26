@@ -1,7 +1,6 @@
 'use client';
 
-import { FaRegFile } from "react-icons/fa";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { uploadEncryptedText } from "../functions/encryptText";
 import { FileIdDisplay } from "./FileIdDisplay";
 import { useMutation } from '@tanstack/react-query';

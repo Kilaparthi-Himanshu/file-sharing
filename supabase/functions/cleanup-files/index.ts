@@ -1,12 +1,12 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
-
-serve(async (_req) => {
-    const supabase = createClient(
-        Deno.env.get('SUPABASE_URL') ?? '',
-        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
-
+import { createClient } from 'https://esm.sh/@supabase/supabase-js';
+ 
+const supabase = createClient(
+     Deno.env.get('SUPABASE_URL')!,
+     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+);
+ 
+ 
+export async function cleanupFiles() {
     const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
 
     // Get files older than 5 minutes
@@ -28,8 +28,7 @@ serve(async (_req) => {
         await supabase.from('temporary_files').delete().eq('file_path', file.file_path);
     }
 
-    return new Response(
-        JSON.stringify({ message: `Deleted ${files.length} expired files` }),
-        { status: 200 }
-    );
-});
+    console.log(`Deleted ${files.length} expired files.`);
+}
+
+cleanupFiles();

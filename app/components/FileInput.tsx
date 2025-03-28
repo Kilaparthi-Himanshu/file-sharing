@@ -6,6 +6,7 @@ import {  uploadEncryptedFile } from "../functions/encrypt";
 import { FileIdDisplay } from "./FileIdDisplay";
 import { useMutation } from '@tanstack/react-query';
 import { SpinnerRenderer } from "./Spinner";
+import { usePasswordEye } from "../utils/hooks/usePasswordEye";
 
 export const FileInput = () => {
     const [file, setFile] = useState<File | null>(null);
@@ -14,6 +15,7 @@ export const FileInput = () => {
     const [errorMessage, setErrorMessage] = useState<string>("");
     const [showFileIdDisplay, setShowFileIdDisplay] = useState<boolean>(false);
     const [fileId, setFileId] = useState<string>('');
+    const {isHidden, PasswordEye} = usePasswordEye();
 
     const { mutateAsync: addFile, isPending: isUploadPending } = useMutation({
         mutationFn: async (data: { file: File, secretKey: string }) => uploadEncryptedFile(data.file, data.secretKey)
@@ -93,7 +95,10 @@ export const FileInput = () => {
                 </div>
             </div>
 
-            <input type='text' className={`border border-neutral-600 w-full h-12 rounded-lg flex items-center p-2 mt-8 text-center text-xl ${secretKey && 'tracking-[8px]'}  font-sans focus:outline-4 outline-neutral-700 focus:border-neutral-400 focus:border-2 transition-[outline,border] duration-50`} maxLength={5}  placeholder='Enter 5-Digit Secret Key' required onChange={(e) => SetSecretKey(e.target.value)}/>
+            <div className="w-full relative mt-8">
+                <input type={isHidden ? 'password' : 'text'} className={`border border-neutral-600 w-full h-12 rounded-lg flex items-center p-2 text-center text-xl ${secretKey ? 'tracking-[8px]' : 'max-lg:text-sm'}  font-sans focus:outline-4 outline-neutral-700 focus:border-neutral-400 focus:border-2 transition-[outline,border] duration-[50ms,0ms]`} maxLength={5}  placeholder='Enter 5-Digit Secret Key' required onChange={(e) => SetSecretKey(e.target.value)}/>
+                <PasswordEye />
+            </div>
 
             <div className="w-full flex items-center mt-8 justify-between">
                 <button className="w-40 h-12 self-start border border-neutral-600 rounded-lg bg-neutral-800 hover:bg-neutral-900 transition-[background,scale] cursor-pointer active:scale-98" onClick={handleUpload}>

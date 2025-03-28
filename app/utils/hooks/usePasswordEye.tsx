@@ -22,7 +22,7 @@ export const usePasswordEye = () => {
                 </motion.div>
             </div>
         );
-    }, [isHidden]); // useCallback ensures the component dosen't rerender on input change
+    }, [isHidden]); // useCallback ensures the component dosen't re-render on input change
 
     return {isHidden, PasswordEye};
 }

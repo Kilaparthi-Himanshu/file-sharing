@@ -30,4 +30,10 @@
     .custom-scrollbar::-webkit-scrollbar-thumb:hover {
         background: rgb(110, 110, 110) !important;
     }
+
+    .char {
+        transform: translateY(115px);
+        transition: transform 0.5s;
+        display: inline-flex;
+    }   
 }

@@ -6,7 +6,7 @@ import React from 'react';
 export const ButtonsUi = () => {
     const router = useRouter();
 
-    const handleRedirect = (text: string) => {
+    const handleRedirect = (text: 'send' | 'receive') => {
         router.push(`/${text}`);
     }
 

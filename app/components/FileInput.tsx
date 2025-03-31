@@ -56,6 +56,12 @@ export const FileInput = () => {
             return;
         }
 
+        const maxSize = 5 * 1024 * 1024; //50MB
+        if (file.size > maxSize) {
+            setErrorMessage("Exceeds max file size of 50MB");
+            return;
+        }
+
         setErrorMessage("");
 
         const { fileId } = await addFile({file, secretKey});

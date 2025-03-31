@@ -15,7 +15,7 @@ export const OpeningPageTextAnimation = () => {
             });
 
             gsap.set('.char', {
-                y: 100,
+                y: -100,
                 opacity: 0,
                 letterSpacing: '10px'
             });

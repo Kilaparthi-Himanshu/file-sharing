@@ -1,6 +1,5 @@
 'use client';
 
-import { FaRegFile } from "react-icons/fa";
 import { useRef, useState } from "react";
 import {  uploadEncryptedFile } from "../functions/encrypt";
 import { FileIdDisplay } from "./FileIdDisplay";

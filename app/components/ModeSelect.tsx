@@ -27,7 +27,7 @@ export const ModeSelect = () => {
         };
     }, []);
 
-    const handleModeChange = (mode: string) => {
+    const handleModeChange = (mode: "File" | "Folder" | "Text") => {
         setMode(mode);
         setTimeout(() => {
             setOpenModeModal(false);
@@ -56,6 +56,13 @@ export const ModeSelect = () => {
                         <div className='flex items-center justify-between p-2' onClick={() => handleModeChange("File")}>
                             File
                             {mode == "File" && <FaCheck size={18} />}
+                        </div>
+
+                        <div className='border-b border-neutral-700'></div>
+
+                        <div className='flex items-center justify-between p-2' onClick={() => handleModeChange("Folder")}>
+                            Folder
+                            {mode == "Folder" && <FaCheck size={18} />}
                         </div>
 
                         <div className='border-b border-neutral-700'></div>

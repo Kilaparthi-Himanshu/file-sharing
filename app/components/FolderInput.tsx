@@ -7,8 +7,10 @@ import { FileIdDisplay } from "./FileIdDisplay";
 import { useMutation } from '@tanstack/react-query';
 import { SpinnerRenderer } from "./Spinner";
 import { usePasswordEye } from "../utils/hooks/usePasswordEye";
+import JSZip from "jszip";
+import { FaRegFolder } from "react-icons/fa6";
 
-export const FileInput = () => {
+export const FolderInput = () => {
     const [file, setFile] = useState<File | null>(null);
     const [secretKey, SetSecretKey] = useState<string>('')
     const fileRef = useRef<HTMLInputElement>(null);
@@ -16,33 +18,51 @@ export const FileInput = () => {
     const [showFileIdDisplay, setShowFileIdDisplay] = useState<boolean>(false);
     const [fileId, setFileId] = useState<string>('');
     const {isHidden, PasswordEye} = usePasswordEye();
+    const [uploadingFolder, setUploadingFolder] = useState<boolean>(false);
 
     const { mutateAsync: addFile, isPending: isUploadPending } = useMutation({
         mutationFn: async (data: { file: File, secretKey: string }) => uploadEncryptedFile(data.file, data.secretKey)
     });
 
-    const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
-        event.preventDefault();
-    };
-
-    const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
-        event.preventDefault();
-        const files = event.dataTransfer.files;
-        if (files && files[0]) {
-            setFile(files[0]);
-        }
-    };
-
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        setUploadingFolder(true);
         const files = event.target.files;
-        if (files && files[0]) {
-            setFile(files[0]);
+        if (!files || files.length === 0) {
+            setErrorMessage("Please Upload a Folder");
+            setUploadingFolder(false);
+            return;
         }
+
+        let totalSize = 0;
+        for (let i = 0; i < files.length; i++)
+            totalSize += files[i].size;
+
+        const maxSize = 50 * 1024 * 1024; // 50MB
+        if (totalSize > maxSize) {
+            setUploadingFolder(false);
+            setErrorMessage("Exceeds max size of 50MB");
+            return;
+        }
+
+        const zip = new JSZip();
+        const folderName = files[0].webkitRelativePath.split('/')[0]; // Get the folder name
+        const folderZip = zip.folder(folderName); // Create a folder inside ZIP
+
+        for (const file of files) {
+            const relativePath = file.webkitRelativePath; // Keep the original structure
+            const fileData = await file.arrayBuffer(); // Read file
+            folderZip!.file(relativePath.replace(folderName + "/", ""), fileData);
+        }
+
+        zip.generateAsync({ type: "blob" }).then(blob => {
+            setFile(new File([blob], `${folderName}.zip`, { type: "application/zip" }));
+        });
+        setUploadingFolder(false);
     };
 
     const handleUpload = async () => {
         if (!file) {
-            setErrorMessage("Please Upload a File");
+            setErrorMessage("Please Upload a Folder");
             return;
         }
 
@@ -58,7 +78,7 @@ export const FileInput = () => {
 
         const maxSize = 50 * 1024 * 1024; // 50MB
         if (file.size > maxSize) {
-            setErrorMessage("Exceeds max file size of 50MB");
+            setErrorMessage("Exceeds max size of 50MB");
             return;
         }
 
@@ -79,25 +99,28 @@ export const FileInput = () => {
 
     return(
         <>
-            <div className='border-2 border-dashed border-neutral-600 w-full h-60 rounded-xl flex flex-col items-center gap-6 p-4 pt-10 group'
-                onClick={() => fileRef?.current?.click()}
-                onDrop={handleDrop}
-                onDragOver={handleDragOver}
-            >
-                <FaRegFile size={60} className="text-neutral-300 group-active:scale-90 transition-[scale]" />
-                <span className="text-xl text-center">Drag and drop a file or click to browse</span>
-                <span className="text-neutral-300">PDF, image, video, or audio</span>
-            </div>
-
-            <div className="w-full mt-8" onClick={() => fileRef?.current?.click()}>
-                <div className="border border-neutral-600 w-full h-12 rounded-lg flex items-center p-2">
+            <div className="w-full" onClick={() => fileRef?.current?.click()}>
+                <div className="border-2 border-neutral-600 border-dashed w-full h-80 rounded-lg flex items-center p-2 justify-center text-xl text-center group">
                     <input 
                         type="file" 
-                        className="hidden" 
+                        className="hidden"
                         ref={fileRef} 
                         onChange={handleFileChange} 
+                        {...{ webkitdirectory: "true" }} 
+                        multiple
                     />
-                    {file ? file.name : "Choose File: No file chosen"}
+                    {file ? 
+                        <span className="">
+                            Ready to Upload:<br/>
+                            <span className="text-neutral-400">
+                                {file.name}
+                            </span>
+                        </span> : 
+                        <div className="flex flex-col items-center">
+                            <FaRegFolder size={60} className="text-neutral-300 group-active:scale-90 transition-[scale] mb-[24px]" />
+                            Click here to choose a Folder
+                        </div>
+                    }
                 </div>
             </div>
 
@@ -118,7 +141,7 @@ export const FileInput = () => {
                 <FileIdDisplay fileId={fileId} />
             )}
 
-           {isUploadPending &&  <SpinnerRenderer />}
+           {(isUploadPending || uploadingFolder) &&  <SpinnerRenderer />}
         </>
     );
 }

@@ -1,3 +1,3 @@
 import { atom } from "jotai";
 
-export const selectModeAtom = atom<string>("File");
+export const selectModeAtom = atom<"File" | "Folder" | "Text">("File");

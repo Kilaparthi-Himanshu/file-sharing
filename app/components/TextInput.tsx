@@ -54,7 +54,7 @@ export const TextInput = () => {
 
     return(
         <>
-            <div className='border border-neutral-600 w-full h-80 rounded-xl flex flex-col items-center gap-6 p-2 group focus:border-neutral-300 overflow-hidden'>
+            <div className='border-2 outline-1 outline-neutral-600  border-transparent w-full h-80 rounded-xl flex flex-col items-center gap-6 p-2 focus-within:outline-4 focus-within:outline-neutral-700 focus-within:border-neutral-400 focus-within:border-2 transition-[outline,border] duration-[50ms,0ms] overflow-hidden'>
                 <textarea 
                     className="outline-0 resize-none custom-scrollbar w-full h-full p-2"
                     onChange={(e) => setText(e.target.value)}

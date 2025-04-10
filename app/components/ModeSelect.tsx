@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { startTransition, useEffect, useRef, useState } from 'react';
 import { selectModeAtom } from '../Atoms/atoms';
 import { useAtom } from 'jotai';
 import { FaArrowDown } from "react-icons/fa";
@@ -28,7 +28,9 @@ export const ModeSelect = () => {
     }, []);
 
     const handleModeChange = (mode: "File" | "Folder" | "Text") => {
-        setMode(mode);
+        startTransition(() => {
+            setMode(mode);
+        });
         setTimeout(() => {
             setOpenModeModal(false);
         }, 200);

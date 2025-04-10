@@ -34,10 +34,10 @@ export default function Send() {
             </div>
            <ModeSelect />
             {mode === "Folder" && 
-                    <span className='absolute mb-4 bottom-0 text-lg flex text-center text-red-400 font-medium'>
-                        <IoWarningOutline className='text-center h-full mr-2' size={30} />
-                        This Feature Is Still in Beta
-                    </span>
+                <span className='absolute mb-4 bottom-0 text-lg flex text-center text-red-400 font-medium'>
+                    <IoWarningOutline className='text-center h-full mr-2' size={30} />
+                    This Feature Is Still in Beta
+                </span>
             }
         </div>
     );

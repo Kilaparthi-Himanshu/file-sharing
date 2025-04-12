@@ -27,3 +27,5 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ fileId });
 }
+
+// API to upload to supabase

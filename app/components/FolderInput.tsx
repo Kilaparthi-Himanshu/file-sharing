@@ -11,7 +11,7 @@ import { FaRegFolder } from "react-icons/fa6";
 
 export const FolderInput = () => {
     const [file, setFile] = useState<File | null>(null);
-    const [secretKey, SetSecretKey] = useState<string>('')
+    const [secretKey, SetSecretKey] = useState<string>('');
     const fileRef = useRef<HTMLInputElement>(null);
     const [errorMessage, setErrorMessage] = useState<string>("");
     const [showFileIdDisplay, setShowFileIdDisplay] = useState<boolean>(false);

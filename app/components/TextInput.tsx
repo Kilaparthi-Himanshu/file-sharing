@@ -9,7 +9,7 @@ import { usePasswordEye } from "../utils/hooks/usePasswordEye";
 
 export const TextInput = () => {
     const [text, setText] = useState<string>("");
-    const [secretKey, SetSecretKey] = useState<string>('')
+    const [secretKey, SetSecretKey] = useState<string>('');
     const [errorMessage, setErrorMessage] = useState<string>("");
     const [showFileIdDisplay, setShowFileIdDisplay] = useState<boolean>(false);
     const [fileId, setFileId] = useState<string>('');

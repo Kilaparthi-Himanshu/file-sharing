@@ -48,6 +48,20 @@ export async function uploadEncryptedFile(file: File, userKey: string) {
     const supabase = await createClient();
 
     const encryptedBlob = await encryptFile(file, userKey);
+
+    // const formData = new FormData();
+    // formData.append("file", encryptedBlob);
+
+    // const response = await fetch('/api/fileUpload', {
+    //     method: "POST",
+    //     body: formData
+    // });
+
+    // if (!response.ok)
+    //     throw new Error("Upload Failed");
+
+    // const { fileId } = await response.json();
+
     const fileId = Math.floor(100000 + Math.random() * 900000).toString();
     const filePath = `encrypted-files/${fileId}.enc`; // Store with `.enc` extension
 

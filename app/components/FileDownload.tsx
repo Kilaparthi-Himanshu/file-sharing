@@ -10,7 +10,7 @@ import { CopyButton } from "./CopyButton";
 import { usePasswordEye } from "../utils/hooks/usePasswordEye";
 
 export const FileDownload = () => {
-    const [secretKey, SetSecretKey] = useState<string>('')
+    const [secretKey, SetSecretKey] = useState<string>('');
     const [fileId, setFileId] = useState<string>('');
     const [errorMessage, setErrorMessage] = useState<string>("");
     const [text, setText] = useState<string>("");

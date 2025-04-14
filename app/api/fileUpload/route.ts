@@ -1,7 +1,13 @@
 import { createClient } from "@/app/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
+const API_ENABLED = false;
+
 export async function POST(req: NextRequest) {
+
+    if (!API_ENABLED) {
+        return NextResponse.json({ error: "This endpoint is disabled" }, { status: 403 });
+    }
 
     const formData = await req.formData();
     const file = formData.get("file") as File;

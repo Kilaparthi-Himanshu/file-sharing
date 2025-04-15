@@ -25,9 +25,11 @@ export const FolderInput = () => {
 
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         setUploadingFolder(true);
+        setErrorMessage("");
+
         const files = event.target.files;
         if (!files || files.length === 0) {
-            setErrorMessage("Please Upload a Folder");
+            setErrorMessage("The Folder is Empty");
             setUploadingFolder(false);
             return;
         }
@@ -99,7 +101,7 @@ export const FolderInput = () => {
     return(
         <>
             <div className="w-full" onClick={() => fileRef?.current?.click()}>
-                <div className="border-2 border-neutral-600 border-dashed w-full h-80 rounded-lg flex items-center p-2 justify-center text-xl text-center group">
+                <div className="border-2 border-neutral-600 border-dashed w-full h-80 rounded-lg flex items-center p-2 justify-center text-center group">
                     <input 
                         type="file" 
                         className="hidden"
@@ -109,15 +111,16 @@ export const FolderInput = () => {
                         multiple
                     />
                     {file ? 
-                        <span className="">
-                            Ready to Upload:<br/>
+                        <span className="text-xl">
+                            Ready to Upload:<br/><br/>
                             <span className="text-neutral-400">
                                 {file.name}
                             </span>
                         </span> : 
                         <div className="flex flex-col items-center">
                             <FaRegFolder size={60} className="text-neutral-300 group-active:scale-90 transition-[scale] mb-[24px]" />
-                            Click here to choose a Folder
+                            <span className="text-xl">Click here to choose a Folder</span>
+                            <span className="text-neutral-300 mt-[24px]">Folder will be compressed and uploaded</span>
                         </div>
                     }
                 </div>

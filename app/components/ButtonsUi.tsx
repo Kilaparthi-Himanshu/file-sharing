@@ -74,8 +74,8 @@ export const ButtonsUi = () => {
                                 </SmoothCorners>
                             </motion.div>
                         </motion.div>
-                        )}
-                    </AnimatePresence>
+                    )}
+                </AnimatePresence>
             </div>
         </div>
     );

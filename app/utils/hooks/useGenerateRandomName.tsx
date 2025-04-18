@@ -31,6 +31,7 @@ export const useGenerateRandomName = () => {
                     generateRandomName();
                     setTimeout(() => setIsRotating(false), 500);
                 }}
+                title={'Randomize'}
             >
                 <FaRandom
                     size={25}

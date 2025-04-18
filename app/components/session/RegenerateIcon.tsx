@@ -15,6 +15,7 @@ export default function RegenarateIcon({generateNewId}: {generateNewId: () => vo
                 generateNewId();
                 setIsRotating(prev => prev + 360);
             }}
+            title={'Randomize'}
         />
     );
 }

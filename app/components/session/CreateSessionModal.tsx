@@ -41,6 +41,7 @@ export default function CreateSessionModal({removeModal} : {removeModal: () => v
 
         const username = formData.get('username');
         const password = formData.get('password');
+        const sessionId = formData.get('sessionId')
 
         if (!username) {
             setErrorMessage("Please Enter a Username");
@@ -52,11 +53,11 @@ export default function CreateSessionModal({removeModal} : {removeModal: () => v
             return;
         }
 
-        console.log(formData.get('sessionId'));
-        console.log(formData.get('username'));
-        console.log(formData.get('password'));
+        console.log(username);
+        console.log(sessionId);
+        console.log(password);
 
-        router.push(`/session/${formData.get('sessionId')}`);
+        router.push(`/session/${sessionId}`);
     }
 
     return (
@@ -77,10 +78,10 @@ export default function CreateSessionModal({removeModal} : {removeModal: () => v
                 onClick={(e) => e.stopPropagation()} // prevent backdrop click
             >
                 <form onSubmit={createSession} className='w-full h-full flex flex-col items-center justify-center'>
-                    <label className='text-4xl font-light'>Session</label>
+                    <span className='text-4xl font-light'>Create Session</span>
 
                     <div className='w-full flex flex-col gap-2 mt-8'>
-                        <label>Session ID:</label>
+                        <span>Session ID:</span>
                         <div className='w-full relative'>
                             <input type="text" name='sessionId' className={`border border-neutral-600 w-full h-12 rounded-lg flex items-center p-2 text-center text-xl font-sans focus:outline-4 outline-neutral-700 focus:border-neutral-400 focus:border-2 transition-[outline,border] duration-[50ms,0ms] text-neutral-400`} maxLength={6} defaultValue={sessionId} readOnly/>
                             <RegenarateIcon generateNewId={generateNewId} />
@@ -88,7 +89,7 @@ export default function CreateSessionModal({removeModal} : {removeModal: () => v
                     </div>
 
                     <div className='w-full flex flex-col gap-2 mt-8'>
-                        <label>Username:</label>
+                        <span>Display Name:</span>
                         <div className='w-full relative'>
                             <input type="text" name='username' className={`border border-neutral-600 w-full h-12 rounded-lg flex items-center p-2 text-center text-xl font-sans focus:outline-4 outline-neutral-700 focus:border-neutral-400 focus:border-2 transition-[outline,border] duration-[50ms,0ms]`} value={randomName} onChange={(e) => setRandomName(e.target.value)} />
                             <RandomNameButton />
@@ -96,7 +97,7 @@ export default function CreateSessionModal({removeModal} : {removeModal: () => v
                     </div>
 
                     <div className='w-full flex flex-col gap-2 mt-8'>
-                        <label>Enter Session Password:</label>
+                        <span>Session Password:</span>
                         <div className='w-full relative'>
                             <input type={isHidden ? 'password' : 'text'} name='password' className={`border border-neutral-600 w-full h-12 rounded-lg flex items-center p-2 text-center text-xl font-sans focus:outline-4 outline-neutral-700 focus:border-neutral-400 focus:border-2 transition-[outline,border] duration-[50ms,0ms] pr-10 pl-10`} placeholder='Enter Session Password' />
                             <PasswordEye />

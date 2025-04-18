@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import CreateSessionModal from '../components/room/CreateSessionModal';
-import JoinSessionModal from '../components/room/JoinSessionModal';
+import CreateSessionModal from '../components/session/CreateSessionModal';
+import JoinSessionModal from '../components/session/JoinSessionModal';
 
 export default function SessionOptions()  {
     const [modalType, setModalType] = useState<'create' | 'join' | null>(null);

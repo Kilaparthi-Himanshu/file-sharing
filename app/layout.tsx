@@ -26,12 +26,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
     return (
-        <html lang="en">
+        <html lang="en" className="selection:bg-neutral-600 selection:text-white">
             <link rel="icon" href="/icon.png" sizes="any"></link>
             <link rel="icon" type="image/png" href="/icon.png" sizes="32x32"></link>
             <link rel="apple-touch-icon" href="/icon.png"></link>
             <body
-            className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-hidden`}
+                className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-hidden`}
             >
                 <div className="absolute w-full h-full bg-neutral-600/30 z-100 pointer-fine:hidden portrait:hidden flex items-center justify-center text-3xl text-red-400">
                     <div className="w-full h-20 flex justify-center items-center bg-neutral-600/70 font-sans">

@@ -1,11 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { Squircle } from "@squircle-js/react";
-import { SmoothCorners } from 'react-smooth-corners'
-import SuperEllipse from "react-superellipse";
+import React from 'react';
 
 export const ButtonsUi = () => {
     const router = useRouter();
@@ -13,8 +9,6 @@ export const ButtonsUi = () => {
     const handleRedirect = (text: 'send' | 'receive' | 'room') => {
         router.push(`/${text}`);
     }
-
-    const [isVisible, setIsVisible] = useState<boolean>(false);
 
     return (
         <div className='w-120 flex flex-col items-center max-sm:gap-8'>

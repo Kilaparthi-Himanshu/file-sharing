@@ -10,6 +10,8 @@
         "vercel-build": "next build || true"
     },
     "dependencies": {
+        "@react-spring/types": "^9.7.5",
+        "@react-spring/web": "^9.7.5",
         "@squircle-js/react": "^1.2.17",
         "@supabase/ssr": "^0.6.1",
         "@supabase/supabase-js": "^2.49.1",

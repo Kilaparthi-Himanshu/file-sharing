@@ -29,7 +29,7 @@ export const ButtonsUi = () => {
             </div>
 
             <div className='relative'>
-                <div 
+                <div
                     onMouseEnter={() => setIsVisible(true)} 
                     onMouseLeave={() => setIsVisible(false)} 
                     onTouchStart={() => setIsVisible(true)}
@@ -40,41 +40,24 @@ export const ButtonsUi = () => {
                 </div>
 
                 <AnimatePresence>
-                    {isVisible && (
-                        <motion.div
-                            className="absolute top-[90%] left-1/2 transform -translate-x-1/2 z-50 pointer-events-none"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.2, ease: "easeInOut" }}
-                            style={{
-                                willChange: 'opacity',
-                                transform: 'translateZ(0)',
-                            }}
+                {isVisible && (
+                    <motion.div
+                    className="absolute top-[90%] left-1/2 transform -translate-x-1/2 z-50 pointer-events-none"
+                    initial={{ opacity: 0, y: 0 }}
+                    animate={{ opacity: 1, y: 10 }}
+                    exit={{ opacity: 0, y: 0 }}
+                    transition={{ duration: 0.2, ease: "easeInOut" }}
+                    >
+                        <SmoothCorners
+                            corners="12, 3"
+                            borderRadius="20px"
+                            className="bg-neutral-900 p-4 text-white text-xl font-mono"
+                            {...{} as any}
                         >
-                            <motion.div
-                                initial={{ y: 0 }}
-                                animate={{ y: 10 }}
-                                exit={{ y: 0 }}
-                                transition={{ duration: 0.2, ease: "easeInOut" }}
-                                style={{
-                                willChange: 'transform',
-                                transform: 'translateZ(0)',
-                                backfaceVisibility: 'hidden',
-                                }}
-                                className="text-white text-xl font-mono"
-                            >
-                                <SmoothCorners
-                                    corners="12, 3"
-                                    borderRadius="20px"
-                                    className="bg-neutral-900 p-4 text-white"
-                                    {...{} as any}
-                                    >
-                                    Upcoming!
-                                </SmoothCorners>
-                            </motion.div>
-                        </motion.div>
-                    )}
+                            Upcoming!
+                        </SmoothCorners>
+                    </motion.div>
+                )}
                 </AnimatePresence>
             </div>
         </div>

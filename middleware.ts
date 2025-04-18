@@ -3,9 +3,9 @@ import { NextRequest, NextResponse } from 'next/server';
 export function middleware(request: NextRequest) {
     const pathname = request.nextUrl.pathname;
 
-    if (pathname.startsWith('/room')) {
-        // Match routes like /room/abc where abc is not a number
-        const postMatch = pathname.match(/^\/room\/([^/]+)$/);
+    if (pathname.startsWith('/session')) {
+        // Match routes like /session/abc where abc is not a number
+        const postMatch = pathname.match(/^\/session\/([^/]+)$/);
 
         if (postMatch) {
             const id = postMatch[1];
@@ -19,5 +19,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/room/:id*'],
+    matcher: ['/session/:id*'],
 };

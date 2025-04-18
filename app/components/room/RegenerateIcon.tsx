@@ -8,7 +8,7 @@ export default function RegenarateIcon({generateNewId}: {generateNewId: () => vo
 
     return(
         <IoMdRefresh 
-            className="absolute top-[11px] right-2 transition-transform duration-500"
+            className="absolute top-[9px] right-2 transition-transform duration-500"
             style={{ transform: `rotate(${isRotating}deg)` }}
             size={30}
             onClick={() => {

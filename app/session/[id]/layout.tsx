@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     description: "Share any files within a blink of an eye!",
 };
 
-export default function RoomLayout({
+export default function SessionLayout({
 children,
 }: Readonly<{
 children: React.ReactNode;

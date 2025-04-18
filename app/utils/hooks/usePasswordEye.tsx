@@ -10,7 +10,7 @@ export const usePasswordEye = () => {
 
     const PasswordEye = useCallback(() => {
         return (
-            <div className='absolute top-[11px] right-2' onClick={() => setIsHidden(!isHidden)}>
+            <div className='absolute top-[11px] right-3' onClick={() => setIsHidden(!isHidden)}>
                 <motion.div
                     key={isHidden ? 'hidden' : 'visible'}
                     initial={{ opacity: 0, scale: 0.5 }}

@@ -1,28 +1,28 @@
 'use client';
 
 import React, { useState } from 'react';
-import CreateRoomModal from '../components/room/CreateRoomModal';
-import JoinRoomModal from '../components/room/JoinRoomModal';
 import { AnimatePresence } from 'framer-motion';
+import CreateSessionModal from '../components/room/CreateSessionModal';
+import JoinSessionModal from '../components/room/JoinSessionModal';
 
-export default function RoomOptions()  {
+export default function SessionOptions()  {
     const [modalType, setModalType] = useState<'create' | 'join' | null>(null);
 
     return (
         <div className='w-[100dvw] h-[100dvh] bg-black flex flex-col items-center justify-center text-white font-bold text-8xl gap-4'>
             <div onClick={() => setModalType('create')}>
-                Create Room
+                Create Session
             </div>
             <div onClick={() => setModalType('join')}>
-                Join Room
+                Join Session
             </div>
 
             <AnimatePresence>
                 {modalType === 'create' && (
-                    <CreateRoomModal removeModal={() => setModalType(null)} />
+                    <CreateSessionModal removeModal={() => setModalType(null)} />
                 )}
                 {modalType === 'join' && (
-                    <JoinRoomModal removeModal={() => setModalType(null)} />
+                    <JoinSessionModal removeModal={() => setModalType(null)} />
                 )}
             </AnimatePresence>
         </div>

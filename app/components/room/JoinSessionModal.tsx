@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 
-export default function JoinRoomModal({removeModal} : {removeModal: () => void}) {
+export default function JoinSessionModal({removeModal} : {removeModal: () => void}) {
     return (
         <motion.div
             className="w-[100dvw] h-[100dvh] fixed inset-0 bg-neutral-800/50 flex items-center justify-center z-50"
@@ -16,7 +16,7 @@ export default function JoinRoomModal({removeModal} : {removeModal: () => void})
                 exit={{ scale: 0.95, opacity: 0 }}
                 transition={{ duration: 0.2 }}
             >
-                Join Room
+                Join Session
             </motion.div>
         </motion.div>
     )

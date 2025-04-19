@@ -87,7 +87,7 @@ export default function CreateSessionModal({removeModal} : {removeModal: () => v
             return;
         }
 
-        const data = await sessionCreate({displayName, sessionId, password});
+        const data = await sessionCreate({ displayName, sessionId, password });
 
         if (data.status === 'error') {
             setErrorMessage(data.message);

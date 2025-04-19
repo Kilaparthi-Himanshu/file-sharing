@@ -73,8 +73,6 @@ export const FileInput = () => {
         setTimeout(() => {
             setErrorMessage("");
         }, 3000);
-
-        console.log(fileId);
     }
 
     return(

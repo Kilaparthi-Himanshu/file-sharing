@@ -84,8 +84,6 @@ async function decryptText(encryptedBuffer: ArrayBuffer, userKey: string) {
 export async function downloadDecryptedFile(fileId: string, userKey: string) {
     const supabase = await createClient();
 
-    console.log(fileId);
-
     let filePath = `encrypted-files/${fileId}.enc`;
 
     let { data, error } = await supabase.storage.from("encrypted-data").download(`${filePath}?nocache=${Date.now()}`);

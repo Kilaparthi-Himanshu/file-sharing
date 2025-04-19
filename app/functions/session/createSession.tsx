@@ -13,7 +13,6 @@ interface CreateSessionTypes {
 export default async function createSession({ displayName, sessionId, password } : CreateSessionTypes) {
     const supabase = await createClient();
     const hashedPassword = await bycrypt.hash(password, 10);
-    // console.log({ displayName, sessionId, password,  hashedPassword });
 
     const { error } = await supabase.from('sessions').insert([
         { id: sessionId, password: hashedPassword, status: 'Active' }
@@ -22,7 +21,7 @@ export default async function createSession({ displayName, sessionId, password }
     if (error) {
         return { status: 'error', message: 'Unable to Create Session' };
     }
-    
+
     const cookieStore = await cookies();
     cookieStore.set(`sessionAccess:${sessionId}`, 'true', {
         httpOnly: true,

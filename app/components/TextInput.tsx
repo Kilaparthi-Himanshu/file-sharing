@@ -48,8 +48,6 @@ export const TextInput = () => {
         setTimeout(() => {
             setErrorMessage("");
         }, 3000);
-
-        console.log(fileId);
     }
 
     return(

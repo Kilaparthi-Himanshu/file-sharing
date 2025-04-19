@@ -65,7 +65,7 @@ export async function uploadEncryptedFile(file: File, userKey: string) {
     const fileId = Math.floor(100000 + Math.random() * 900000).toString();
     const filePath = `encrypted-files/${fileId}.enc`; // Store with `.enc` extension
 
-    const {data, error } = await supabase.storage.from("encrypted-data").upload(filePath, encryptedBlob, {
+    const {data, error} = await supabase.storage.from("encrypted-data").upload(filePath, encryptedBlob, {
         contentType: "application/octet-stream"
     });
 

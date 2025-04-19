@@ -10,6 +10,7 @@ import createSession from '@/app/functions/session/createSession';
 import { ToastContainer, toast, Bounce } from 'react-toastify';
 import { useMutation } from '@tanstack/react-query';
 import { SpinnerRenderer } from '../Spinner';
+import { IoClose } from "react-icons/io5";
 
 export default function CreateSessionModal({removeModal} : {removeModal: () => void}) {
     const [sessionId, setSessionId] = useState<string>("");
@@ -112,13 +113,14 @@ export default function CreateSessionModal({removeModal} : {removeModal: () => v
                 onClick={removeModal}
             >
                 <motion.div 
-                    className="bg-black border border-neutral-500 p-8 text-xl w-[500px] h-max rounded-xl font-normal"
+                    className="bg-black border border-neutral-500 p-8 text-xl w-[500px] h-max rounded-xl font-normal relative"
                     initial={{ scale: 0.95, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 0.95, opacity: 0 }}
                     transition={{ duration: 0.2 }}
                     onClick={(e) => e.stopPropagation()} // prevent backdrop click
                 >
+                    <IoClose className='absolute top-2 right-2 text-white' size={34} onClick={removeModal} />
                     <form onSubmit={handleSubmit} className='w-full h-full flex flex-col items-center justify-center'>
                         <span className='text-4xl font-light'>Create Session</span>
 

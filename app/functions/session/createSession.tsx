@@ -18,9 +18,7 @@ export default async function createSession({ displayName, sessionId, password }
         { id: sessionId, password: hashedPassword, status: 'Active' }
     ]);
 
-    if (error) {
-        return { status: 'error', message: 'Unable to Create Session' };
-    }
+    if (error) return { status: 'error', message: 'Unable to Create Session' };
 
     const cookieStore = await cookies();
     cookieStore.set(`sessionAccess:${sessionId}`, 'true', {

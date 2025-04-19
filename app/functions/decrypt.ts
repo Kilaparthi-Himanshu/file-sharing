@@ -90,8 +90,6 @@ export async function downloadDecryptedFile(fileId: string, userKey: string) {
     // ?nocache=${Date.now()} helps preventing querying cached files from Supabase CDN
 
     if (!error && data) {
-        console.log(`File downloaded successfully, size: ${data.size} bytes`);
-
         const encryptedBuffer = await data.arrayBuffer();
         const decryptResult = await decryptFile(encryptedBuffer, userKey);
 
@@ -119,7 +117,6 @@ export async function downloadDecryptedFile(fileId: string, userKey: string) {
      // ?nocache=${Date.now()} helps preventing querying cached files from Supabase CDN
 
     if (!error && data) {
-        console.log(`Text file found: ${filePath}`);
         const encryptedBuffer = await data.arrayBuffer();
         return await decryptText(encryptedBuffer, userKey);
     }

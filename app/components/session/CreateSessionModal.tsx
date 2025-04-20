@@ -97,9 +97,7 @@ export default function CreateSessionModal({removeModal} : {removeModal: () => v
 
         notify(data.message);
 
-        setTimeout(() => {
-            router.push(`/session/${sessionId}`);
-        }, 1500);
+        router.push(`/session/${sessionId}`);
     }
 
     return (

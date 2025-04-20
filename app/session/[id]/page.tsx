@@ -5,15 +5,14 @@ import { ToastContainer } from 'react-toastify';
 import SessionDetailsBanner from '@/app/components/session/SessionDetailsBanner';
 
 type Props = {
-    params: { id: string };
-    searchParams: { participantId: string }
+    params: Promise<{ id: string }>;
+    searchParams: Promise<{ participantId: string }>;
 }
 
-export default async function Session(props: Props) {
-    const { params, searchParams } = props;
+export default async function Session({ params, searchParams }: Props) {
 
-    const id = params.id;
-    const participantId = searchParams.participantId;
+    const { id } = await params;
+    const { participantId } = await searchParams;
 
     return (
         <>

@@ -4,7 +4,8 @@ import { useAtom } from "jotai";
 import { sessionDetails } from "@/app/Atoms/atoms";
 import { createClient } from "@/app/utils/supabase/client";
 import { useEffect } from "react";
-import { toast, Bounce } from "react-toastify";
+import { toast, Slide } from "react-toastify";
+import { AnimatePresence, motion } from "framer-motion";
 
 export default function SessionDetailsBanner({ 
     sessionId,
@@ -39,7 +40,7 @@ export default function SessionDetailsBanner({
             draggable: true,
             progress: undefined,
             theme: "dark",
-            transition: Bounce,
+            transition: Slide,
             style: {
                 background: 'black',
                 border: '1px solid rgb(50, 50, 50)'
@@ -52,13 +53,24 @@ export default function SessionDetailsBanner({
     }, []);
 
     return (
-        <div className="border border-neutral-500 w-max h-max p-3 flex flex-col absolute top-0 m-2 text-white text-[16px] font-normal rounded-xl gap-2 font-inter ">
-            <span>Sender: 
-                <span className="text-teal-400"> {sessionData.displayName}</span>
-            </span>
-            <span>Session ID: 
-                <span className="text-amber-400"> {sessionData.sessionId}</span>
-            </span>
-        </div>
+        <>
+            <AnimatePresence>
+                {sessionData.displayName && (
+                    <motion.div 
+                        className="border border-neutral-500 w-max h-max p-3 flex flex-col absolute top-0 m-2 text-white text-[16px] font-normal rounded-xl gap-2 font-inter"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        <span>Sender: 
+                            <span className="text-teal-400"> {sessionData.displayName}</span>
+                        </span>
+                        <span>Session ID: 
+                            <span className="text-amber-400"> {sessionData.sessionId}</span>
+                        </span>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </>
     );
 }

@@ -4,7 +4,7 @@ import { useAtom } from "jotai";
 import { sessionDetails } from "@/app/Atoms/atoms";
 import { createClient } from "@/app/utils/supabase/client";
 import { useEffect } from "react";
-import { toast, Zoom } from "react-toastify";
+import { toast, Bounce } from "react-toastify";
 
 export default function SessionDetailsBanner({ 
     sessionId,
@@ -39,7 +39,7 @@ export default function SessionDetailsBanner({
             draggable: true,
             progress: undefined,
             theme: "dark",
-            transition: Zoom,
+            transition: Bounce,
             style: {
                 background: 'black',
                 border: '1px solid rgb(50, 50, 50)'

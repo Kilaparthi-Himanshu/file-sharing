@@ -13,7 +13,7 @@ export default async function Session({
     searchParams: { participantId: string }
 }) {
     const id = params.id;
-    const participantIt = searchParams.participantId;
+    const participantId = searchParams.participantId;
 
     return (
         <>
@@ -26,7 +26,7 @@ export default async function Session({
                 </div>
             </main>
             <ToastContainer />
-            <SessionDetailsBanner sessionId={id} participantIt={participantIt} />
+            <SessionDetailsBanner sessionId={id} participantId={participantId} />
         </>
     );
 }

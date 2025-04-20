@@ -8,10 +8,10 @@ import { toast, Bounce } from "react-toastify";
 
 export default function SessionDetailsBanner({ 
     sessionId,
-    participantIt 
+    participantId 
 } : { 
     sessionId: string
-    participantIt: string 
+    participantId: string 
 }) {
     const [sessionData, setSessionData] = useAtom(sessionDetails);
     const supabase =  createClient();
@@ -20,7 +20,7 @@ export default function SessionDetailsBanner({
         const { data, error } = await supabase
             .from('session_participants')
             .select('display_name')
-            .eq('id', participantIt)
+            .eq('id', participantId)
             .single();
 
         if (error) return;

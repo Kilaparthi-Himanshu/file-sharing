@@ -4,15 +4,16 @@ import ReceiveFiles from '@/app/components/session/ReceiveFiles';
 import { ToastContainer } from 'react-toastify';
 import SessionDetailsBanner from '@/app/components/session/SessionDetailsBanner';
 
-export default async function Session({
-    params,
-    searchParams
-}: {
+type Props = {
     params: { id: string };
-    searchParams?: { participantId?: string }
-}) {
+    searchParams: { participantId: string }
+}
+
+export default async function Session(props: Props) {
+    const { params, searchParams } = props;
+
     const id = params.id;
-    const participantId = searchParams?.participantId ?? "";
+    const participantId = searchParams.participantId;
 
     return (
         <>

@@ -16,6 +16,10 @@ export async function middleware(request: NextRequest) {
                 // Does not match digits or is not of length of six digits redirect to 404
             }
 
+            if (id === '123456') {
+                return;
+            } // To be strictly removed in Production
+
             const cookieStore = await cookies();
             const accessCookie = cookieStore.get(`sessionAccess:${id}`);
             const participantCookie = cookieStore.get(`participant-${id}`);
@@ -23,11 +27,10 @@ export async function middleware(request: NextRequest) {
             const isValidSession = accessCookie && accessCookie.value === 'true';
             const isValidParticipant = participantCookie;
 
-            if ((!isValidSession || !isValidParticipant) && (id != '123456')) {
+            if ((!isValidSession || !isValidParticipant)) {
                 cookieStore.delete(`sessionAccess:${id}`);
                 cookieStore.delete(`participant-${id}`);
                 return NextResponse.redirect(new URL('/404', request.url));
-                // && (id != '123456') to be removed in production
             }
 
             const supabase = await createClient();

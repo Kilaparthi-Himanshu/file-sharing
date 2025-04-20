@@ -57,17 +57,25 @@ export default function SessionDetailsBanner({
             <AnimatePresence>
                 {sessionData.displayName && (
                     <motion.div 
-                        className="border border-neutral-500 w-max h-max p-3 flex flex-col absolute top-0 m-2 text-white text-[16px] font-normal rounded-xl gap-2 font-inter"
+                        className="w-max h-max absolute top-0"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.3 }}
                     >
-                        <span>Sender: 
-                            <span className="text-teal-400"> {sessionData.displayName}</span>
-                        </span>
-                        <span>Session ID: 
-                            <span className="text-amber-400"> {sessionData.sessionId}</span>
-                        </span>
+                        <div className="border border-neutral-500 relatve w-full h-full p-3 flex flex-col m-2 text-white text-[16px] font-normal rounded-xl gap-2 font-inter">
+                            <span>Sender: 
+                                <span className="text-teal-400"> {sessionData.displayName}</span>
+                            </span>
+                            <span>Session ID: 
+                                <span className="text-amber-400"> {sessionData.sessionId}</span>
+                            </span>
+                            <div className="absolute right-[-12] top-1">
+                                <span className="relative flex size-3">
+                                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-300 opacity-75"></span>
+                                    <span className="relative inline-flex size-3 rounded-full bg-green-400"></span>
+                                </span>
+                            </div>
+                        </div>
                     </motion.div>
                 )}
             </AnimatePresence>

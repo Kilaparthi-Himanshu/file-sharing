@@ -47,8 +47,10 @@ export async function middleware(request: NextRequest) {
             }
 
             const updatedUrl = request.nextUrl;
+            const participantIdFromCookie = participantCookie?.value;
+            const participantIdFromQuery = updatedUrl.searchParams.get('participantId');
 
-            if (!updatedUrl.searchParams.has('participantId')) {
+            if (participantIdFromQuery !== participantIdFromCookie) {
                 updatedUrl.searchParams.set('participantId', participantCookie?.value!);
                 return NextResponse.redirect(updatedUrl); // Redirect to the same page with the participantId
             }

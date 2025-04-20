@@ -13,24 +13,45 @@ export async function middleware(request: NextRequest) {
             const id = postMatch[1];
             if (!/^\d+$/.test(id) || id.length !== 6) {
                 return NextResponse.redirect(new URL('/404', request.url));
-            } // Does not match digits or is not of length of six digits redirect to 404
+                // Does not match digits or is not of length of six digits redirect to 404
+            }
 
             const cookieStore = await cookies();
             const accessCookie = cookieStore.get(`sessionAccess:${id}`);
+            const participantCookie = cookieStore.get(`participant-${id}`);
 
-            if ((!accessCookie || accessCookie.value != 'true') && (id != '123456'))
+            const isValidSession = accessCookie && accessCookie.value === 'true';
+            const isValidParticipant = participantCookie;
+
+            if ((!isValidSession || !isValidParticipant) && (id != '123456')) {
+                cookieStore.delete(`sessionAccess:${id}`);
+                cookieStore.delete(`participant-${id}`);
                 return NextResponse.redirect(new URL('/404', request.url));
                 // && (id != '123456') to be removed in production
+            }
 
             const supabase = await createClient();
-            const { data: session, error } = await supabase
-                .from('sessions')
+            const { data, error } = await supabase
+                .from('session_participants')
                 .select('id')
-                .eq('id', id)
+                .match({
+                    id: participantCookie?.value,
+                    session_id: id
+                })
                 .single();
 
-            if (!session || error)
+            if (!data || error) {
+                cookieStore.delete(`sessionAccess:${id}`);
+                cookieStore.delete(`participant-${id}`);
                 return NextResponse.redirect(new URL('/404', request.url));
+            }
+
+            const updatedUrl = request.nextUrl;
+
+            if (!updatedUrl.searchParams.has('participantId')) {
+                updatedUrl.searchParams.set('participantId', participantCookie?.value!);
+                return NextResponse.redirect(updatedUrl); // Redirect to the same page with the participantId
+            }
         }
     }
 

@@ -1,9 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Merriweather:ital,opsz,wght@0,18..144,300..900;1,18..144,300..900&display=swap" rel="stylesheet');
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:ital,opsz,wght@0,18..144,300..900;1,18..144,300..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
 @import "tailwindcss";
 
 @theme {
     --font-merriweather: "Merriweather", serif;
+    --font-inter: "Inter", sans-serif;
 }
 
 .input-border-animation {

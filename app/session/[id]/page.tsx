@@ -1,5 +1,4 @@
 import React from 'react';
-import { notFound } from 'next/navigation';
 import SendFiles from '@/app/components/session/SendFiles';
 import ReceiveFiles from '@/app/components/session/ReceiveFiles';
 import { ToastContainer } from 'react-toastify';
@@ -10,10 +9,10 @@ export default async function Session({
     searchParams
 }: {
     params: { id: string };
-    searchParams: { participantId: string }
+    searchParams?: { participantId?: string }
 }) {
     const id = params.id;
-    const participantId = searchParams.participantId;
+    const participantId = searchParams?.participantId ?? "";
 
     return (
         <>

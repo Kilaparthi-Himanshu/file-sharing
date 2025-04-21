@@ -42,11 +42,10 @@ export default function CreateSessionModal({removeModal} : {removeModal: () => v
         }
 
         document.addEventListener('keydown', handleKeydown);
-        return () => document.removeEventListener('keydown', handleKeydown);
-    }, []);
 
-    useEffect(() => {
         generateNewId();
+
+        return () => document.removeEventListener('keydown', handleKeydown);
     }, []);
 
     const generateNewId = () => {

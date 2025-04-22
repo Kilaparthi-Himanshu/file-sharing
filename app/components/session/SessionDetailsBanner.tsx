@@ -3,7 +3,7 @@
 import { useAtom } from "jotai";
 import { sessionDetails } from "@/app/Atoms/atoms";
 import { createClient } from "@/app/utils/supabase/client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { toast, Slide } from "react-toastify";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -16,7 +16,8 @@ export default function SessionDetailsBanner({
 }) {
     const [sessionData, setSessionData] = useAtom(sessionDetails);
     const supabase =  createClient();
-
+    const [sessionStatus, setSessionStatus] = useState<'active' | 'inactive'>('active');
+ 
     const fetcUserDetails = async () => {
         const { data, error } = await supabase
             .from('session_participants')
@@ -61,6 +62,7 @@ export default function SessionDetailsBanner({
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.3 }}
+                        title={sessionStatus === 'active' ? 'Session Active' : 'Session Inactive'}
                     >
                         <div className="border border-neutral-500 relatve w-full h-full p-3 flex flex-col m-2 text-white text-[16px] font-normal rounded-xl gap-2 font-inter">
                             <span>Sender: 
@@ -71,8 +73,8 @@ export default function SessionDetailsBanner({
                             </span>
                             <div className="absolute right-[-12] top-1">
                                 <span className="relative flex size-3">
-                                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-300 opacity-75"></span>
-                                    <span className="relative inline-flex size-3 rounded-full bg-green-400"></span>
+                                    <span className={`absolute inline-flex h-full w-full animate-ping rounded-full ${sessionStatus === 'active' ? 'bg-green-300' : 'bg-yellow-300'} opacity-75`}></span>
+                                    <span className={`relative inline-flex size-3 rounded-full ${sessionStatus === 'active' ? 'bg-green-400' : 'bg-yellow-400'}`}></span>
                                 </span>
                             </div>
                         </div>

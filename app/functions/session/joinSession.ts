@@ -20,7 +20,7 @@ export default async function joinSession({ displayName, sessionId, password } :
 
     if (hashedPasswordDataError)  return { status: 'error', message: 'Unable to Retrive Password' }
 
-    const isMatch = await bycrypt.compare(password, hashedPasswordData?.password);
+    const isMatch = await bycrypt.compare(password, hashedPasswordData.password);
 
     if (!isMatch)  return { status: 'error', message: 'Wrong Password!' }
  

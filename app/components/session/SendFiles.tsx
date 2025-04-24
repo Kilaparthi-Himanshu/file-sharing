@@ -24,7 +24,6 @@ export default function SendFiles() {
 
     const handleUpload = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         event.stopPropagation();
-        
     }
 
     return (

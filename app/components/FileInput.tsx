@@ -2,7 +2,7 @@
 
 import { FaRegFile } from "react-icons/fa";
 import { useRef, useState } from "react";
-import {  uploadEncryptedFile } from "../functions/encrypt";
+import { uploadEncryptedFile } from "../functions/encrypt";
 import { FileIdDisplay } from "./FileIdDisplay";
 import { useMutation } from '@tanstack/react-query';
 import { SpinnerRenderer } from "./Spinner";

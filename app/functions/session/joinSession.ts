@@ -47,5 +47,5 @@ export default async function joinSession({ displayName, sessionId, password } :
         sameSite: 'lax', // good for CSRF protection without breaking UX
     });
 
-    return { status: 'success', message: 'Created a Session!' };
+    return { status: 'success', message: 'Joining the Session!' };
 }

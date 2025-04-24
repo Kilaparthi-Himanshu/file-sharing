@@ -95,7 +95,7 @@ export default function SessionDetailsBanner({
                         transition={{ duration: 0.3 }}
                         title={sessionStatus === 'Active' ? 'Session Active' : 'Session Inactive'}
                     >
-                        <div className="border border-neutral-500 relatve w-full h-full p-3 flex flex-col m-2 text-white text-[16px] font-normal rounded-xl gap-2 font-inter">
+                        <div className="border border-neutral-500 relatve w-full h-full p-3 flex m-2 text-white text-[16px] font-normal rounded-xl gap-2 font-inter">
                             <span>Sender: 
                                 <span className="text-teal-400"> {sessionData.displayName}</span>
                             </span>

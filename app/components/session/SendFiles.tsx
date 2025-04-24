@@ -36,7 +36,7 @@ export default function SendFiles() {
             >
                 <div className="w-full h-full flex flex-col items-center justify-center gap-4 text-center">
                     <LuFileStack className="mb-2 text-8xl max-lg:text-5xl" />
-                    <span className="text-xl font-normal max-sm:text-lg">Drag and drop a file or click to browse</span>
+                    <span className="text-xl font-normal max-sm:text-lg">Drag and drop files or click to browse</span>
                     <span className="text-neutral-300 text-lg font-normal max-sm:text-sm">PDF, image, video, or audio</span>
                     <input type="file" multiple hidden ref={fileRef} onChange={handleFileChange}/>
                 </div>

@@ -29,23 +29,24 @@ export default function SendFiles() {
 
     return (
         <div className="border border-neutral-500 w-full h-full text-white rounded-xl flex flex-row lg:flex-col p-4 gap-2 max-lg:gap-4">
-            <div className="border-2 border-neutral-700 border-dashed rounded-xl flex-1 flex flex-col items-center justify-center gap-4 p-2 relative"
+            <div className="border-2 border-neutral-700 border-dashed rounded-xl flex-1 flex flex-col items-center justify-center gap-4 p-2 relative group"
                 onClick={() => fileRef?.current?.click()}
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={handleDrop}
             >
-                <div className="w-full h-full flex flex-col items-center justify-center gap-4 text-center">
-                    <LuFileStack className="mb-2 text-8xl max-lg:text-5xl" />
-                    <span className="text-xl font-normal max-sm:text-lg">Drag and drop files or click to browse</span>
+                <div className="w-full h-full flex flex-col items-center justify-center gap-4 max-sm:gap-0 max-sm:justify-start text-center">
+                    <LuFileStack className="mb-2 text-8xl max-lg:text-5xl max-sm:mb-0 group-active:scale-90 transition-[scale]" />
+                    <span className="text-xl max-sm:text-sm font-normal max-sm:hidden">Drag and drop files or click to browse</span>
+                    <span className="text-xl max-sm:text-sm font-normal sm:hidden">Click to Add Files</span>
                     <span className="text-neutral-300 text-lg font-normal max-sm:text-sm">PDF, image, video, or audio</span>
                     <input type="file" multiple hidden ref={fileRef} onChange={handleFileChange}/>
                 </div>
 
                 <button 
-                    className="absolute bottom-2 right-2 max-lg:right-1 px-6 py-2 bg-neutral-900 active:bg-neutral-950 transition-[background,scale] active:scale-96 max-lg:active:scale-86 border border-neutral-700 text-lg rounded-xl max-lg:scale-90"
+                    className="sm:absolute bottom-2 right-2 max-lg:right-1 px-6 py-2 bg-neutral-900 active:bg-neutral-950 transition-[background,scale] active:scale-96 max-lg:active:scale-86 border border-neutral-700 text-lg rounded-xl max-lg:scale-90"
                     onClick={handleUpload}
                 >
-                    Upload
+                    Send
                 </button>
             </div>
 
@@ -79,7 +80,7 @@ export default function SendFiles() {
                     </div>
                 ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                        <span className="text-neutral-500 text-4xl font-bold text-center font-inter">No Files Sent Yet</span>
+                        <span className="text-neutral-500 text-4xl max-sm:text-2xl font-bold text-center font-inter">No Files Have Been Sent Yet</span>
                     </div>
                 )}
             </div>

@@ -34,9 +34,7 @@ export default function SendFiles() {
 
         if (!files) return;
 
-        const formatedDate = formatTime(new Date());
-        const filesWithTime = [...Array.from(files)].map(file => ({file, addedAt: formatedDate}));
-        setPendingFiles(prevFiles => [...prevFiles, ...filesWithTime]);
+        handleFiles(files);
         // No spreading ...file to preserve the full File object reference
         // creating new object in format 
         // {file: File, addedAt: Fri Apr 25 2025 10:56:58 GMT+0530 (India Standard Time)}
@@ -46,6 +44,10 @@ export default function SendFiles() {
         const files = event.target.files;
         if (!files) return;
 
+        handleFiles(files);
+    }
+
+    const handleFiles = (files: FileList) => {
         const formatedDate = formatTime(new Date());
         const filesWithTime = [...Array.from(files)].map(file => ({file, addedAt: formatedDate}));
         setPendingFiles(prevFiles => [...prevFiles, ...filesWithTime]);
@@ -63,24 +65,29 @@ export default function SendFiles() {
                 onDrop={handleDrop}
             >
                 <div className="w-full h-full flex flex-col items-center justify-center gap-4 max-sm:gap-0 max-sm:justify-start text-center group">
-                    <LuFileStack className="mb-2 text-8xl max-lg:text-5xl max-sm:mb-0 group-active:scale-90 transition-[scale]" />
-                    <span className="text-xl max-sm:text-sm font-normal max-sm:hidden">Drag and drop files or click to browse</span>
-                    <span className="text-xl max-sm:text-sm font-normal sm:hidden">Click to Add Files</span>
-                    <span className="text-neutral-300 text-lg font-normal max-sm:text-sm">PDF, image, video, or audio</span>
                     <input type="file" multiple hidden ref={fileRef} onChange={handleFileChange}/>
+                    {pendingFiles.length === 0 ? (<>
+                        <LuFileStack className="mb-2 text-8xl max-lg:text-5xl max-sm:mb-0 group-active:scale-90 transition-[scale]" />
+                        <span className="text-xl max-sm:text-sm font-normal max-sm:hidden">Drag and drop files or click to browse</span>
+                        <span className="text-xl max-sm:text-sm font-normal sm:hidden">Click to Add Files</span>
+                        <span className="text-neutral-300 text-lg font-normal max-sm:text-sm">PDF, image, video, or audio</span>
+                    </>) : (
+                        <div>
+
+                        </div>
+                    )}
                 </div>
 
                 <div className="sm:absolute bottom-2 right-2 flex flex-row gap-1 lg:gap-2">
                     <button 
-                        className={`px-6 py-2 bg-neutral-900 active:bg-neutral-950 transition-[background,scale] active:scale-96 border border-neutral-700 text-lg rounded-xl ${sentFiles.length > 0 && 'max-sm:px-3 max-sm:py-1'}`}
+                        className={`px-6 py-2 bg-neutral-900 active:bg-neutral-950 transition-[background,scale] active:scale-96 border border-neutral-700 text-lg rounded-xl ${pendingFiles.length > 0 && 'max-sm:px-3 max-sm:py-1'}`}
                         onClick={handleUpload}
                     >
                         Send
                     </button>
 
-                    {sentFiles.length > 0 && (<button 
+                    {pendingFiles.length > 0 && (<button 
                         className="px-6 py-2 bg-neutral-900 active:bg-neutral-950 transition-[background,scale] active:scale-96 border border-neutral-700 text-lg rounded-xl max-sm:px-3 max-sm:py-1"
-                        onClick={handleUpload}
                         onMouseDown={(e) => e.stopPropagation()}
                         onPointerDown={(e) => e.stopPropagation()}
                     >

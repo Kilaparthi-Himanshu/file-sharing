@@ -4,7 +4,13 @@ import { useRef, useState } from "react";
 import { CiFileOn, CiImageOn, CiText, CiVideoOn, CiMusicNote1 } from "react-icons/ci";
 import { LuFileStack } from "react-icons/lu";
 
+type SenderFiles = {
+    file: File;
+    addedAt: Date;
+}
+
 export default function SendFiles() {
+    const [pendingFiles, setPendingFiles] = useState<SenderFiles[]>([]);
     const [sentFiles, setSentFiles] = useState<File[]>([]);
     const fileRef = useRef<HTMLInputElement>(null);
 
@@ -14,6 +20,10 @@ export default function SendFiles() {
         if (!files) return;
         console.log(files);
         setSentFiles([...sentFiles, ...Array.from(files)]);
+        console.log(sentFiles.map(file => ({file, addedAt: new Date()}))); 
+        // No spreading ...file to preserve the full File object reference
+        // creating new object in format 
+        // {file: File, addedAt: Fri Apr 25 2025 10:56:58 GMT+0530 (India Standard Time)}
     }
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {

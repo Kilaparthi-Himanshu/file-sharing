@@ -1,31 +1,26 @@
-'use client';
+'use server';
 
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import React from 'react';
 
-export const ButtonsUi = () => {
-    const router = useRouter();
-
-    const handleRedirect = (text: 'send' | 'receive' | 'session') => {
-        router.push(`/${text}`);
-    }
+export const ButtonsUi = async () => {
 
     return (
         <div className='w-120 flex flex-col items-center max-sm:gap-8'>
             <div className='w-120 h-40 flex items-center justify-around font-mono max-sm:flex-col max-sm:h-auto gap-8'>
-                <button className='border border-neutral-600 w-40 h-15 rounded-lg text-white text-xl hover:bg-neutral-800 transition-[background,scale] cursor-pointer active:scale-98' onClick={() => handleRedirect("send")}>
+                <Link className='border border-neutral-600 w-40 h-15 rounded-lg text-white text-xl hover:bg-neutral-800 transition-[background,scale] cursor-pointer active:scale-98 flex items-center justify-center' href='/send'>
                     Send
-                </button>
+                </Link>
 
-                <button className='border border-neutral-600 w-40 h-15 rounded-lg text-white text-xl hover:bg-neutral-800 transition-[background,scale] cursor-pointer active:scale-98' onClick={() => handleRedirect("receive")}>
+                <Link className='border border-neutral-600 w-40 h-15 rounded-lg text-white text-xl hover:bg-neutral-800 transition-[background,scale] cursor-pointer active:scale-98 flex items-center justify-center' href='/receive'>
                     Receive
-                </button>
+                </Link>
             </div>
 
             <div className='relative'>
-                <button className='border border-neutral-600 w-40 h-15 rounded-lg text-white text-xl hover:bg-neutral-800 transition-[background,scale] cursor-pointer active:scale-98' onClick={() => handleRedirect('session')}>
+                <Link className='border border-neutral-600 w-40 h-15 rounded-lg text-white text-xl hover:bg-neutral-800 transition-[background,scale] cursor-pointer active:scale-98 flex items-center justify-center' href='/session'>
                     Session
-                </button>
+                </Link>
             </div>
         </div>
     );

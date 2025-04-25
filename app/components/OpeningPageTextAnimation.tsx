@@ -33,7 +33,7 @@ export const OpeningPageTextAnimation = () => {
 
     return (
         <div id='title' ref={textRef} className='tracking-[10px] text-shadow-lg text-shadow-blue-500/80'>
-           Blinkshare
+           BlinkShare
         </div>
     );
 }

@@ -1,12 +1,19 @@
 'use client';
 
+import { AnimatePresence, motion } from "framer-motion";
 import { useRef, useState } from "react";
 import { CiFileOn, CiImageOn, CiText, CiVideoOn, CiMusicNote1 } from "react-icons/ci";
 import { LuFileStack } from "react-icons/lu";
 
 type SenderFiles = {
     file: File;
-    addedAt: Date;
+    addedAt: string;
+}
+
+type FileComponent = {
+    file: SenderFiles;
+    type: string;
+    index: number
 }
 
 export default function SendFiles() {
@@ -14,13 +21,22 @@ export default function SendFiles() {
     const [sentFiles, setSentFiles] = useState<File[]>([]);
     const fileRef = useRef<HTMLInputElement>(null);
 
+    const formatTime = (date: Date) => {
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        return `${hours}:${minutes}:${seconds}`;
+    }
+
     const handleDrop =(event: React.DragEvent<HTMLDivElement>) => {
         event.preventDefault();
         const files = event.dataTransfer.files;
+
         if (!files) return;
-        console.log(files);
-        setSentFiles([...sentFiles, ...Array.from(files)]);
-        console.log(sentFiles.map(file => ({file, addedAt: new Date()}))); 
+
+        const formatedDate = formatTime(new Date());
+        const filesWithTime = [...Array.from(files)].map(file => ({file, addedAt: formatedDate}));
+        setPendingFiles(prevFiles => [...prevFiles, ...filesWithTime]);
         // No spreading ...file to preserve the full File object reference
         // creating new object in format 
         // {file: File, addedAt: Fri Apr 25 2025 10:56:58 GMT+0530 (India Standard Time)}
@@ -29,7 +45,10 @@ export default function SendFiles() {
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
         if (!files) return;
-        setSentFiles([...sentFiles, ...Array.from(files)]);
+
+        const formatedDate = formatTime(new Date());
+        const filesWithTime = [...Array.from(files)].map(file => ({file, addedAt: formatedDate}));
+        setPendingFiles(prevFiles => [...prevFiles, ...filesWithTime]);
     }
 
     const handleUpload = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -38,12 +57,12 @@ export default function SendFiles() {
 
     return (
         <div className="border border-neutral-500 w-full h-full text-white rounded-xl flex flex-row lg:flex-col p-4 gap-2 max-lg:gap-4">
-            <div className="border-2 border-neutral-700 border-dashed rounded-xl flex-1 flex flex-col items-center justify-center gap-4 p-2 relative group"
+            <div className="border-2 border-neutral-700 border-dashed rounded-xl flex-1 flex flex-col items-center justify-center gap-4 p-2 relative"
                 onClick={() => fileRef?.current?.click()}
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={handleDrop}
             >
-                <div className="w-full h-full flex flex-col items-center justify-center gap-4 max-sm:gap-0 max-sm:justify-start text-center">
+                <div className="w-full h-full flex flex-col items-center justify-center gap-4 max-sm:gap-0 max-sm:justify-start text-center group">
                     <LuFileStack className="mb-2 text-8xl max-lg:text-5xl max-sm:mb-0 group-active:scale-90 transition-[scale]" />
                     <span className="text-xl max-sm:text-sm font-normal max-sm:hidden">Drag and drop files or click to browse</span>
                     <span className="text-xl max-sm:text-sm font-normal sm:hidden">Click to Add Files</span>
@@ -51,39 +70,35 @@ export default function SendFiles() {
                     <input type="file" multiple hidden ref={fileRef} onChange={handleFileChange}/>
                 </div>
 
-                <button 
-                    className="sm:absolute bottom-2 right-2 max-lg:right-1 px-6 py-2 bg-neutral-900 active:bg-neutral-950 transition-[background,scale] active:scale-96 max-lg:active:scale-86 border border-neutral-700 text-lg rounded-xl max-lg:scale-90"
-                    onClick={handleUpload}
-                >
-                    Send
-                </button>
+                <div className="sm:absolute bottom-2 right-2 flex flex-row gap-1 lg:gap-2">
+                    <button 
+                        className={`px-6 py-2 bg-neutral-900 active:bg-neutral-950 transition-[background,scale] active:scale-96 border border-neutral-700 text-lg rounded-xl ${sentFiles.length > 0 && 'max-sm:px-3 max-sm:py-1'}`}
+                        onClick={handleUpload}
+                    >
+                        Send
+                    </button>
+
+                    {sentFiles.length > 0 && (<button 
+                        className="px-6 py-2 bg-neutral-900 active:bg-neutral-950 transition-[background,scale] active:scale-96 border border-neutral-700 text-lg rounded-xl max-sm:px-3 max-sm:py-1"
+                        onClick={handleUpload}
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onPointerDown={(e) => e.stopPropagation()}
+                    >
+                        Add
+                    </button>)}
+                </div>
             </div>
 
             <span className="text-xl w-full max-lg:hidden">Files Sent:</span>
 
             <div className="rounded-xl flex-1 overflow-y-auto custom-scrollbar">
-                {sentFiles.length > 0 ? (
+                {pendingFiles.length > 0 ? (
                     <div className="w-full flex gap-2 flex-wrap">
-                        {sentFiles.map((file, index) => {
-                            const type = file.type.split('/')[0];
+                        {pendingFiles.map((file, index) => {
+                            const type = file.file.type.split('/')[0];
 
                             return (
-                                <div key={index} className="border border-neutral-500 text-lg font-normal w-30 h-28 p-2 gap-2 flex flex-col items-center justify-center rounded-xl text-center">
-                                    {
-                                        type === 'image' ? (
-                                            <CiImageOn size={30} />
-                                        ) : type === 'text' ? (
-                                            <CiText size={30} />
-                                        ) : type === 'audio' ? (
-                                            <CiMusicNote1 size={30} />
-                                        ) : type === 'video' ? (
-                                            <CiVideoOn size={30} />
-                                        ) : (
-                                            <CiFileOn size={30} />
-                                        )
-                                    }
-                                    <span className="line-clamp-filename w-full text-[16px]">{file.name}</span>
-                                </div>
+                                <FileItem key={index} file={file} type={type} index={index} />
                             );
                         })}
                     </div>
@@ -93,6 +108,46 @@ export default function SendFiles() {
                     </div>
                 )}
             </div>
+        </div>
+    );
+}
+
+const FileItem = ({ file, type, index }: FileComponent) => {
+    const [isHovered, setIsHovered] = useState(false);
+
+    return (
+        <div key={index} 
+            className="border border-neutral-500 text-lg font-normal w-30 h-28 p-2 gap-2 flex flex-col items-center justify-center rounded-xl text-center relative overflow-hidden" 
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+        >
+            {
+                type === 'image' ? (
+                    <CiImageOn size={30} />
+                ) : type === 'text' ? (
+                    <CiText size={30} />
+                ) : type === 'audio' ? (
+                    <CiMusicNote1 size={30} />
+                ) : type === 'video' ? (
+                    <CiVideoOn size={30} />
+                ) : (
+                    <CiFileOn size={30} />
+                )
+            }
+            <span className="line-clamp-filename w-full text-[16px]">{file.file.name}</span>
+            <AnimatePresence>
+                {isHovered && (
+                    <motion.div 
+                        className="flex flex-col items-center justify-center w-full h-full absolute bg-neutral-700/20 backdrop-blur-sm font-sans rounded-xl"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.2 }}
+                    >
+                        <span>Sent At:</span>
+                        <span>{file.addedAt}</span>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

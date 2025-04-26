@@ -10,6 +10,7 @@
         "vercel-build": "next build || true"
     },
     "dependencies": {
+        "@formkit/auto-animate": "^0.8.2",
         "@react-spring/types": "^9.7.5",
         "@react-spring/web": "^9.7.5",
         "@squircle-js/react": "^1.2.17",

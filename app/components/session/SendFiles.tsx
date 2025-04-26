@@ -42,7 +42,8 @@ export default function SendFiles() {
         style: {
             background: 'black',
             border: '1px solid rgb(28, 28, 28)',
-            width: '500px'
+            width: '300px',
+            textAlign: 'center'
         }
     });
     const notifySuccess = (message: string) => toast.success(message, {
@@ -113,7 +114,7 @@ export default function SendFiles() {
         const MAX_SIZE = 50 * 1024 * 1024; // 50MB
         for (const file of pendingFiles) {
             if (file.file.size > MAX_SIZE) {
-                notifyError('A File or more exceed 50MB, please remove them!');
+                notifyError('A File or more exceed 50MB, please remove them !');
                 return;
             }
         }
@@ -245,7 +246,7 @@ const FileItem = ({ file, type, index }: FileComponent) => {
 
     return (
         <div key={index} 
-            className="border border-neutral-500 text-lg font-normal w-30 h-28 p-2 gap-2 flex flex-col items-center justify-center rounded-xl text-center relative overflow-hidden" 
+            className="border border-neutral-500 text-lg font-normal w-30 h-28 p-2 gap-2 flex flex-col items-center justify-center rounded-xl text-center relative overflow-hidden max-sm:h-14 max-sm:w-35 pointer-fine:max-sm:w-44 max-sm:flex-row"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
@@ -266,7 +267,7 @@ const FileItem = ({ file, type, index }: FileComponent) => {
             <AnimatePresence mode="wait">
                 {isHovered && (
                     <motion.div 
-                        className="flex flex-col items-center justify-center w-full h-full absolute bg-neutral-700/20 backdrop-blur-sm font-sans rounded-xl"
+                        className="flex flex-col items-center justify-center w-full h-full absolute bg-neutral-700/20 backdrop-blur-sm font-sans rounded-xl max-sm:text-sm"
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.9 }}

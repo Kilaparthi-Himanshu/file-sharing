@@ -245,7 +245,7 @@ const FileItem = ({ file, type, index }: FileComponent) => {
     const [isHovered, setIsHovered] = useState(false);
 
     return (
-        <div key={index} 
+        <div key={index}
             className="border border-neutral-500 text-lg font-normal w-30 h-28 p-2 gap-2 flex flex-col items-center justify-center rounded-xl text-center relative overflow-hidden max-sm:h-14 max-sm:w-35 pointer-fine:max-sm:w-44 max-sm:flex-row"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}

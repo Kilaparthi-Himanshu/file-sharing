@@ -88,7 +88,7 @@ export const FileInput = () => {
             </div>
 
             <div className="w-full mt-8" onClick={() => fileRef?.current?.click()}>
-                <div className="border border-neutral-600 w-full h-12 rounded-lg flex items-center p-2">
+                <div className="border border-neutral-600 w-full h-12 rounded-lg flex items-center p-2 overflow-hidden">
                     <input 
                         type="file" 
                         className="hidden" 

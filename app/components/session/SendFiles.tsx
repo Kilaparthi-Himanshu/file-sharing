@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useRef, useState } from "react";
 import { CiFileOn, CiImageOn, CiText, CiVideoOn, CiMusicNote1 } from "react-icons/ci";
 import { LuFileStack } from "react-icons/lu";
+import { FaRegTrashCan } from "react-icons/fa6";
 
 type SenderFiles = {
     file: File;
@@ -19,6 +20,7 @@ type FileComponent = {
 export default function SendFiles() {
     const [pendingFiles, setPendingFiles] = useState<SenderFiles[]>([]);
     const [sentFiles, setSentFiles] = useState<File[]>([]);
+    const [isDragging, setIsDragging] = useState(false);
     const fileRef = useRef<HTMLInputElement>(null);
 
     const formatTime = (date: Date) => {
@@ -29,6 +31,7 @@ export default function SendFiles() {
     }
 
     const handleDrop =(event: React.DragEvent<HTMLDivElement>) => {
+        setIsDragging(false);
         event.preventDefault();
         const files = event.dataTransfer.files;
 
@@ -53,32 +56,68 @@ export default function SendFiles() {
         setPendingFiles(prevFiles => [...prevFiles, ...filesWithTime]);
     }
 
+    const handleDelete = (event: React.MouseEvent, index: number) => {
+        event.preventDefault();
+        event.stopPropagation();
+        setPendingFiles(prevFiles => prevFiles.filter((_, fileIndex) => fileIndex != index));
+    }
+
     const handleUpload = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         event.stopPropagation();
     }
 
     return (
         <div className="border border-neutral-500 w-full h-full text-white rounded-xl flex flex-row lg:flex-col p-4 gap-2 max-lg:gap-4">
-            <div className="border-2 border-neutral-700 border-dashed rounded-xl flex-1 flex flex-col items-center justify-center gap-4 p-2 relative"
+            <div className="border-2 border-neutral-700 border-dashed rounded-xl flex-1 flex flex-col items-center justify-center gap-4 p-2 relative max-lg:max-w-1/2 lg:max-h-1/2"
                 onClick={() => fileRef?.current?.click()}
                 onDragOver={(e) => e.preventDefault()}
+                onDragEnter={() => setIsDragging(true)}
+                onDragLeave={(e) => {
+                    // Check if leaving towards outside the div
+                    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                      setIsDragging(false);
+                    }
+                }}
                 onDrop={handleDrop}
             >
-                <div className="w-full h-full flex flex-col items-center justify-center gap-4 max-sm:gap-0 max-sm:justify-start text-center group">
-                    <input type="file" multiple hidden ref={fileRef} onChange={handleFileChange}/>
-                    {pendingFiles.length === 0 ? (<>
-                        <LuFileStack className="mb-2 text-8xl max-lg:text-5xl max-sm:mb-0 group-active:scale-90 transition-[scale]" />
-                        <span className="text-xl max-sm:text-sm font-normal max-sm:hidden">Drag and drop files or click to browse</span>
-                        <span className="text-xl max-sm:text-sm font-normal sm:hidden">Click to Add Files</span>
-                        <span className="text-neutral-300 text-lg font-normal max-sm:text-sm">PDF, image, video, or audio</span>
-                    </>) : (
-                        <div>
+                {!isDragging ? (
+                    <div className={`w-full h-full flex flex-col items-center justify-center gap-4 max-sm:gap-0 pointer-coarse:max-sm:justify-start text-center group ${pendingFiles.length !== 0 && 'justify-start'}`}>
+                        <input type="file" multiple hidden ref={fileRef} onChange={handleFileChange}/>
+                        {pendingFiles.length === 0 ? (
+                            <>
+                                <LuFileStack className="mb-2 text-8xl max-lg:text-5xl max-sm:mb-0 group-active:scale-90 transition-[scale]" />
+                                <span className="text-xl max-sm:text-sm font-normal max-sm:hidden">Drag and drop files or click to browse</span>
+                                <span className="text-xl max-sm:text-sm font-normal sm:hidden">Click to Add Files</span>
+                                <span className="text-neutral-300 text-lg font-normal max-sm:text-sm">PDF, image, video, or audio</span>
+                            </>
+                        ) : (
+                            <div className="w-full overflow-y-auto pointer-coarse:max-sm:h-30 max-sm:h-50 custom-scrollbar">
+                                <div className="flex flex-col gap-2 overflow-hidden max-w-full">
+                                    {pendingFiles.map((file, index) => (
+                                        <div key={index} className="w-full py-2 text-ellipsis truncate flex gap-2 border border-neutral-800 rounded-xl px-2">
+                                            <div className="w-full overflow-x-hidden flex">
+                                                <span className="text-start w-full">
+                                                    <span className="font-bold">{index + 1}. </span>
+                                                    {file.file.name}
+                                                </span>
+                                            </div>
 
-                        </div>
-                    )}
-                </div>
+                                            <div className="right-0 top-1 p-1 rounded" onClick={(event) => handleDelete(event, index)}>
+                                                <FaRegTrashCan className="text-[#e22a33] text-lg" />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    <div className="w-full h-full backdrop-blur-lg flex items-center justify-center rounded-xl bg-gradient-to-br from-neutral-900/20 via-neutral-700/40 to-neutral-900/20 text-2xl font-inter font-bold">
+                        Drop Here
+                    </div>
+                )}
 
-                <div className="sm:absolute bottom-2 right-2 flex flex-row gap-1 lg:gap-2">
+                <div className={`sm:absolute bottom-2 right-2 flex flex-row gap-1 lg:gap-2 ${pendingFiles.length > 0 && 'right-14'}`}>
                     <button 
                         className={`px-6 py-2 bg-neutral-900 active:bg-neutral-950 transition-[background,scale] active:scale-96 border border-neutral-700 text-lg rounded-xl ${pendingFiles.length > 0 && 'max-sm:px-3 max-sm:py-1'}`}
                         onClick={handleUpload}
@@ -86,13 +125,15 @@ export default function SendFiles() {
                         Send
                     </button>
 
-                    {pendingFiles.length > 0 && (<button 
-                        className="px-6 py-2 bg-neutral-900 active:bg-neutral-950 transition-[background,scale] active:scale-96 border border-neutral-700 text-lg rounded-xl max-sm:px-3 max-sm:py-1"
-                        onMouseDown={(e) => e.stopPropagation()}
-                        onPointerDown={(e) => e.stopPropagation()}
-                    >
-                        Add
-                    </button>)}
+                    {pendingFiles.length > 0 && (
+                        <button 
+                            className="px-6 py-2 bg-neutral-900 active:bg-neutral-950 transition-[background,scale] active:scale-96 border border-neutral-700 text-lg rounded-xl max-sm:px-3 max-sm:py-1"
+                            onMouseDown={(e) => e.stopPropagation()}
+                            onPointerDown={(e) => e.stopPropagation()}
+                        >
+                            Add
+                        </button>
+                    )}
                 </div>
             </div>
 

@@ -31,7 +31,7 @@ export default function SendFiles() {
     });
     const notifyError = (message: string) => toast.error(message, {
         position: "top-center",
-        autoClose: 10000,
+        autoClose: 5000,
         hideProgressBar: true,
         closeOnClick: true,
         pauseOnHover: true,

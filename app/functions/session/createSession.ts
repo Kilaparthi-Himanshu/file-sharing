@@ -15,7 +15,7 @@ export default async function createSession({ displayName, sessionId, password }
     const hashedPassword = await bycrypt.hash(password, 10);
 
     const { error: sessionCreationError } = await supabase.from('sessions').insert([
-        { id: sessionId, password: hashedPassword, status: 'Active' }
+        { id: sessionId, password: hashedPassword }
     ]);
 
     if (sessionCreationError) return { status: 'error', message: 'Unable to Create Session' }

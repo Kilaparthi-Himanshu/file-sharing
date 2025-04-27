@@ -49,6 +49,23 @@ export async function middleware(request: NextRequest) {
                 return NextResponse.redirect(new URL('/404', request.url));
             }
 
+            cookieStore.set(`sessionAccess:${id}`, 'true', {
+                httpOnly: true,
+                maxAge: 3600, // expires in 1 hour
+                path: '/',
+                secure: process.env.NODE_ENV === 'production', // only secure on HTTPS in prod
+                sameSite: 'lax', // good for CSRF protection without breaking UX
+            });
+
+            cookieStore.set(`participant-${id}`, participantCookie.value, {
+                httpOnly: true,
+                maxAge: 3600, // expires in 1 hour
+                path: '/',
+                secure: process.env.NODE_ENV === 'production', // only secure on HTTPS in prod
+                sameSite: 'lax', // good for CSRF protection without breaking UX
+            });
+            // Resetting the cookies, the old ones get overridden
+
             const updatedUrl = request.nextUrl;
             const participantIdFromCookie = participantCookie?.value;
             const participantIdFromQuery = updatedUrl.searchParams.get('participantId');

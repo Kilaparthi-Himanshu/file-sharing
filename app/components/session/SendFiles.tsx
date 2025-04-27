@@ -14,15 +14,16 @@ type SenderFiles = {
     addedAt: string;
 }
 
-type FileComponent = {
-    file: SenderFiles;
+type FileInfo = {
+    name: string;
     type: string;
-    index: number
+    addedAt: string;
+    index?: number
 }
 
 export default function SendFiles() {
     const [pendingFiles, setPendingFiles] = useState<SenderFiles[]>([]);
-    const [sentFiles, setSentFiles] = useState<SenderFiles[]>([]);
+    const [sentFiles, setSentFiles] = useState<FileInfo[]>([]);
     const [isDragging, setIsDragging] = useState(false);
     const fileRef = useRef<HTMLInputElement>(null);
     const [parent] = useAutoAnimate({
@@ -127,7 +128,11 @@ export default function SendFiles() {
             }, 3000);
         }); // to be removed when tanstack query support is added
 
-        setSentFiles(prevFiles => [...prevFiles, ...pendingFiles]); 
+        setSentFiles(prevFiles => [...prevFiles, 
+            ...pendingFiles.map(file => ({ 
+                name: file.file.name, type: file.file.type, addedAt: file.addedAt 
+            }))
+        ]);
         setPendingFiles([]);
         notifySuccess('Successfully Uploaded the File(s) !');
     }
@@ -222,10 +227,10 @@ export default function SendFiles() {
                 {sentFiles.length > 0 ? (
                     <div className="w-full flex gap-2 flex-wrap">
                         {sentFiles.map((file, index) => {
-                            const type = file.file.type.split('/')[0];
+                            const type = file.type.split('/')[0];
 
                             return (
-                                <FileItem key={index} file={file} type={type} index={index} />
+                                <FileItem key={index} name={file.name} type={type} index={index} addedAt={file.addedAt} />
                             );
                         })}
                     </div>
@@ -241,7 +246,7 @@ export default function SendFiles() {
     );
 }
 
-const FileItem = ({ file, type, index }: FileComponent) => {
+const FileItem = ({ name, type, addedAt, index }: FileInfo) => {
     const [isHovered, setIsHovered] = useState(false);
 
     return (
@@ -263,7 +268,7 @@ const FileItem = ({ file, type, index }: FileComponent) => {
                     <CiFileOn size={30} />
                 )
             }
-            <span className="line-clamp-filename w-full text-[16px]">{file.file.name}</span>
+            <span className="line-clamp-filename w-full text-[16px]">{name}</span>
             <AnimatePresence mode="wait">
                 {isHovered && (
                     <motion.div 
@@ -275,7 +280,7 @@ const FileItem = ({ file, type, index }: FileComponent) => {
                         key="dragging-overlay"
                     >
                         <span>Sent At:</span>
-                        <span>{file.addedAt}</span>
+                        <span>{addedAt}</span>
                     </motion.div>
                 )}
             </AnimatePresence>

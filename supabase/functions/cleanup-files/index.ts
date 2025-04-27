@@ -9,7 +9,7 @@ const supabase = createClient(
 export async function cleanupFiles() {
     const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
 
-    // Get files older than 5 minutes
+    // Get files older than 30 minutes
     const { data: files, error } = await supabase
         .from('temporary_files')
         .select('*')

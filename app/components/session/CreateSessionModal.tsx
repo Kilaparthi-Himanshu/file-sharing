@@ -9,6 +9,8 @@ import { ToastContainer, toast, Bounce } from 'react-toastify';
 import { useMutation } from '@tanstack/react-query';
 import { SpinnerRenderer } from '../Spinner';
 import { IoClose } from "react-icons/io5";
+import { useAtom } from 'jotai';
+import { sessionPassword } from '@/app/Atoms/atoms';
 
 export default function CreateSessionModal({removeModal} : {removeModal: () => void}) {
     const [sessionId, setSessionId] = useState<string>("");
@@ -16,6 +18,8 @@ export default function CreateSessionModal({removeModal} : {removeModal: () => v
     const {isHidden, PasswordEye} = usePasswordEye();
     const [errorMessage, setErrorMessage] = useState<string>("");
     const router = useRouter();
+    const [buttonText, setButtonText] = useState('Create Session');
+    const [currentSessionPassword, setCurrentSessionPassword] = useAtom(sessionPassword);
     const notify = (message: string) => toast.success(message, {
             position: "top-right",
             autoClose: 1000,
@@ -92,7 +96,11 @@ export default function CreateSessionModal({removeModal} : {removeModal: () => v
             return;
         }
 
+        setButtonText('Redirecting...');
+
         notify(data.message);
+
+        setCurrentSessionPassword(password);
 
         router.push(`/session/${sessionId}`);
     }
@@ -144,8 +152,8 @@ export default function CreateSessionModal({removeModal} : {removeModal: () => v
                         </div>
 
                         <div className="w-full flex items-center mt-8 justify-between">
-                            <button className="w-40 h-auto min-h-12 self-start border border-neutral-600 rounded-lg bg-neutral-800 hover:bg-neutral-900 transition-[background,scale] cursor-pointer active:scale-98">
-                                Create Session
+                            <button className="w-40 h-auto min-h-12 self-start border border-neutral-600 rounded-lg bg-neutral-800 hover:bg-neutral-900 transition-[background,scale] cursor-pointer active:scale-98 disabled:opacity-70" disabled={buttonText === 'Redirecting...'}>
+                                {buttonText}
                             </button>
 
                             <span className={`text-lg ${errorMessage == "Success!" ? 'text-green-400' : 'text-red-400'} ml-8`}>{errorMessage}</span>

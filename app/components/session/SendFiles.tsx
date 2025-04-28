@@ -8,6 +8,9 @@ import { FaRegTrashCan } from "react-icons/fa6";
 import { toast, Bounce } from "react-toastify";
 import { useAutoAnimate } from '@formkit/auto-animate/react'
 import { Spinner } from "../Spinner";
+import { useAtom } from "jotai";
+import { sessionPassword } from "@/app/Atoms/atoms";
+import { ReEnterPassword } from "./ReEnterPassword";
 
 type SenderFiles = {
     file: File;
@@ -21,7 +24,7 @@ type FileInfo = {
     index?: number
 }
 
-export default function SendFiles() {
+export default function SendFiles({ sessionId }: { sessionId: string }) {
     const [pendingFiles, setPendingFiles] = useState<SenderFiles[]>([]);
     const [sentFiles, setSentFiles] = useState<FileInfo[]>([]);
     const [isDragging, setIsDragging] = useState(false);
@@ -63,7 +66,14 @@ export default function SendFiles() {
         }
     });
     const [isLoading, setIsLoading] = useState(false);
+    const [currentSessionPassword, setCurrentSessionPassword] = useAtom(sessionPassword);
     // This will be replaced from isPending from tanstack query
+
+    if (!currentSessionPassword) {
+        return (
+            <ReEnterPassword sessionId={sessionId} />
+        );
+    }
 
     const formatTime = (date: Date) => {
         const hours = String(date.getHours()).padStart(2, '0');

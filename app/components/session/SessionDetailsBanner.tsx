@@ -3,9 +3,10 @@
 import { useAtom } from "jotai";
 import { sessionDetails } from "@/app/Atoms/atoms";
 import { createClient } from "@/app/utils/supabase/client";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { toast, Slide } from "react-toastify";
 import { AnimatePresence, motion } from "framer-motion";
+import { useSessionDeletionListener } from "@/app/utils/hooks/session/useSessionDeleteListener";
 
 export default function SessionDetailsBanner({ 
     sessionId,
@@ -14,6 +15,8 @@ export default function SessionDetailsBanner({
     sessionId: string
     participantId: string 
 }) {
+    useSessionDeletionListener(sessionId);
+
     const [sessionData, setSessionData] = useAtom(sessionDetails);
     const supabase =  createClient();
 
@@ -24,14 +27,14 @@ export default function SessionDetailsBanner({
                 .select('display_name')
                 .eq('id', participantId)
                 .single();
-    
+
             if (userDataError) return;
-    
+
             setSessionData({
                 displayName: userData.display_name,
                 sessionId
             });
-    
+
             toast.success(`Welcome ${userData.display_name}`, {
                 position: "top-center",
                 autoClose: 2000,

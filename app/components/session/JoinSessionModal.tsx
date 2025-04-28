@@ -9,12 +9,16 @@ import joinSession from '@/app/functions/session/joinSession';
 import { useMutation } from '@tanstack/react-query';
 import { SpinnerRenderer } from '../Spinner';
 import { toast, Bounce } from 'react-toastify';
+import { useAtom } from 'jotai';
+import { sessionPassword } from '@/app/Atoms/atoms';
 
 export default function JoinSessionModal({removeModal} : {removeModal: () => void}) {
     const {isHidden, PasswordEye} = usePasswordEye();
     const [errorMessage, setErrorMessage] = useState<string>("");
     const router = useRouter();
     const {randomName, setRandomName, RandomNameButton} = useGenerateRandomName();
+    const [buttonText, setButtonText] = useState('Create Session');
+    const [currentSessionPassword, setCurrentSessionPassword] = useAtom(sessionPassword);
     const notify = (message: string) => toast.success(message, {
         position: "top-right",
         autoClose: 1000,
@@ -84,8 +88,12 @@ export default function JoinSessionModal({removeModal} : {removeModal: () => voi
             setErrorMessage(data.message);
             return;
         }
+        
+        setButtonText('Redirecting...');
 
         notify(data.message);
+
+        setCurrentSessionPassword(password);
 
         router.push(`/session/${sessionId}`);
     }
@@ -115,7 +123,7 @@ export default function JoinSessionModal({removeModal} : {removeModal: () => voi
                         <div className='w-full flex flex-col gap-2 mt-8'>
                             <span>Session ID:</span>
                             <div className='w-full relative'>
-                                <input type="text" name='sessionId' className={`border border-neutral-600 w-full h-12 rounded-lg flex items-center p-2 text-center text-xl font-sans focus:outline-4 outline-neutral-700 focus:border-neutral-400 focus:border-2 transition-[outline,border] duration-[50ms,0ms]`} maxLength={6} placeholder='Enter Session ID'/>
+                                <input type="text" name='sessionId' className={`border border-neutral-600 w-full h-12 rounded-lg flex items-center p-2 text-center text-xl font-sans focus:outline-4 outline-neutral-700 focus:border-neutral-400 focus:border-2 transition-[outline,border] duration-[50ms,0ms]`} autoComplete='off' maxLength={6} placeholder='Enter Session ID'/>
                             </div>
                         </div>
 
@@ -136,8 +144,8 @@ export default function JoinSessionModal({removeModal} : {removeModal: () => voi
                         </div>
 
                         <div className="w-full flex items-center mt-8 justify-between">
-                            <button className="w-40 h-auto min-h-12 self-start border border-neutral-600 rounded-lg bg-neutral-800 hover:bg-neutral-900 transition-[background,scale] cursor-pointer active:scale-98">
-                                Join Session
+                            <button className="w-40 h-auto min-h-12 self-start border border-neutral-600 rounded-lg bg-neutral-800 hover:bg-neutral-900 transition-[background,scale] cursor-pointer active:scale-98 disabled:opacity-70" disabled={buttonText === 'Redirecting...'}>
+                                {buttonText}
                             </button>
 
                             <span className={`text-lg ${errorMessage == "Success!" ? 'text-green-400' : 'text-red-400'} ml-8`}>{errorMessage}</span>

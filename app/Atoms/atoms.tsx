@@ -9,3 +9,5 @@ export const sessionDetails = atom<{
     displayName: null,
     sessionId: null
 });
+
+export const sessionPassword = atom<string | null>(null);

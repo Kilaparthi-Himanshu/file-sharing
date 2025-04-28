@@ -107,5 +107,5 @@ const SessionBanner = ({ session }: { session: sessionData }) => {
                 )}
             </AnimatePresence>
         </div>
-    )
+    );
 }

@@ -43,7 +43,6 @@ async function encryptFile(file: File, userKey: string) {
     return new Blob([salt, iv, encryptedData], { type: "application/octet-stream" });
 }
 
-
 export async function uploadEncryptedFile(file: File, userKey: string) {
     const supabase = await createClient();
 

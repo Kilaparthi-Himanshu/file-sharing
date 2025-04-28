@@ -12,7 +12,7 @@ import { toast, Bounce } from 'react-toastify';
 import { useAtom } from 'jotai';
 import { sessionPassword } from '@/app/Atoms/atoms';
 
-export default function JoinSessionModal({removeModal} : {removeModal: () => void}) {
+export default function JoinSessionModal({ removeModal } : { removeModal: () => void }) {
     const {isHidden, PasswordEye} = usePasswordEye();
     const [errorMessage, setErrorMessage] = useState<string>("");
     const router = useRouter();
@@ -88,7 +88,7 @@ export default function JoinSessionModal({removeModal} : {removeModal: () => voi
             setErrorMessage(data.message);
             return;
         }
-        
+
         setButtonText('Redirecting...');
 
         notify(data.message);

@@ -12,7 +12,7 @@ import { IoClose } from "react-icons/io5";
 import { useAtom } from 'jotai';
 import { sessionPassword } from '@/app/Atoms/atoms';
 
-export default function CreateSessionModal({removeModal} : {removeModal: () => void}) {
+export default function CreateSessionModal({ removeModal }: { removeModal: () => void }) {
     const [sessionId, setSessionId] = useState<string>("");
     const {randomName, setRandomName, RandomNameButton} = useGenerateRandomName();
     const {isHidden, PasswordEye} = usePasswordEye();
@@ -152,7 +152,7 @@ export default function CreateSessionModal({removeModal} : {removeModal: () => v
                         </div>
 
                         <div className="w-full flex items-center mt-8 justify-between">
-                            <button className="w-40 h-auto min-h-12 self-start border border-neutral-600 rounded-lg bg-neutral-800 hover:bg-neutral-900 transition-[background,scale] cursor-pointer active:scale-98 disabled:opacity-70" disabled={buttonText === 'Redirecting...'}>
+                            <button className="w-40 h-auto min-h-12 self-start border border-neutral-600 rounded-lg bg-neutral-800 hover:bg-neutral-900 transition-[background,scale] active:scale-98 disabled:opacity-70" disabled={buttonText === 'Redirecting...'}>
                                 {buttonText}
                             </button>
 

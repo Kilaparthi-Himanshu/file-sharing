@@ -17,7 +17,7 @@ export default function JoinSessionModal({removeModal} : {removeModal: () => voi
     const [errorMessage, setErrorMessage] = useState<string>("");
     const router = useRouter();
     const {randomName, setRandomName, RandomNameButton} = useGenerateRandomName();
-    const [buttonText, setButtonText] = useState('Create Session');
+    const [buttonText, setButtonText] = useState('Join Session');
     const [currentSessionPassword, setCurrentSessionPassword] = useAtom(sessionPassword);
     const notify = (message: string) => toast.success(message, {
         position: "top-right",

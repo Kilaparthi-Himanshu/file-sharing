@@ -11,8 +11,11 @@ import { Spinner } from "../Spinner";
 import { useAtom } from "jotai";
 import { sessionPassword } from "@/app/Atoms/atoms";
 import { ReEnterPassword } from "./ReEnterPassword";
+import { useMutation } from "@tanstack/react-query";
+import { encryptFiles } from "@/app/functions/session/encryptFiles";
+import { useSearchParams } from "next/navigation";
 
-type SenderFiles = {
+export type SenderFiles = {
     file: File;
     addedAt: string;
 }
@@ -22,6 +25,13 @@ type FileInfo = {
     type: string;
     addedAt: string;
     index?: number
+}
+
+type encryptFilesType = {
+    files: SenderFiles[];
+    password: string ;
+    sessionId: string;
+    uploaded_by: string
 }
 
 export default function SendFiles({ sessionId }: { sessionId: string }) {
@@ -65,9 +75,13 @@ export default function SendFiles({ sessionId }: { sessionId: string }) {
             border: '1px solid rgb(28, 28, 28)'
         }
     });
-    const [isLoading, setIsLoading] = useState(false);
     const [currentSessionPassword, setCurrentSessionPassword] = useAtom(sessionPassword);
     // This will be replaced from isPending from tanstack query
+    const searchParams = useSearchParams();
+    const participantId = searchParams.get('participantId');
+    const { mutateAsync: addFiles, isPending } = useMutation({
+        mutationFn: ({ files, password, sessionId, uploaded_by }: encryptFilesType) => encryptFiles(files, password, sessionId, uploaded_by)
+    });
 
     if (!currentSessionPassword) {
         return (
@@ -120,7 +134,7 @@ export default function SendFiles({ sessionId }: { sessionId: string }) {
 
     const handleUpload = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         event.stopPropagation();
-        if (pendingFiles.length === 0) return;
+        if (pendingFiles.length === 0 || !participantId) return;
 
         const MAX_SIZE = 50 * 1024 * 1024; // 50MB
         for (const file of pendingFiles) {
@@ -130,13 +144,7 @@ export default function SendFiles({ sessionId }: { sessionId: string }) {
             }
         }
 
-        setIsLoading(true);
-        await new Promise<void>(resolve => {
-            setTimeout(() => {
-                setIsLoading(false);
-                resolve();
-            }, 3000);
-        }); // to be removed when tanstack query support is added
+        const data = await addFiles({ files: pendingFiles, password: currentSessionPassword, sessionId, uploaded_by:  participantId});
 
         setSentFiles(prevFiles => [...prevFiles, 
             ...pendingFiles.map(file => ({ 
@@ -211,7 +219,7 @@ export default function SendFiles({ sessionId }: { sessionId: string }) {
                     )}
                 </AnimatePresence>
 
-                {pendingFiles.length > 0 && (
+                {pendingFiles.length > 0 ? (
                     <div className={`sm:absolute bottom-2 right-2 flex flex-row gap-1 lg:gap-2 ${pendingFiles.length > 0 && 'right-14'}`}>
                             <button 
                                 className={`px-6 py-2 bg-neutral-900 active:bg-neutral-950 transition-[background,scale] active:scale-96 border border-neutral-700 text-lg rounded-xl ${pendingFiles.length > 0 && 'max-sm:px-3 max-sm:py-1'}`}
@@ -228,6 +236,13 @@ export default function SendFiles({ sessionId }: { sessionId: string }) {
                                 Add
                             </button>
                     </div>
+                ) : (
+                    <button 
+                        className={`absolute right-2 bottom-2 px-6 py-2 bg-neutral-900 active:bg-neutral-950 transition-[background,scale] active:scale-96 border border-neutral-700 text-lg rounded-xl ${pendingFiles.length > 0 && 'max-sm:px-3 max-sm:py-1'}`}
+                        onClick={handleUpload}
+                    >
+                        Send
+                    </button>
                 )}
             </div>
 
@@ -251,7 +266,7 @@ export default function SendFiles({ sessionId }: { sessionId: string }) {
                 )}
             </div>
 
-            {isLoading && <Spinner />}
+            {isPending && <Spinner />}
         </div>
     );
 }

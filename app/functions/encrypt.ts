@@ -1,6 +1,6 @@
 import { createClient } from "../utils/supabase/client";
 
-async function encryptFile(file: File, userKey: string) {
+export async function encryptFile(file: File, userKey: string) {
     const encoder = new TextEncoder();
     const keyMaterial = await window.crypto.subtle.importKey(
         "raw",

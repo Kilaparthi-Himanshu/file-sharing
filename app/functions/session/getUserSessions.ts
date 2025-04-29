@@ -31,7 +31,7 @@ export async function getUserSessions() {
     const { data, error } = await supabase
         .from('session_participants')
         .select('session_id, display_name')
-        .in('id', sessions.map(p => p.participantId))
+        .in('id', sessions.map(s => s.participantId))
 
     if (error) {
         console.log(error);

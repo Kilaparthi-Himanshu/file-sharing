@@ -45,7 +45,7 @@ export const MySessionsModal = ({ removeModal, setModalType } : MySessionsModalT
                 onClick={removeModal}
             >
                 <motion.div 
-                    className="bg-black border border-neutral-500 p-8 text-xl w-[500px] h-max rounded-xl font-normal relative flex flex-col items-center"
+                    className="bg-black border border-neutral-500 p -8 text-xl w-[500px] h-max rounded-xl font-normal relative flex flex-col items-center"
                     initial={{ scale: 0.95, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 0.95, opacity: 0 }}

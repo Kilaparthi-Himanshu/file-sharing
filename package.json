@@ -40,6 +40,7 @@
         "split-type": "^0.3.4",
         "tailwindcss": "^4.1.2",
         "unique-names-generator": "^4.7.1",
+        "uuidv4": "^6.2.13",
         "zod": "^3.24.2"
     },
     "devDependencies": {

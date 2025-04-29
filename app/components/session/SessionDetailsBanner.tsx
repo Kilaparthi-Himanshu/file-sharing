@@ -60,7 +60,7 @@ export default function SessionDetailsBanner({
             <AnimatePresence>
                 {sessionData.displayName && (
                     <motion.div 
-                        className="w-max h-max absolute top-0 min-h-12"
+                        className="w-max h-max absolute top-0 min-h-12 z-201"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.3 }}

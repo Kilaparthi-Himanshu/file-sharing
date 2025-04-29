@@ -1,7 +1,6 @@
 import { SenderFiles } from "@/app/components/session/SendFiles";
 import { createClient } from "@/app/utils/supabase/client";
 import { encryptFile } from "../encrypt";
-import { v4 as uuidv4 } from 'uuid';
 
 export async function encryptFiles (files: SenderFiles[], password: string, sessionId: string, uploaded_by: string) {
     const supabase = createClient();

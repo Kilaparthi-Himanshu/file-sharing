@@ -38,7 +38,7 @@ export const ReEnterPassword = ({ sessionId }: { sessionId: string }) => {
     }
 
     return (
-        <div className='absolute w-[100dvw] h-[100dvh] top-0 left-0 flex items-center justify-center bg-black px-2 py-2'>
+        <div className='absolute w-[100dvw] h-[100dvh] top-0 left-0 flex items-center justify-center bg-black px-2 py-2 z-200'>
             <form className='w-120 h-max bg-black border border-neutral-500 rounded-xl flex flex-col items-center gap-6 p-8 justify-around' onSubmit={handleSubmit}>
                 <span className='text-4xl font-light text-center'>Re-Enter the Session Password</span>
                 <div className='w-full relative mt-10'>

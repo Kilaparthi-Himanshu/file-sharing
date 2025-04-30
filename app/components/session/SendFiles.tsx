@@ -5,7 +5,6 @@ import { useRef, useState } from "react";
 import { CiFileOn, CiImageOn, CiText, CiVideoOn, CiMusicNote1 } from "react-icons/ci";
 import { LuFileStack } from "react-icons/lu";
 import { FaRegTrashCan } from "react-icons/fa6";
-import { toast, Bounce } from "react-toastify";
 import { useAutoAnimate } from '@formkit/auto-animate/react'
 import { Spinner } from "../Spinner";
 import { useAtom } from "jotai";
@@ -14,6 +13,7 @@ import { ReEnterPassword } from "./ReEnterPassword";
 import { useMutation } from "@tanstack/react-query";
 import { encryptFiles } from "@/app/functions/session/encryptFiles";
 import { useSearchParams } from "next/navigation";
+import { notifyError, notifySuccess } from "../Alerts";
 
 export type SenderFiles = {
     file: File;
@@ -42,38 +42,6 @@ export default function SendFiles({ sessionId }: { sessionId: string }) {
     const [parent] = useAutoAnimate({
         duration: 200,
         easing: 'ease-in-out',
-    });
-    const notifyError = (message: string) => toast.error(message, {
-        position: "top-center",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "dark",
-        transition: Bounce,
-        style: {
-            background: 'black',
-            border: '1px solid rgb(28, 28, 28)',
-            width: '300px',
-            textAlign: 'center'
-        }
-    });
-    const notifySuccess = (message: string) => toast.success(message, {
-        position: "top-center",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "dark",
-        transition: Bounce,
-        style: {
-            background: 'black',
-            border: '1px solid rgb(28, 28, 28)'
-        }
     });
     const [currentSessionPassword, setCurrentSessionPassword] = useAtom(sessionPassword);
     // This will be replaced from isPending from tanstack query
@@ -152,7 +120,7 @@ export default function SendFiles({ sessionId }: { sessionId: string }) {
             }))
         ]);
         setPendingFiles([]);
-        notifySuccess('Successfully Uploaded the File(s) !');
+        notifySuccess({message: 'Successfully Uploaded the File(s) !'});
     }
 
     return (
@@ -182,7 +150,7 @@ export default function SendFiles({ sessionId }: { sessionId: string }) {
                                 </>
                             ) : (
                                 <div className="w-full overflow-y-auto pointer-coarse:max-sm:h-30 max-sm:h-50 custom-scrollbar">
-                                    <div ref={parent} className="flex flex-col gap-2 overflow-hidden max-w-full">
+                                    <div ref={parent} className="flex flex-col gap-2 overflow-hidden max-w-full pointer-fine:pb-14">
                                         {pendingFiles.map((file, index) => (
                                             <div
                                                 key={file.file.name + file.addedAt} // better unique key  

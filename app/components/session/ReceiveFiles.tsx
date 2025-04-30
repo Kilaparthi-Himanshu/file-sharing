@@ -1,8 +1,6 @@
 'use client'
 
 import { useRef, useState } from "react";
-import { FaRegFile } from "react-icons/fa";
-import { LuFileStack } from "react-icons/lu";
 import { AnimatePresence, motion } from "framer-motion";
 import { CiFileOn, CiImageOn, CiText, CiVideoOn, CiMusicNote1 } from "react-icons/ci";
 

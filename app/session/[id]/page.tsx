@@ -5,6 +5,7 @@ import { ToastContainer } from 'react-toastify';
 import SessionDetailsBanner from '@/app/components/session/SessionDetailsBanner';
 import UpdateLastActive from '@/app/components/session/updaters/updateLastActive';
 import RefreshSessionCookies from '@/app/components/session/updaters/updateCookies';
+import { DeleteSessionButton } from '@/app/components/session/DeleteSessionButton';
 
 type Props = {
     params: Promise<{ id: string }>;
@@ -31,6 +32,7 @@ export default async function Session({ params, searchParams }: Props) {
             </main>
             <ToastContainer />
             <SessionDetailsBanner sessionId={id} participantId={participantId} />
+            <DeleteSessionButton sessionId={id} />
         </>
     );
 }

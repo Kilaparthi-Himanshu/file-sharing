@@ -3,7 +3,7 @@
 import { createClient } from "@/app/utils/supabase/client";
 import { useEffect, useRef } from "react";
 
-export default function UpdateLastActive({ sessionId }: {sessionId: string} ) {
+export default function UpdateLastActive({ sessionId }: { sessionId: string }) {
     const supabase = createClient();
     const lastUpdatedRef = useRef(0);
 

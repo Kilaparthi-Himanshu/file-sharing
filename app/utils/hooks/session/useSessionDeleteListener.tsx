@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "../../supabase/client";
+import { notifySuccess } from "@/app/components/Alerts";
 
 export function useSessionDeletionListener(sessionId: string) {
     const supabase = createClient();
@@ -16,7 +17,12 @@ export function useSessionDeletionListener(sessionId: string) {
                 table: 'sessions',
                 filter: `id=eq.${sessionId}`
             }, _payload => {
-                router.replace('/404');
+                notifySuccess({
+                    message: 'Deleted The Session !', 
+                    onClose: () => router.push('/session'), 
+                    time: 2000, 
+                    hideProgressBar: false
+                })
             })
             .subscribe();
 

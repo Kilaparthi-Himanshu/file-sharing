@@ -60,12 +60,12 @@ export default function SessionDetailsBanner({
             <AnimatePresence>
                 {sessionData.displayName && (
                     <motion.div 
-                        className="w-max h-max absolute top-0 min-h-12 z-201 max-lg:w-55"
+                        className="w-max h-max absolute top-0 min-h-12 z-201 max-lg:w-55 max-lg:max-w-45 max-lg:min-h-15"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.3 }}
                     >
-                        <div className="border border-neutral-500 relatve w-full h-full p-3 flex m-2 text-white text-[16px] font-normal rounded-xl font-inter max-lg:text-[12px] max-lg:flex-col">
+                        <div className="border border-neutral-500 relatve w-full h-full p-3 flex m-2 text-white text-[16px] font-normal rounded-xl font-inter max-lg:text-[12px] max-lg:flex-col lg:gap-2 bg-black">
                             <span>Sender: 
                                 <span className="text-teal-400"> {sessionData.displayName}</span>
                             </span>

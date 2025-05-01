@@ -6,6 +6,7 @@ import SessionDetailsBanner from '@/app/components/session/SessionDetailsBanner'
 import UpdateLastActive from '@/app/components/session/updaters/updateLastActive';
 import RefreshSessionCookies from '@/app/components/session/updaters/updateCookies';
 import { DeleteSessionButton } from '@/app/components/session/DeleteSessionButton';
+import { ReEnterPasswordWrapper } from '@/app/components/session/ReEnterPassword';
 
 type Props = {
     params: Promise<{ id: string }>;
@@ -18,21 +19,23 @@ export default async function Session({ params, searchParams }: Props) {
     const { participantId } = await searchParams;
 
     return (
-        <>
-            <UpdateLastActive sessionId={id} />
-            <RefreshSessionCookies sessionId={id} />
+        <ReEnterPasswordWrapper sessionId={id}>
+            <>
+                <UpdateLastActive sessionId={id} />
+                <RefreshSessionCookies sessionId={id} />
 
-            <main className='w-screen h-[100dvh] bg-black flex items-center justify-center text-white max-lg:flex-col'>
-                <div className='w-full max-lg:h-1/2 h-full bg-black flex items-center justify-center p-20 max-sm:px-5 max-sm:pb-5 max-lg:px-10 max-lg:pb-10 lg:max-w-1/2'>
-                    <SendFiles sessionId={id} />
-                </div>
-                <div className='w-full max-lg:h-1/2 h-full bg-neutral-800 flex items-center justify-center p-20 max-lg:p-10'>
-                    <ReceiveFiles />
-                </div>
-            </main>
-            <ToastContainer />
-            <SessionDetailsBanner sessionId={id} participantId={participantId} />
-            <DeleteSessionButton sessionId={id} />
-        </>
+                <main className='w-screen h-[100dvh] bg-black flex items-center justify-center text-white max-lg:flex-col noise-texture'>
+                    <div className='w-full max-lg:h-1/2 h-full flex items-center justify-center p-20 max-sm:px-5 max-sm:pb-5 max-lg:px-10 max-lg:pb-10 lg:max-w-1/2'>
+                        <SendFiles sessionId={id} />
+                    </div>
+                    <div className='w-full max-lg:h-1/2 h-full flex items-center justify-center p-20 max-lg:p-10'>
+                        <ReceiveFiles sessionId={id} participantId={participantId} />
+                    </div>
+                </main>
+                <ToastContainer />
+                <SessionDetailsBanner sessionId={id} participantId={participantId} />
+                <DeleteSessionButton sessionId={id} />
+            </>
+        </ReEnterPasswordWrapper>
     );
 }

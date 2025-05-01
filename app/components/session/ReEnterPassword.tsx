@@ -38,11 +38,11 @@ export const ReEnterPassword = ({ sessionId }: { sessionId: string }) => {
     }
 
     return (
-        <div className='absolute w-[100dvw] h-[100dvh] top-0 left-0 flex items-center justify-center bg-black px-2 py-2 z-200'>
+        <div className='absolute w-[100dvw] h-[100dvh] top-0 left-0 flex items-center justify-center bg-black px-2 py-2 z-200 noise-texture'>
             <form className='w-120 h-max bg-black border border-neutral-500 rounded-xl flex flex-col items-center gap-6 p-8 justify-around' onSubmit={handleSubmit}>
-                <span className='text-4xl font-light text-center'>Re-Enter the Session Password</span>
+                <span className='text-4xl font-light text-center text-white'>Enter the Session Password</span>
                 <div className='w-full relative mt-10'>
-                    <input type={isHidden ? 'password' : 'text'} name='password' className={`border border-neutral-600 w-full h-12 rounded-lg flex items-center p-2 text-center text-xl font-sans focus:outline-4 outline-neutral-700 focus:border-neutral-400 focus:border-2 transition-[outline,border] duration-[50ms,0ms] pr-10 pl-10`} placeholder='Enter Session Password'/>
+                    <input type={isHidden ? 'password' : 'text'} name='password' className={`border border-neutral-600 w-full h-12 rounded-lg flex items-center p-2 text-center text-xl font-sans focus:outline-4 outline-neutral-700 focus:border-neutral-400 focus:border-2 transition-[outline,border] duration-[50ms,0ms] pr-10 pl-10 text-white`} placeholder='Enter Session Password' autoFocus/>
                     <PasswordEye />
                 </div>
                 <div className="w-full flex items-center mt-8 justify-between">
@@ -56,4 +56,20 @@ export const ReEnterPassword = ({ sessionId }: { sessionId: string }) => {
             </form>
         </div>
     );
+}
+
+export function ReEnterPasswordWrapper({
+    sessionId,
+    children
+} : {
+    sessionId: string,
+    children: React.ReactNode
+}) {
+    const [currentSessionPassword] = useAtom(sessionPassword);
+
+    if (!currentSessionPassword) {
+        return <ReEnterPassword sessionId={sessionId} />
+    } else {
+        return <>{children}</>
+    }
 }

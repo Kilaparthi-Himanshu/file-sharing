@@ -9,11 +9,12 @@ import { useAutoAnimate } from '@formkit/auto-animate/react'
 import { Spinner } from "../Spinner";
 import { useAtom } from "jotai";
 import { sessionPassword } from "@/app/Atoms/atoms";
-import { ReEnterPassword } from "./ReEnterPassword";
+import { assertNotNull } from "@/app/functions/assertNotNull";
 import { useMutation } from "@tanstack/react-query";
 import { encryptFiles } from "@/app/functions/session/encryptFiles";
 import { useSearchParams } from "next/navigation";
 import { notifyError, notifySuccess } from "../Alerts";
+import ShinyText from "../misc/ShinyText";
 
 export type SenderFiles = {
     file: File;
@@ -44,18 +45,12 @@ export default function SendFiles({ sessionId }: { sessionId: string }) {
         easing: 'ease-in-out',
     });
     const [currentSessionPassword, setCurrentSessionPassword] = useAtom(sessionPassword);
-    // This will be replaced from isPending from tanstack query
+    const password = assertNotNull(currentSessionPassword, 'Missing Session Password');
     const searchParams = useSearchParams();
     const participantId = searchParams.get('participantId');
     const { mutateAsync: addFiles, isPending } = useMutation({
         mutationFn: ({ files, password, sessionId, uploaded_by }: encryptFilesType) => encryptFiles(files, password, sessionId, uploaded_by)
     });
-
-    if (!currentSessionPassword) {
-        return (
-            <ReEnterPassword sessionId={sessionId} />
-        );
-    }
 
     const formatTime = (date: Date) => {
         const hours = String(date.getHours()).padStart(2, '0');
@@ -112,7 +107,7 @@ export default function SendFiles({ sessionId }: { sessionId: string }) {
             }
         }
 
-        const data = await addFiles({ files: pendingFiles, password: currentSessionPassword, sessionId, uploaded_by:  participantId});
+        const data = await addFiles({ files: pendingFiles, password: password, sessionId, uploaded_by:  participantId});
 
         setSentFiles(prevFiles => [...prevFiles, 
             ...pendingFiles.map(file => ({ 
@@ -124,8 +119,8 @@ export default function SendFiles({ sessionId }: { sessionId: string }) {
     }
 
     return (
-        <div className="border border-neutral-500 w-full h-full text-white rounded-xl flex flex-row lg:flex-col p-4 gap-2 max-lg:gap-4 relative">
-            <div className="border-2 border-neutral-700 border-dashed rounded-xl flex-1 flex flex-col items-center justify-center gap-4 p-2 relative max-lg:max-w-1/2 lg:max-h-1/2"
+        <div className="border border-neutral-500 w-full h-full text-white rounded-xl flex flex-row lg:flex-col p-4 gap-2 max-lg:gap-4 relative bg-black">
+            <div className="border-2 border-neutral-700 border-dashed rounded-xl flex-1 flex flex-col items-center justify-center gap-4 p-2 relative max-lg:max-w-1/2 lg:max-h-1/2 bg-[url(https://transparenttextures.com/patterns/carbon-fibre-v2.png)]"
                 onClick={() => fileRef?.current?.click()}
                 onDragOver={(e) => e.preventDefault()}
                 onDragEnter={() => setIsDragging(true)}
@@ -154,7 +149,7 @@ export default function SendFiles({ sessionId }: { sessionId: string }) {
                                         {pendingFiles.map((file, index) => (
                                             <div
                                                 key={file.file.name + file.addedAt} // better unique key  
-                                                className={`w-full py-2 text-ellipsis truncate flex gap-2 border border-neutral-800 ${file.file.size > 50 * 1024 * 1024 && 'border-red-500 bg-red-400/20'} rounded-xl px-2`} 
+                                                className={`w-full py-2 text-ellipsis truncate flex gap-2 border border-neutral-800 ${file.file.size > 50 * 1024 * 1024 && 'border-red-500 bg-red-400/20'} rounded-xl px-2 bg-[url(https://transparenttextures.com/patterns/dark-dot.png)] bg-black`} 
                                                 title={file.file.size > 50 * 1024 * 1024 ? 'Exceeds 50MB' : ''}
                                             >
                                                 <div className="w-full overflow-x-hidden flex">
@@ -229,7 +224,7 @@ export default function SendFiles({ sessionId }: { sessionId: string }) {
                     </div>
                 ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                        <span className="text-neutral-500 text-4xl max-sm:text-2xl font-bold text-center font-inter">No Files Have Been Sent Yet</span>
+                        <ShinyText text="No Files Have Been Sent Yet" disabled={false} speed={3} className="text-3xl font-bold" />
                     </div>
                 )}
             </div>

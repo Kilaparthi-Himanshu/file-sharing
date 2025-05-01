@@ -23,7 +23,7 @@
         "cloc": "^2.4.0-cloc",
         "dotenv": "^16.4.7",
         "framer-motion": "^12.5.0",
-        "gsap": "^3.12.7",
+        "gsap": "^3.13.0",
         "jotai": "^2.12.2",
         "jszip": "^3.10.1",
         "lucide-react": "^0.483.0",

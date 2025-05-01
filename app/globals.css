@@ -3,6 +3,8 @@
 
 @import "tailwindcss";
 
+@config "../tailwind.config.ts";
+
 @theme {
     --font-merriweather: "Merriweather", serif;
     --font-inter: "Inter", sans-serif;
@@ -44,5 +46,10 @@
         -webkit-box-orient: vertical;
         overflow: hidden;
         text-overflow: ellipsis;
+    }
+
+    .noise-texture {
+        background-image: url("https://transparenttextures.com/patterns/3px-tile.png");
+        background-color: #000000;
     }
 }

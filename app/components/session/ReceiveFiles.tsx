@@ -1,8 +1,9 @@
 'use client'
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { CiFileOn, CiImageOn, CiText, CiVideoOn, CiMusicNote1 } from "react-icons/ci";
+import { createClient } from "@/app/utils/supabase/client";
 
 type FileInfo = {
     name: string;
@@ -11,7 +12,20 @@ type FileInfo = {
     index?: number
 }
 
-export default function ReceiveFiles() {
+export default function ReceiveFiles({ sessionId, participantId }: { sessionId: string, participantId: string }) {
+    useEffect(() => {
+        async function fetchFiles() {
+            const supabase = createClient();
+            const { data, error } = await supabase
+                .from('session_files')
+                .select('*')
+                .match({ 'session_id': sessionId, 'uploaded_by': participantId });
+            console.log(data);
+        }
+
+        fetchFiles();
+    }, []);
+
     const filesDemoData = [
         { name: 'HelloWorld.txt', downloaded: true, type: 'file', addedAt: '12-2-25' },
         { name: 'Sharp.mp3', downloaded: false, type: 'file', addedAt: '12-2-25' },
@@ -28,7 +42,7 @@ export default function ReceiveFiles() {
     const fileRef = useRef<HTMLInputElement>(null);
 
     return (
-        <div className="border border-neutral-500 w-full h-full text-white rounded-xl flex flex-row lg:flex-col p-4 gap-2">
+        <div className="border border-neutral-500 w-full h-full text-white rounded-xl flex flex-row lg:flex-col p-4 gap-2 bg-black">
             <span className="text-lg w-full max-lg:hidden">Files Received:</span>
 
             <div className="flex flex-col overflow-y-auto">

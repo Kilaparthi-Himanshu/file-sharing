@@ -40,5 +40,5 @@ export const useGenerateRandomName = () => {
         )
     }, [isRotating]);
 
-    return {randomName,setRandomName,  RandomNameButton};
+    return {randomName, setRandomName, RandomNameButton};
 }

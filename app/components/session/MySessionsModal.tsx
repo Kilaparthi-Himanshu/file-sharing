@@ -45,7 +45,7 @@ export const MySessionsModal = ({ removeModal, setModalType } : MySessionsModalT
                 onClick={removeModal}
             >
                 <motion.div 
-                    className="bg-black border border-neutral-500 p -8 text-xl w-[500px] h-max rounded-xl font-normal relative flex flex-col items-center"
+                    className="bg-black border border-neutral-500 p-8 text-xl w-[500px] h-max rounded-xl font-normal relative flex flex-col items-center bg-[url(https://transparenttextures.com/patterns/black-orchid.png)]"
                     initial={{ scale: 0.95, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 0.95, opacity: 0 }}
@@ -63,7 +63,7 @@ export const MySessionsModal = ({ removeModal, setModalType } : MySessionsModalT
                                 <SessionBanner session={session} key={session.session_id}/>
                             ))
                         ) : (
-                            <div className='h-full w-full flex flex-col items-center justify-center text-2xl font-bold'>
+                            <div className='h-full w-full flex flex-col items-center justify-center text-2xl font-bold text-neutral-400'>
                                 No Active Sessions
                                 <FaRegSadTear size={70} className='mt-10' />
                             </div>
@@ -86,7 +86,7 @@ const SessionBanner = ({ session }: { session: sessionData }) => {
 
     return (
         <div 
-            className='w-full border border-neutral-600 h-10 items-center p-2 rounded-lg flex justify-around relative active:scale-98 transition-[scale]' onMouseEnter={() => setIsHovered(true)}
+            className='w-full border border-neutral-600 h-10 items-center p-2 rounded-lg flex justify-around relative active:scale-98 transition-[scale] bg-black' onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
             onClick={handleClick}
         >

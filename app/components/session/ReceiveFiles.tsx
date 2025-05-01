@@ -4,6 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { CiFileOn, CiImageOn, CiText, CiVideoOn, CiMusicNote1 } from "react-icons/ci";
 import { createClient } from "@/app/utils/supabase/client";
+import { decryptFiles } from "@/app/functions/session/encryptAndDecryptFiles";
+import { useAtom } from "jotai";
+import { sessionPassword } from "@/app/Atoms/atoms";
+import { assertNotNull } from "@/app/functions/assertNotNull";
+import { DecryptedFile } from "@/app/functions/session/encryptAndDecryptFiles";
+import { formatTime } from "./SendFiles";
 
 type FileInfo = {
     name: string;
@@ -12,49 +18,71 @@ type FileInfo = {
     index?: number
 }
 
+type DecryptedFileWithTime = DecryptedFile & {
+    addedAt: string;
+}
+
 export default function ReceiveFiles({ sessionId, participantId }: { sessionId: string, participantId: string }) {
+    const [currentSessionPassword, setCurrentSessionPassword] = useAtom(sessionPassword);
+    const password = assertNotNull(currentSessionPassword, 'Missing Session Password');
+    const [receivedFiles, setReceivedFiles] = useState<DecryptedFileWithTime[]>([]);
+
     useEffect(() => {
         async function fetchFiles() {
             const supabase = createClient();
             const { data, error } = await supabase
                 .from('session_files')
-                .select('*')
+                .select('file_path')
                 .match({ 'session_id': sessionId, 'uploaded_by': participantId });
+
+            if (error) return;
+
             console.log(data);
+
+            const encryptedFiles: Blob[] = []
+
+            for (const file of data) {
+                const { data: fileData, error: fileError } = await supabase
+                    .storage
+                    .from('sessions-data')
+                    .download(`${file.file_path}?nocache=${Date.now()}`);
+
+                if (fileError) continue;
+
+                encryptedFiles.push(fileData);
+            }
+
+            console.log(encryptedFiles);
+
+            const decryptedFiles = await decryptFiles(encryptedFiles, password);
+
+            const formatedDate = formatTime(new Date());
+
+            setReceivedFiles(prevFiles => [
+                ...prevFiles, 
+                ...decryptedFiles.map(file => ({ 
+                    blob: file.blob, fileName: file.fileName, addedAt: formatedDate 
+                }))
+            ]);
         }
 
         fetchFiles();
     }, []);
 
-    const filesDemoData = [
-        { name: 'HelloWorld.txt', downloaded: true, type: 'file', addedAt: '12-2-25' },
-        { name: 'Sharp.mp3', downloaded: false, type: 'file', addedAt: '12-2-25' },
-        { name: 'Scaled.pdf', downloaded: false, type: 'file', addedAt: '12-2-25' },
-        { name: 'Movie.vid', downloaded: true, type: 'file', addedAt: '12-2-25' },
-        { name: 'Pandas.png', downloaded: true, type: 'file', addedAt: '12-2-25' },
-        { name: 'Exam Hallticket.rar', downloaded: false, type: 'file', addedAt: '12-2-25' },
-        { name: 'Scaled.pdf', downloaded: false, type: 'file', addedAt: '12-2-25' },
-        { name: 'Movie.vid', downloaded: true, type: 'file', addedAt: '12-2-25' },
-        { name: 'Pandas.png', downloaded: true, type: 'file', addedAt: '12-2-25' },
-        { name: 'Exam Hallticket.rar', downloaded: false, type: 'file', addedAt: '12-2-25' }
-    ]
-    const [receivedFiles, setReceivedFiles] = useState<File[]>([]);
-    const fileRef = useRef<HTMLInputElement>(null);
-
     return (
         <div className="border border-neutral-500 w-full h-full text-white rounded-xl flex flex-row lg:flex-col p-4 gap-2 bg-black">
             <span className="text-lg w-full max-lg:hidden">Files Received:</span>
 
-            <div className="flex flex-col overflow-y-auto">
+            <div className="flex flex-col overflow-y-auto flex-1/2">
                 <span className="text-lg w-full lg:hidden">Files Downloaded:</span>
                 <div className="rounded-xl flex-1 overflow-y-auto custom-scrollbar">
-                    {filesDemoData.length > 0 ? (
+                    {receivedFiles.length > 0 ? (
                         <div className="w-full flex gap-2 flex-wrap">
-                            {filesDemoData.map((file, index) => {
-                                const type = file.type.split('/')[0];
+                            {receivedFiles.map((file, index) => {
+                                const type = file.fileName.split('/')[0];
 
                                 return (
-                                    <FileItem key={index} name={file.name} type={type} index={index} addedAt={file.addedAt} />
+                                    <FileItem key={index} name={file.fileName} type={type} index={index} addedAt={file.addedAt} />
                                 );
                             })}
                         </div>
@@ -68,16 +96,16 @@ export default function ReceiveFiles({ sessionId, participantId }: { sessionId: 
 
             <span className="text-lg w-full max-lg:hidden">Files Downloaded:</span>
 
-            <div className="flex flex-col overflow-y-auto">
+            <div className="flex flex-col overflow-y-auto flex-1/2">
                 <span className="text-lg w-full lg:hidden">Files Downloaded:</span>
                 <div className="rounded-xl flex-1 overflow-y-auto custom-scrollbar">
-                    {filesDemoData.length > 0 ? (
+                    {receivedFiles.length > 0 ? (
                         <div className="w-full flex gap-2 flex-wrap">
-                            {filesDemoData.map((file, index) => {
-                                const type = file.type.split('/')[0];
+                            {receivedFiles.map((file, index) => {
+                                const type = file.fileName.split('/')[0];
 
                                 return (
-                                    <FileItem key={index} name={file.name} type={type} index={index} addedAt={file.addedAt} />
+                                    <FileItem key={index} name={file.fileName} type={type} index={index} addedAt={file.addedAt} />
                                 );
                             })}
                         </div>

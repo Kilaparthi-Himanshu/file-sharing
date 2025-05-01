@@ -11,7 +11,7 @@ import { useAtom } from "jotai";
 import { sessionPassword } from "@/app/Atoms/atoms";
 import { assertNotNull } from "@/app/functions/assertNotNull";
 import { useMutation } from "@tanstack/react-query";
-import { encryptFiles } from "@/app/functions/session/encryptFiles";
+import { encryptFiles } from "@/app/functions/session/encryptAndDecryptFiles";
 import { useSearchParams } from "next/navigation";
 import { notifyError, notifySuccess } from "../Alerts";
 import ShinyText from "../misc/ShinyText";
@@ -35,6 +35,13 @@ type encryptFilesType = {
     uploaded_by: string
 }
 
+export const formatTime = (date: Date) => {
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    return `${hours}:${minutes}:${seconds}`;
+}
+
 export default function SendFiles({ sessionId }: { sessionId: string }) {
     const [pendingFiles, setPendingFiles] = useState<SenderFiles[]>([]);
     const [sentFiles, setSentFiles] = useState<FileInfo[]>([]);
@@ -51,13 +58,6 @@ export default function SendFiles({ sessionId }: { sessionId: string }) {
     const { mutateAsync: addFiles, isPending } = useMutation({
         mutationFn: ({ files, password, sessionId, uploaded_by }: encryptFilesType) => encryptFiles(files, password, sessionId, uploaded_by)
     });
-
-    const formatTime = (date: Date) => {
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const seconds = String(date.getSeconds()).padStart(2, '0');
-        return `${hours}:${minutes}:${seconds}`;
-    }
 
     const handleDrop =(event: React.DragEvent<HTMLDivElement>) => {
         setIsDragging(false);

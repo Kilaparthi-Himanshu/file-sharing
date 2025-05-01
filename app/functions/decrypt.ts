@@ -1,6 +1,6 @@
 import { createClient } from "../utils/supabase/client";
 
-async function decryptFile(encryptedBuffer: ArrayBuffer, userKey: string) {
+export async function decryptFile(encryptedBuffer: ArrayBuffer, userKey: string) {
     const encoder = new TextEncoder();
     const keyMaterial = await window.crypto.subtle.importKey(
         "raw",
@@ -42,6 +42,7 @@ async function decryptFile(encryptedBuffer: ArrayBuffer, userKey: string) {
         return { blob: new Blob([fileContent], { type: fileType }), fileName };
 
     } catch (error) {
+        console.error('Decryption failed:', error);
         return;
     }
 }

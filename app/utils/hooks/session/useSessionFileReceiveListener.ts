@@ -3,7 +3,6 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "../../supabase/client";
-import { notifySuccess } from "@/app/components/Alerts";
 
 export function useSessionFileReceiveListener(sessionId: string, participantId: string,  handleFileReceive: (file_path: string) => void) {
     const supabase = createClient();

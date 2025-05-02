@@ -88,13 +88,15 @@ export default function ReceiveFiles({ sessionId, participantId }: { sessionId: 
                 <div className="rounded-xl flex-1 overflow-y-auto custom-scrollbar">
                     {receivedFiles.length > 0 ? (
                         <div className="w-full flex gap-2 flex-wrap">
-                            {receivedFiles.map((file, index) => {
-                                const type = file.blob.type.split('/')[0];
+                            <AnimatePresence>
+                                {receivedFiles.map((file, index) => {
+                                    const type = file.blob.type.split('/')[0];
 
-                                return (
-                                    <FileItem key={index} name={file.fileName} type={type} index={index} addedAt={file.addedAt} filesType={'received'} click={() => handleDownload(file)} />
-                                );
-                            })}
+                                    return (
+                                        <FileItem key={index} name={file.fileName} type={type} index={index} addedAt={file.addedAt} filesType={'received'} click={() => handleDownload(file)} />
+                                    );
+                                })}
+                            </AnimatePresence>
                         </div>
                     ) : (
                         <div className="w-full h-full flex items-center justify-center">
@@ -143,6 +145,7 @@ const FileItem = ({ name, type, addedAt, index, filesType, click }: FileInfo) =>
             onMouseLeave={() => setIsHovered(false)}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
             onClick={click}
         >
             {

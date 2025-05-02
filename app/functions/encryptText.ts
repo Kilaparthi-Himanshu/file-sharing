@@ -34,7 +34,7 @@ async function encryptText(text: string, userKey: string) {
 export async function uploadEncryptedText(text: string, userKey: string) {
     const supabase = createClient();
     const encryptedBlob = await encryptText(text, userKey);
-    
+
     const fileId = Math.floor(100000 + Math.random() * 900000).toString();
     const filePath = `encrypted-files/${fileId}.txt`;
 

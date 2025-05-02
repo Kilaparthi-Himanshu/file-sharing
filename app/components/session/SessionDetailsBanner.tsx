@@ -6,7 +6,6 @@ import { createClient } from "@/app/utils/supabase/client";
 import { useEffect } from "react";
 import { toast, Slide } from "react-toastify";
 import { AnimatePresence, motion } from "framer-motion";
-import { useSessionDeletionListener } from "@/app/utils/hooks/session/useSessionDeleteListener";
 
 export default function SessionDetailsBanner({ 
     sessionId,
@@ -15,7 +14,6 @@ export default function SessionDetailsBanner({
     sessionId: string
     participantId: string 
 }) {
-    useSessionDeletionListener(sessionId);
 
     const [sessionData, setSessionData] = useAtom(sessionDetails);
     const supabase =  createClient();

@@ -40,30 +40,14 @@ export type DecryptedFile = {
     fileName: string;
 }
 
-export async function decryptFiles(blobs: Blob[], password: string) {
-    const decryptedFiles:DecryptedFile[] = [];
+export async function decryptFiles(blob: Blob, password: string) {
 
-    for (const encryptedBlob of blobs) {
-        const encryptedBuffer = await encryptedBlob.arrayBuffer();
-        const decryptResult = await decryptFile(encryptedBuffer, password);
+    const encryptedBuffer = await blob.arrayBuffer();
+    const decryptedResult = await decryptFile(encryptedBuffer, password);
 
-        if (!decryptResult) continue;
+    if (!decryptedResult) return;
 
-        decryptedFiles.push(decryptResult);
-    }
+    console.log(decryptedResult);
 
-    console.log(decryptedFiles);
-
-    return decryptedFiles;
-
-    // const { blob, fileName } = decryptedFiles[4];
-
-    // const url = URL.createObjectURL(blob);
-    // const a = document.createElement("a");
-    // a.href = url;
-    // a.download = fileName; // Use original file name
-    // document.body.appendChild(a);
-    // a.click();
-    // document.body.removeChild(a);
-    // URL.revokeObjectURL(url);
+    return decryptedResult;
 }

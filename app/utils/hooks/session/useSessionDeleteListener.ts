@@ -16,13 +16,13 @@ export function useSessionDeletionListener(sessionId: string) {
                 schema: 'public',
                 table: 'sessions',
                 filter: `id=eq.${sessionId}`
-            }, _payload => {
+            }, payload => {
                 notifySuccess({
                     message: 'Deleted The Session !', 
                     onClose: () => router.push('/session'), 
-                    time: 2000, 
+                    time: 1000,
                     hideProgressBar: false
-                })
+                });
             })
             .subscribe();
 

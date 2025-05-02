@@ -16,10 +16,6 @@ export async function middleware(request: NextRequest) {
                 // Does not match digits or is not of length of six digits redirect to 404
             }
 
-            if (id === '123456') {
-                return;
-            } // To be strictly removed in Production
-
             const cookieStore = await cookies();
             const accessCookie = cookieStore.get(`sessionAccess:${id}`);
             const participantCookie = cookieStore.get(`participant-${id}`);

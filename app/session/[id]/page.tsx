@@ -34,7 +34,13 @@ export default async function Session({ params, searchParams }: Props) {
                 </main>
                 <ToastContainer />
                 <SessionDetailsBanner sessionId={id} participantId={participantId} />
-                <DeleteSessionButton sessionId={id} />
+                <DeleteSessionButton sessionId={id}>
+                    <button 
+                        className='absolute top-2 right-2 bg-red-900 rounded-lg border border-red-500 px-4 py-2 text-white active:scale-95 active:bg-red-500/40 transition-[scale,background]'
+                    >
+                        Delete Session
+                    </button>
+                </DeleteSessionButton>
             </>
         </ReEnterPasswordWrapper>
     );

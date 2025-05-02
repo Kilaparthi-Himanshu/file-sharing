@@ -10,12 +10,17 @@ import { sessionPassword } from "@/app/Atoms/atoms";
 import { assertNotNull } from "@/app/functions/assertNotNull";
 import { DecryptedFile } from "@/app/functions/session/encryptAndDecryptFiles";
 import { formatTime } from "./SendFiles";
+import ShinyText from "../misc/ShinyText";
+import { IoMdDownload } from "react-icons/io";
+import { useSessionFileReceiveListener } from "@/app/utils/hooks/session/useSessionFileReceiveListener";
 
 type FileInfo = {
     name: string;
     type: string;
     addedAt: string;
     index?: number
+    filesType: 'received' | 'downloaded'
+    click?: () => void
 }
 
 type DecryptedFileWithTime = DecryptedFile & {
@@ -26,55 +31,60 @@ export default function ReceiveFiles({ sessionId, participantId }: { sessionId: 
     const [currentSessionPassword, setCurrentSessionPassword] = useAtom(sessionPassword);
     const password = assertNotNull(currentSessionPassword, 'Missing Session Password');
     const [receivedFiles, setReceivedFiles] = useState<DecryptedFileWithTime[]>([]);
+    const [downloadedFiles, setDownloadedFiles] = useState<DecryptedFileWithTime[]>([]);
+    const supabase = createClient();
 
-    useEffect(() => {
-        async function fetchFiles() {
-            const supabase = createClient();
-            const { data, error } = await supabase
-                .from('session_files')
-                .select('file_path')
-                .match({ 'session_id': sessionId, 'uploaded_by': participantId });
+    const handleFileReceive = async (file_path: string) => {
+        const { data: fileData, error: fileError } = await supabase
+            .storage
+            .from('sessions-data')
+            .download(`${file_path}?nocache=${Date.now()}`)
 
-            if (error) return;
+        if (!fileData || fileError) return;
 
-            console.log(data);
+        const decryptedFile = await decryptFiles(fileData, password);
+        const formatedDate = formatTime(new Date());
 
-            const encryptedFiles: Blob[] = []
+        setReceivedFiles(prevFiles => [
+            ...prevFiles, 
+            { blob: decryptedFile!.blob, fileName: decryptedFile!.fileName, addedAt: formatedDate }
+        ]);
+    }
 
-            for (const file of data) {
-                const { data: fileData, error: fileError } = await supabase
-                    .storage
-                    .from('sessions-data')
-                    .download(`${file.file_path}?nocache=${Date.now()}`);
+    useSessionFileReceiveListener(sessionId, participantId,  handleFileReceive);
 
-                if (fileError) continue;
+    const handleDownload = (file: DecryptedFileWithTime) => {
+        setReceivedFiles(prevFiles => prevFiles.filter(prevFile => prevFile != file));
 
-                encryptedFiles.push(fileData);
-            }
+        const url = URL.createObjectURL(file.blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = file.fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
 
-            console.log(encryptedFiles);
+        setDownloadedFiles(prevFiles => [...prevFiles, file]);
+    }
 
-            const decryptedFiles = await decryptFiles(encryptedFiles, password);
-
-            const formatedDate = formatTime(new Date());
-
-            setReceivedFiles(prevFiles => [
-                ...prevFiles, 
-                ...decryptedFiles.map(file => ({ 
-                    blob: file.blob, fileName: file.fileName, addedAt: formatedDate 
-                }))
-            ]);
-        }
-
-        fetchFiles();
-    }, []);
+    const handleReDownload = (file: DecryptedFileWithTime) => {
+        const url = URL.createObjectURL(file.blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = file.fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
 
     return (
         <div className="border border-neutral-500 w-full h-full text-white rounded-xl flex flex-row lg:flex-col p-4 gap-2 bg-black">
             <span className="text-lg w-full max-lg:hidden">Files Received:</span>
 
             <div className="flex flex-col overflow-y-auto flex-1/2">
-                <span className="text-lg w-full lg:hidden">Files Downloaded:</span>
+                <span className="text-lg w-full lg:hidden">Files Received:</span>
                 <div className="rounded-xl flex-1 overflow-y-auto custom-scrollbar">
                     {receivedFiles.length > 0 ? (
                         <div className="w-full flex gap-2 flex-wrap">
@@ -82,13 +92,13 @@ export default function ReceiveFiles({ sessionId, participantId }: { sessionId: 
                                 const type = file.fileName.split('/')[0];
 
                                 return (
-                                    <FileItem key={index} name={file.fileName} type={type} index={index} addedAt={file.addedAt} />
+                                    <FileItem key={index} name={file.fileName} type={type} index={index} addedAt={file.addedAt} filesType={'received'} click={() => handleDownload(file)} />
                                 );
                             })}
                         </div>
                     ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                            <span className="text-neutral-500 text-4xl max-sm:text-2xl font-bold text-center font-inter">No Files Have Been Sent Yet</span>
+                            <ShinyText text="No Files Have Received Sent Yet" disabled={false} speed={3} className="text-3xl font-bold" />
                         </div>
                     )}
                 </div>
@@ -99,19 +109,19 @@ export default function ReceiveFiles({ sessionId, participantId }: { sessionId: 
             <div className="flex flex-col overflow-y-auto flex-1/2">
                 <span className="text-lg w-full lg:hidden">Files Downloaded:</span>
                 <div className="rounded-xl flex-1 overflow-y-auto custom-scrollbar">
-                    {receivedFiles.length > 0 ? (
+                    {downloadedFiles.length > 0 ? (
                         <div className="w-full flex gap-2 flex-wrap">
-                            {receivedFiles.map((file, index) => {
+                            {downloadedFiles.map((file, index) => {
                                 const type = file.fileName.split('/')[0];
 
                                 return (
-                                    <FileItem key={index} name={file.fileName} type={type} index={index} addedAt={file.addedAt} />
+                                    <FileItem key={index} name={file.fileName} type={type} index={index} addedAt={file.addedAt} filesType={'downloaded'} click={() => handleReDownload(file)} />
                                 );
                             })}
                         </div>
                     ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                            <span className="text-neutral-500 text-4xl max-sm:text-2xl font-bold text-center font-inter">No Files Have Been Sent Yet</span>
+                            <ShinyText text="No Files Have Downloaded Sent Yet" disabled={false} speed={3} className="text-3xl font-bold" />
                         </div>
                     )}
                 </div>
@@ -120,14 +130,18 @@ export default function ReceiveFiles({ sessionId, participantId }: { sessionId: 
     );
 }
 
-const FileItem = ({ name, type, addedAt, index }: FileInfo) => {
+const FileItem = ({ name, type, addedAt, index, filesType, click }: FileInfo) => {
     const [isHovered, setIsHovered] = useState(false);
 
     return (
-        <div key={index}
+        <motion.div 
+            key={index}
             className="border border-neutral-500 text-lg font-normal w-30 h-28 p-2 gap-2 flex flex-col items-center justify-center rounded-xl text-center relative overflow-hidden max-sm:h-14 max-sm:w-35 pointer-fine:max-sm:w-44 max-sm:flex-row"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            onClick={click}
         >
             {
                 type === 'image' ? (
@@ -145,19 +159,35 @@ const FileItem = ({ name, type, addedAt, index }: FileInfo) => {
             <span className="line-clamp-filename w-full text-[16px]">{name}</span>
             <AnimatePresence mode="wait">
                 {isHovered && (
-                    <motion.div 
-                        className="flex flex-col items-center justify-center w-full h-full absolute bg-neutral-700/20 backdrop-blur-sm font-sans rounded-xl max-sm:text-sm"
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
-                        transition={{ duration: 0.2 }}
-                        key="dragging-overlay"
-                    >
-                        <span>Sent At:</span>
-                        <span>{addedAt}</span>
-                    </motion.div>
+                    filesType === 'received' ? (
+                        <motion.div 
+                            className="flex flex-col items-center justify-center w-full h-full absolute bg-neutral-700/20 backdrop-blur-sm font-sans rounded-xl max-sm:text-sm"
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            transition={{ duration: 0.2 }}
+                            key="dragging-overlay"
+                        >
+                            <IoMdDownload size={40} />
+                            <span>Download</span>
+                        </motion.div>
+                    ) : (
+                        <motion.div 
+                            className="flex flex-col items-center justify-center w-full h-full absolute bg-neutral-700/20 backdrop-blur-sm font-sans rounded-xl text-sm"
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            transition={{ duration: 0.2 }}
+                            key="dragging-overlay"
+                        >
+                            <span>Sent At:</span>
+                            <span>{addedAt}</span>
+                            <IoMdDownload size={40} />
+                            <span>Download Again</span>
+                        </motion.div>
+                    )
                 )}
             </AnimatePresence>
-        </div>
+        </motion.div>
     );
 }

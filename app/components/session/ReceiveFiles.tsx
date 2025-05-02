@@ -89,7 +89,7 @@ export default function ReceiveFiles({ sessionId, participantId }: { sessionId: 
                     {receivedFiles.length > 0 ? (
                         <div className="w-full flex gap-2 flex-wrap">
                             {receivedFiles.map((file, index) => {
-                                const type = file.fileName.split('/')[0];
+                                const type = file.blob.type.split('/')[0];
 
                                 return (
                                     <FileItem key={index} name={file.fileName} type={type} index={index} addedAt={file.addedAt} filesType={'received'} click={() => handleDownload(file)} />
@@ -112,7 +112,7 @@ export default function ReceiveFiles({ sessionId, participantId }: { sessionId: 
                     {downloadedFiles.length > 0 ? (
                         <div className="w-full flex gap-2 flex-wrap">
                             {downloadedFiles.map((file, index) => {
-                                const type = file.fileName.split('/')[0];
+                                const type = file.blob.type.split('/')[0];
 
                                 return (
                                     <FileItem key={index} name={file.fileName} type={type} index={index} addedAt={file.addedAt} filesType={'downloaded'} click={() => handleReDownload(file)} />
@@ -161,13 +161,15 @@ const FileItem = ({ name, type, addedAt, index, filesType, click }: FileInfo) =>
                 {isHovered && (
                     filesType === 'received' ? (
                         <motion.div 
-                            className="flex flex-col items-center justify-center w-full h-full absolute bg-neutral-700/20 backdrop-blur-sm font-sans rounded-xl max-sm:text-sm"
+                            className="flex flex-col items-center justify-center w-full h-full absolute bg-neutral-700/20 backdrop-blur-sm font-sans rounded-xl text-sm"
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.9 }}
                             transition={{ duration: 0.2 }}
                             key="dragging-overlay"
                         >
+                            <span>Sent At:</span>
+                            <span>{addedAt}</span>
                             <IoMdDownload size={40} />
                             <span>Download</span>
                         </motion.div>

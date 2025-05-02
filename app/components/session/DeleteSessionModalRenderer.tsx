@@ -27,13 +27,14 @@ const DeleteModal = ({setIsOpen, sessionId}: DeleteModalProps) => {;
         }
     }
 
-    const handleReject = () => {
+    const handleReject = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+        e.stopPropagation()
         setIsOpen(false);
     }
 
     return (
         <motion.div 
-            className='fixed top-0 left-0 w-[100dvw] h-[100dvh] bg-black/70 backdrop-blur-md flex items-center justify-center z-202 text-white p-2'
+            className='fixed top-0 left-0 w-[100dvw] h-[100dvh] bg-black/70 backdrop-blur-md flex items-center justify-center z-205 text-white p-2'
             onClick={handleReject}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}

@@ -113,7 +113,7 @@ const SessionBanner = ({ session }: { session: sessionData }) => {
                     )}
                 </AnimatePresence>
             </div>
-            <div className='w-max h-full flex items-center justify-center border-l border-neutral-600 p-4 hover:bg-neutral-800' onClick={() => btnRef.current.click()}>
+            <div className='w-max h-full flex items-center justify-center border-l border-neutral-600 p-4 hover:bg-neutral-800 transition-[background]' onClick={() => btnRef.current.click()}>
                 <DeleteSessionButton sessionId={session.session_id} buttonRef={btnRef}>
                     <HiOutlineTrash size={26} className='text-red-600' />
                 </DeleteSessionButton>

@@ -224,7 +224,7 @@ export default function SendFiles({ sessionId }: { sessionId: string }) {
                     </div>
                 ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                        <ShinyText text="No Files Have Been Sent Yet" disabled={false} speed={3} className="text-3xl font-bold" />
+                        <ShinyText text="No Files Have Been Sent Yet" disabled={false} speed={3} className="text-3xl text-center font-bold max-lg:text-xl" />
                     </div>
                 )}
             </div>

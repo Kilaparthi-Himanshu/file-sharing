@@ -81,7 +81,7 @@ export default function ReceiveFiles({ sessionId, participantId }: { sessionId: 
 
     return (
         <div className="border border-neutral-500 w-full h-full text-white rounded-xl flex flex-row lg:flex-col p-4 gap-2 bg-black">
-            <span className="text-lg w-full max-lg:hidden">Files Received:</span>
+            <span className="text-lg w-full max-lg:hidden font-semibold">Files Received:</span>
 
             <div className="flex flex-col overflow-y-auto flex-1/2">
                 <span className="text-lg w-full lg:hidden">Files Received:</span>
@@ -98,13 +98,15 @@ export default function ReceiveFiles({ sessionId, participantId }: { sessionId: 
                         </div>
                     ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                            <ShinyText text="No Files Have Received Sent Yet" disabled={false} speed={3} className="text-3xl font-bold" />
+                            <ShinyText text="No Files Have Received Sent Yet" disabled={false} speed={3} className="text-3xl text-center font-bold max-lg:text-xl" />
                         </div>
                     )}
                 </div>
             </div>
 
-            <span className="text-lg w-full max-lg:hidden">Files Downloaded:</span>
+            <div className="w-full border-b max-lg:border-b-0 max-lg:border-l max-lg:h-full max-lg:w-0 border-neutral-500" />
+
+            <span className="text-lg w-full max-lg:hidden font-semibold">Files Downloaded:</span>
 
             <div className="flex flex-col overflow-y-auto flex-1/2">
                 <span className="text-lg w-full lg:hidden">Files Downloaded:</span>
@@ -121,7 +123,7 @@ export default function ReceiveFiles({ sessionId, participantId }: { sessionId: 
                         </div>
                     ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                            <ShinyText text="No Files Have Downloaded Sent Yet" disabled={false} speed={3} className="text-3xl font-bold" />
+                            <ShinyText text="No Files Have Downloaded Sent Yet" disabled={false} speed={3} className="text-3xl text-center font-bold max-lg:text-xl" />
                         </div>
                     )}
                 </div>

@@ -112,6 +112,10 @@ const SessionBanner = ({ session }: { session: sessionData }) => {
                         </motion.div>
                     )}
                 </AnimatePresence>
+                <span className="flex size-3 absolute left-[-5] top-[-5]">
+                    <span className={`absolute inline-flex h-full w-full animate-ping rounded-full bg-green-300 opacity-75`}></span>
+                    <span className={`relative inline-flex size-3 rounded-full bg-green-400`}></span>
+                </span>
             </div>
             <div className='w-max h-full flex items-center justify-center border-l border-neutral-600 p-4 hover:bg-neutral-800 transition-[background]' onClick={() => btnRef.current.click()}>
                 <DeleteSessionButton sessionId={session.session_id} buttonRef={btnRef}>

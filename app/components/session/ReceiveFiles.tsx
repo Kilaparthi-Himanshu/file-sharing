@@ -173,7 +173,7 @@ const FileItem = ({ name, type, addedAt, index, filesType, click }: FileInfo) =>
                             transition={{ duration: 0.2 }}
                             key="dragging-overlay"
                         >
-                            <span>Sent At:</span>
+                            <span>Received At:</span>
                             <span>{addedAt}</span>
                             <IoMdDownload size={40} />
                             <span>Download</span>
@@ -187,7 +187,7 @@ const FileItem = ({ name, type, addedAt, index, filesType, click }: FileInfo) =>
                             transition={{ duration: 0.2 }}
                             key="dragging-overlay"
                         >
-                            <span>Sent At:</span>
+                            <span>Received At:</span>
                             <span>{addedAt}</span>
                             <IoMdDownload size={40} />
                             <span>Download Again</span>

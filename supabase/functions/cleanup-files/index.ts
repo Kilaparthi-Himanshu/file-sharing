@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js';
 import { processQueue } from './processQueue.ts';
+import { deleteSessions } from './deleteSessions.ts';
  
 const supabase = createClient(
      Deno.env.get('SUPABASE_URL')!,
@@ -34,3 +35,5 @@ export async function cleanupFiles() {
 cleanupFiles();
 
 processQueue();
+
+deleteSessions();

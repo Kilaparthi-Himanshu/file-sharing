@@ -100,7 +100,7 @@ export default function ReceiveFiles({ sessionId, participantId }: { sessionId: 
                         </div>
                     ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                            <ShinyText text="No Files Have Received Sent Yet" disabled={false} speed={3} className="text-3xl text-center font-bold max-lg:text-xl" />
+                            <ShinyText text="No Files Have Been Received Yet" disabled={false} speed={3} className="text-3xl text-center font-bold max-lg:text-xl" />
                         </div>
                     )}
                 </div>
@@ -125,7 +125,7 @@ export default function ReceiveFiles({ sessionId, participantId }: { sessionId: 
                         </div>
                     ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                            <ShinyText text="No Files Have Downloaded Sent Yet" disabled={false} speed={3} className="text-3xl text-center font-bold max-lg:text-xl" />
+                            <ShinyText text="No Files Have Been Downloaded Yet" disabled={false} speed={3} className="text-3xl text-center font-bold max-lg:text-xl" />
                         </div>
                     )}
                 </div>

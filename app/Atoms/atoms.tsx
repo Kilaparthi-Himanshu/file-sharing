@@ -11,3 +11,5 @@ export const sessionDetails = atom<{
 });
 
 export const sessionPassword = atom<string | null>(null);
+
+export const lifeTimeAtom = atom<number>(30);

@@ -7,6 +7,9 @@ import { FileIdDisplay } from "./FileIdDisplay";
 import { useMutation } from '@tanstack/react-query';
 import { SpinnerRenderer } from "./Spinner";
 import { usePasswordEye } from "../utils/hooks/usePasswordEye";
+import SliderTime from "./SliderTime";
+import { lifeTimeAtom } from "../Atoms/atoms";
+import { useAtom } from "jotai";
 
 export const FileInput = () => {
     const [file, setFile] = useState<File | null>(null);
@@ -16,9 +19,10 @@ export const FileInput = () => {
     const [showFileIdDisplay, setShowFileIdDisplay] = useState<boolean>(false);
     const [fileId, setFileId] = useState<string>('');
     const {isHidden, PasswordEye} = usePasswordEye();
+    const [lifeTime, setLifeTime] = useAtom(lifeTimeAtom);
 
     const { mutateAsync: addFile, isPending: isUploadPending } = useMutation({
-        mutationFn: async (data: { file: File, secretKey: string }) => uploadEncryptedFile(data.file, data.secretKey)
+        mutationFn: async (data: { file: File, secretKey: string, lifeTime: number }) => uploadEncryptedFile(data.file, data.secretKey, data.lifeTime)
     });
 
     const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
@@ -64,7 +68,7 @@ export const FileInput = () => {
 
         setErrorMessage("");
 
-        const { fileId } = await addFile({file, secretKey});
+        const { fileId } = await addFile({file, secretKey, lifeTime});
         setShowFileIdDisplay(true);
         setFileId(fileId);
 
@@ -104,6 +108,11 @@ export const FileInput = () => {
                 <PasswordEye />
             </div>
 
+            <div className="w-full mt-8 items-center justify-center flex flex-col">
+                <span className="font-semibold self-start">Life Time of the File: </span>
+                <SliderTime />
+            </div>
+
             <div className="w-full flex items-center mt-8 justify-between">
                 <button className="w-40 h-12 self-start border border-neutral-600 rounded-lg bg-neutral-800 hover:bg-neutral-900 transition-[background,scale] cursor-pointer active:scale-98" onClick={handleUpload}>
                     Upload
@@ -111,6 +120,7 @@ export const FileInput = () => {
 
                 <span className={`text-lg ${errorMessage == "Success!" ? 'text-green-400' : 'text-red-400'} ml-2`}>{errorMessage}</span>
             </div>
+
 
             {showFileIdDisplay && (
                 <FileIdDisplay fileId={fileId} />

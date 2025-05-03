@@ -43,7 +43,7 @@ export async function encryptFile(file: File, userKey: string) {
     return new Blob([salt, iv, encryptedData], { type: "application/octet-stream" });
 }
 
-export async function uploadEncryptedFile(file: File, userKey: string) {
+export async function uploadEncryptedFile(file: File, userKey: string, lifeTime: number) {
     const supabase = await createClient();
 
     const encryptedBlob = await encryptFile(file, userKey);
@@ -73,7 +73,7 @@ export async function uploadEncryptedFile(file: File, userKey: string) {
     }
 
     await supabase.from('temporary_files').insert([
-        { file_path: data.path, uploaded_at: new Date().toISOString() }
+        { file_path: data.path, uploaded_at: new Date().toISOString(), expires_in: lifeTime }
     ]);
 
     return { fileId }; // Return file ID for later decryption

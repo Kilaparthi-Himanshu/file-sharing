@@ -16,16 +16,16 @@ export const metadata: Metadata = {
     description: "Share any files within a blink of an eye!",
 };
 
-export default function RoomLayout({
+export default function SessionLayout({
 children,
 }: Readonly<{
 children: React.ReactNode;
 }>) {
     return (
-        <html lang="en">
-           <body className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-hidden`}>
+        <div className="w-full h-full">
+           <div className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-hidden`}>
                 {children}
-           </body>
-        </html>
+           </div>
+        </div>
     );
 }

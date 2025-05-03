@@ -1,0 +1,24 @@
+useEffect(() => {
+    const channel = supabase
+        .channel('session-status')
+        .on(
+            'postgres_changes',
+            {
+                event: 'UPDATE',
+                schema: 'public',
+                table: 'sessions',
+                filter: `id=eq.${sessionId}`
+            },
+            (payload) => {
+                const updatedSession = payload.new.status;
+                setSessionStatus(updatedSession);
+            }
+        )
+        .subscribe();
+
+    fetchUserAndSessionDetails();
+
+    return () => {
+        supabase.removeChannel(channel);
+    }
+}, []);

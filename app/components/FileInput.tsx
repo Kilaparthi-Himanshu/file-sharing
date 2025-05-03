@@ -2,7 +2,7 @@
 
 import { FaRegFile } from "react-icons/fa";
 import { useRef, useState } from "react";
-import {  uploadEncryptedFile } from "../functions/encrypt";
+import { uploadEncryptedFile } from "../functions/encrypt";
 import { FileIdDisplay } from "./FileIdDisplay";
 import { useMutation } from '@tanstack/react-query';
 import { SpinnerRenderer } from "./Spinner";
@@ -73,8 +73,6 @@ export const FileInput = () => {
         setTimeout(() => {
             setErrorMessage("");
         }, 3000);
-
-        console.log(fileId);
     }
 
     return(
@@ -90,7 +88,7 @@ export const FileInput = () => {
             </div>
 
             <div className="w-full mt-8" onClick={() => fileRef?.current?.click()}>
-                <div className="border border-neutral-600 w-full h-12 rounded-lg flex items-center p-2">
+                <div className="border border-neutral-600 w-full h-12 rounded-lg flex items-center p-2 overflow-hidden">
                     <input 
                         type="file" 
                         className="hidden" 

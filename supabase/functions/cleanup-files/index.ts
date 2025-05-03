@@ -1,15 +1,16 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js';
+import { processQueue } from './processQueue.ts';
+import { deleteSessions } from './deleteSessions.ts';
  
 const supabase = createClient(
      Deno.env.get('SUPABASE_URL')!,
      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 );
- 
- 
+
 export async function cleanupFiles() {
     const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
 
-    // Get files older than 5 minutes
+    // Get files older than 30 minutes
     const { data: files, error } = await supabase
         .from('temporary_files')
         .select('*')
@@ -32,3 +33,7 @@ export async function cleanupFiles() {
 }
 
 cleanupFiles();
+
+processQueue();
+
+deleteSessions();

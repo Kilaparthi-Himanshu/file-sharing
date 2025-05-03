@@ -1,6 +1,6 @@
 import { createClient } from "../utils/supabase/client";
 
-async function encryptFile(file: File, userKey: string) {
+export async function encryptFile(file: File, userKey: string) {
     const encoder = new TextEncoder();
     const keyMaterial = await window.crypto.subtle.importKey(
         "raw",
@@ -43,7 +43,6 @@ async function encryptFile(file: File, userKey: string) {
     return new Blob([salt, iv, encryptedData], { type: "application/octet-stream" });
 }
 
-
 export async function uploadEncryptedFile(file: File, userKey: string) {
     const supabase = await createClient();
 
@@ -65,7 +64,7 @@ export async function uploadEncryptedFile(file: File, userKey: string) {
     const fileId = Math.floor(100000 + Math.random() * 900000).toString();
     const filePath = `encrypted-files/${fileId}.enc`; // Store with `.enc` extension
 
-    const {data, error } = await supabase.storage.from("encrypted-data").upload(filePath, encryptedBlob, {
+    const {data, error} = await supabase.storage.from("encrypted-data").upload(filePath, encryptedBlob, {
         contentType: "application/octet-stream"
     });
 

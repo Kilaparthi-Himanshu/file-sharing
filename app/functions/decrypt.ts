@@ -1,6 +1,6 @@
 import { createClient } from "../utils/supabase/client";
 
-async function decryptFile(encryptedBuffer: ArrayBuffer, userKey: string) {
+export async function decryptFile(encryptedBuffer: ArrayBuffer, userKey: string) {
     const encoder = new TextEncoder();
     const keyMaterial = await window.crypto.subtle.importKey(
         "raw",
@@ -42,6 +42,7 @@ async function decryptFile(encryptedBuffer: ArrayBuffer, userKey: string) {
         return { blob: new Blob([fileContent], { type: fileType }), fileName };
 
     } catch (error) {
+        console.error('Decryption failed:', error);
         return;
     }
 }
@@ -84,16 +85,12 @@ async function decryptText(encryptedBuffer: ArrayBuffer, userKey: string) {
 export async function downloadDecryptedFile(fileId: string, userKey: string) {
     const supabase = await createClient();
 
-    console.log(fileId);
-
     let filePath = `encrypted-files/${fileId}.enc`;
 
     let { data, error } = await supabase.storage.from("encrypted-data").download(`${filePath}?nocache=${Date.now()}`);
     // ?nocache=${Date.now()} helps preventing querying cached files from Supabase CDN
 
     if (!error && data) {
-        console.log(`File downloaded successfully, size: ${data.size} bytes`);
-
         const encryptedBuffer = await data.arrayBuffer();
         const decryptResult = await decryptFile(encryptedBuffer, userKey);
 
@@ -121,7 +118,6 @@ export async function downloadDecryptedFile(fileId: string, userKey: string) {
      // ?nocache=${Date.now()} helps preventing querying cached files from Supabase CDN
 
     if (!error && data) {
-        console.log(`Text file found: ${filePath}`);
         const encryptedBuffer = await data.arrayBuffer();
         return await decryptText(encryptedBuffer, userKey);
     }

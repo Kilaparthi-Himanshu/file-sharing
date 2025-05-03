@@ -8,6 +8,9 @@ import { SpinnerRenderer } from "./Spinner";
 import { usePasswordEye } from "../utils/hooks/usePasswordEye";
 import JSZip from "jszip";
 import { FaRegFolder } from "react-icons/fa6";
+import SliderTime from "./SliderTime";
+import { lifeTimeAtom } from "../Atoms/atoms";
+import { useAtom } from "jotai";
 
 export const FolderInput = () => {
     const [file, setFile] = useState<File | null>(null);
@@ -18,9 +21,10 @@ export const FolderInput = () => {
     const [fileId, setFileId] = useState<string>('');
     const {isHidden, PasswordEye} = usePasswordEye();
     const [uploadingFolder, setUploadingFolder] = useState<boolean>(false);
+    const [lifeTime, setLifeTime] = useAtom(lifeTimeAtom);
 
     const { mutateAsync: addFile, isPending: isUploadPending } = useMutation({
-        mutationFn: async (data: { file: File, secretKey: string }) => uploadEncryptedFile(data.file, data.secretKey)
+        mutationFn: async (data: { file: File, secretKey: string, lifeTime: number }) => uploadEncryptedFile(data.file, data.secretKey, data.lifeTime)
     });
 
     const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -85,7 +89,7 @@ export const FolderInput = () => {
 
         setErrorMessage("");
 
-        const { fileId } = await addFile({file, secretKey});
+        const { fileId } = await addFile({file, secretKey, lifeTime});
         setShowFileIdDisplay(true);
         setFileId(fileId);
 
@@ -127,6 +131,11 @@ export const FolderInput = () => {
             <div className="w-full relative mt-8">
                 <input type={isHidden ? 'password' : 'text'} className={`border border-neutral-600 w-full h-12 rounded-lg flex items-center p-2 text-center text-xl ${secretKey ? 'tracking-[8px]' : 'max-lg:text-sm'}  font-sans focus:outline-4 outline-neutral-700 focus:border-neutral-400 focus:border-2 transition-[outline,border] duration-[50ms,0ms]`} maxLength={5}  placeholder='Enter 5-Digit Secret Key' required onChange={(e) => SetSecretKey(e.target.value)}/>
                 <PasswordEye />
+            </div>
+
+            <div className="w-full mt-8 items-center justify-center flex flex-col">
+                <span className="font-semibold self-start">Life Time of the Folder: </span>
+                <SliderTime />
             </div>
 
             <div className="w-full flex items-center mt-8 justify-between">

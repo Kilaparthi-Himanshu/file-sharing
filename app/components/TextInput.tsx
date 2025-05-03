@@ -6,6 +6,9 @@ import { FileIdDisplay } from "./FileIdDisplay";
 import { useMutation } from '@tanstack/react-query';
 import { SpinnerRenderer } from "./Spinner";
 import { usePasswordEye } from "../utils/hooks/usePasswordEye";
+import SliderTime from "./SliderTime";
+import { lifeTimeAtom } from "../Atoms/atoms";
+import { useAtom } from "jotai";
 
 export const TextInput = () => {
     const [text, setText] = useState<string>("");
@@ -14,9 +17,10 @@ export const TextInput = () => {
     const [showFileIdDisplay, setShowFileIdDisplay] = useState<boolean>(false);
     const [fileId, setFileId] = useState<string>('');
     const {isHidden, PasswordEye} = usePasswordEye();
+    const [lifeTime, setLifeTime] = useAtom(lifeTimeAtom);
 
     const { mutateAsync: addText, isPending: isUploadPending } = useMutation({
-        mutationFn: async (data: { text: string, secretKey: string }) => uploadEncryptedText(data.text, data.secretKey)
+        mutationFn: async (data: { text: string, secretKey: string, lifeTime: number }) => uploadEncryptedText(data.text, data.secretKey, data.lifeTime)
     });
 
     const handleUpload = async () => {
@@ -39,7 +43,7 @@ export const TextInput = () => {
 
         setErrorMessage("");
 
-        const { fileId } = await addText({text, secretKey});
+        const { fileId } = await addText({text, secretKey, lifeTime});
         setShowFileIdDisplay(true);
         setFileId(fileId);
 
@@ -66,6 +70,11 @@ export const TextInput = () => {
                 <PasswordEye />
             </div>
 
+            <div className="w-full mt-8 items-center justify-center flex flex-col">
+                <span className="font-semibold self-start">Life Time of the Text: </span>
+                <SliderTime />
+            </div>
+
             <div className="w-full flex items-center mt-8 justify-between">
                 <button className="w-40 h-12 self-start border border-neutral-600 rounded-lg bg-neutral-800 hover:bg-neutral-900 transition-[background,scale] cursor-pointer active:scale-98" onClick={handleUpload}>
                     Upload
@@ -73,6 +82,7 @@ export const TextInput = () => {
 
                 <span className={`text-lg ${errorMessage == "Success!" ? 'text-green-400' : 'text-red-400'} ml-2`}>{errorMessage}</span>
             </div>
+
 
             {showFileIdDisplay && (
                 <FileIdDisplay fileId={fileId} />

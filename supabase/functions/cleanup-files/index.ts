@@ -8,20 +8,24 @@ const supabase = createClient(
 );
 
 export async function cleanupFiles() {
-    const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+    const now = Date.now(); // e.g., 1714728000000ms
 
-    // Get files older than 30 minutes
     const { data: files, error } = await supabase
         .from('temporary_files')
-        .select('*')
-        .lt('uploaded_at', thirtyMinutesAgo);
+        .select('file_path, uploaded_at, expires_in');
 
     if (error) {
-        console.error('Error fetching expired files:', error);
+        console.error('Error fetching files:', error);
         return;
     }
 
-    for (const file of files) {
+    const expiredFiles = files.filter(file => {
+        const uploadedTime = new Date(file.uploaded_at).getTime(); // converts timestamp into Date object and return ms
+        const lifeTimeMs = file.expires_in * 60 * 1000;
+        return now - uploadedTime > lifeTimeMs;
+    });
+
+    for (const file of expiredFiles) {
         // Delete from Supabase Storage
         await supabase.storage.from('encrypted-data').remove([file.file_path]);
 
@@ -29,7 +33,7 @@ export async function cleanupFiles() {
         await supabase.from('temporary_files').delete().eq('file_path', file.file_path);
     }
 
-    console.log(`Deleted ${files.length} expired files.`);
+    console.log(`Deleted ${expiredFiles.length} expired files.`);
 }
 
 cleanupFiles();

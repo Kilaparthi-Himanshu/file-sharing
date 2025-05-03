@@ -37,8 +37,8 @@ export const ModeSelect = () => {
     }
 
     return (
-        <div className='absolute top-0 left-0 m-2 bg-black' ref={openModeModalRef}>
-            <div className='w-30 h-full border border-neutral-700 rounded-lg flex items-center p-2 justify-between mb-2 text-xl max-lg:hidden' onClick={() => setOpenModeModal(!openModeModal)}>
+        <div className='absolute top-0 left-0 m-2' ref={openModeModalRef}>
+            <div className='w-30 h-full border border-neutral-700 rounded-lg flex items-center p-2 justify-between mb-2 text-xl max-lg:hidden bg-black' onClick={() => setOpenModeModal(!openModeModal)}>
                 {mode}
                 <FaArrowDown size={20} className={`transition-[rotate] ${openModeModal && 'rotate-180'}`} />
             </div>

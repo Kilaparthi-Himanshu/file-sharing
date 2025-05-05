@@ -14,6 +14,7 @@ export function useSessionFileReceiveListener(sessionId: string, participantId: 
                 event: 'INSERT',
                 schema: 'public',
                 table: 'session_files',
+                filter: `session_id=eq.${sessionId}`
             }, payload => {
                 const file_path = payload.new.file_path;
                 const fileParticipantId = payload.new.uploaded_by;

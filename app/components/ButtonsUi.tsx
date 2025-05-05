@@ -18,7 +18,7 @@ export const ButtonsUi = async () => {
             </div>
 
             <div className='relative'>
-                <Link className='border border-neutral-600 w-40 h-15 rounded-lg text-white text-xl hover:bg-neutral-800 transition-[background,scale] cursor-pointer active:scale-98 flex items-center justify-center bg-black' href='/session'>
+                <Link className='border border-neutral-600 w-40 h-15 rounded-lg text-white text-xl hover:bg-neutral-800 transition-[background,scale] cursor-pointer active:scale-98 flex items-center justify-center bg-black font-mono' href='/session'>
                     Session
                 </Link>
             </div>

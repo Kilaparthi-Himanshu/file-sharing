@@ -51,7 +51,7 @@ export default function ReceiveFiles({ sessionId, participantId }: { sessionId: 
         ]);
     }
 
-    useSessionFileReceiveListener(sessionId, participantId,  handleFileReceive);
+    useSessionFileReceiveListener(sessionId, participantId, handleFileReceive);
 
     const handleDownload = (file: DecryptedFileWithTime) => {
         setReceivedFiles(prevFiles => prevFiles.filter(prevFile => prevFile != file));

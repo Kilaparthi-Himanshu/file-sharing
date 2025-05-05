@@ -1,32 +1,35 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
-import SplitType from 'split-type';
 import { gsap } from "gsap";
+import SplitText from 'gsap/SplitText';
+
+gsap.registerPlugin(SplitText);
 
 export const OpeningPageTextAnimation = () => {
     const textRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (textRef.current) {
-            const text = new SplitType(textRef.current, {
-                types: 'words,chars',
-                tagName: 'span'
+            const split = new SplitText(textRef.current, {
+                type: 'chars,words',
+                charsClass: 'char',
+                wordsClass: 'word'
             });
 
-            gsap.set('.char', {
+            gsap.set(split.chars, {
                 y: -100,
                 opacity: 0,
-                letterSpacing: '10px'
+                letterSpacing: '10px',
             });
 
-            gsap.to('.char',{
+            gsap.to(split.chars,{
                 y: 0,
                 opacity: 1,
                 stagger: 0.05,
                 delay: 0.2,
                 duration: 0.1,
-                ease: "power4.out"
+                ease: "power4.out",
             });
         }
     }, []);

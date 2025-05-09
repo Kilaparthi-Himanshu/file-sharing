@@ -80,7 +80,12 @@ export default function ReceiveFiles({ sessionId, participantId }: { sessionId: 
     }
 
     return (
-        <div className="border border-neutral-500 w-full h-full text-white rounded-xl flex flex-row lg:flex-col p-4 gap-2 bg-black">
+        <motion.div 
+            className="border border-neutral-500 w-full h-full text-white rounded-xl flex flex-row lg:flex-col p-4 gap-2 bg-black"
+            initial={{ opacity: 0, filter: "blur(5px)" }}
+            animate={{ opacity: 1, filter: "blur(0px)" }}
+            transition={{ duration: 0.3 }}
+        >
             <span className="text-lg w-full max-lg:hidden font-semibold">Files Received:</span>
 
             <div className="flex flex-col overflow-y-auto flex-1/2">
@@ -130,7 +135,7 @@ export default function ReceiveFiles({ sessionId, participantId }: { sessionId: 
                     )}
                 </div>
             </div>
-        </div>
+        </motion.div>
     );
 }
 

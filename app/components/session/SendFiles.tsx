@@ -119,7 +119,12 @@ export default function SendFiles({ sessionId }: { sessionId: string }) {
     }
 
     return (
-        <div className="border border-neutral-500 w-full h-full text-white rounded-xl flex flex-row lg:flex-col p-4 gap-2 max-lg:gap-4 relative bg-black">
+        <motion.div 
+            className="border border-neutral-500 w-full h-full text-white rounded-xl flex flex-row lg:flex-col p-4 gap-2 max-lg:gap-4 relative bg-black"
+            initial={{ opacity: 0, filter: "blur(5px)" }}
+            animate={{ opacity: 1, filter: "blur(0px)" }}
+            transition={{ duration: 0.3 }}
+        >
             <div className="border-2 border-neutral-700 border-dashed rounded-xl flex-1 flex flex-col items-center justify-center gap-4 p-2 relative max-lg:max-w-1/2 lg:max-h-1/2 bg-[url(https://transparenttextures.com/patterns/carbon-fibre-v2.png)]"
                 onClick={() => fileRef?.current?.click()}
                 onDragOver={(e) => e.preventDefault()}
@@ -230,7 +235,7 @@ export default function SendFiles({ sessionId }: { sessionId: string }) {
             </div>
 
             {isPending && <Spinner />}
-        </div>
+        </motion.div>
     );
 }
 

@@ -13,11 +13,11 @@ export default function SessionOptions()  {
     return (
         <>
             <div className='w-[100dvw] h-[100dvh] bg-black flex flex-col items-center justify-center text-white font-bold text-8xl gap-8 noise-texture'>
-                <div onClick={() => setModalType('create')} className='bg-black hover:bg-neutral-800 transition-[background,scale] active:scale-98 border border-neutral-600 w-200 max-w-[96dvw] text-center rounded-lg flex items-center justify-center h-max py-20 pb-22 max-lg:py-15 max-lg:text-5xl max-lg:w-150 pointer-coarse:active:bg-neutral-800'>
+                <div onClick={() => setModalType('create')} className='bg-black hover:bg-neutral-800 transition-[background,scale] active:scale-98 border border-neutral-600 w-200 max-w-[96dvw] text-center rounded-lg flex items-center justify-center h-max py-20 pb-22 max-lg:py-15 max-lg:text-5xl max-lg:w-150 pointer-coarse:active:bg-neutral-800 animate-fade animate-once animate-ease-out'>
                     <span>Create Session</span>
                 </div>
 
-                <div onClick={() => setModalType('join')} className='bg-black hover:bg-neutral-800 transition-[background,scale] active:scale-98 border border-neutral-600 w-200 max-w-[96dvw] text-center rounded-lg flex flex-col items-center justify-center h-max py-20 pb-22 max-lg:py-15 max-lg:text-5xl max-lg:w-150 pointer-coarse:active:bg-neutral-800'>
+                <div onClick={() => setModalType('join')} className='bg-black hover:bg-neutral-800 transition-[background,scale] active:scale-98 border border-neutral-600 w-200 max-w-[96dvw] text-center rounded-lg flex flex-col items-center justify-center h-max py-20 pb-22 max-lg:py-15 max-lg:text-5xl max-lg:w-150 pointer-coarse:active:bg-neutral-800 animate-fade animate-once animate-ease-out'>
                     <span>Join Session</span>
                 </div>
 
@@ -33,7 +33,7 @@ export default function SessionOptions()  {
                     )}
                 </AnimatePresence>
 
-                <div onClick={() => setModalType('mySessions')} className='absolute top-4 left-4 bg-black hover:bg-neutral-800 border border-neutral-600 text-2xl p-2 px-4 rounded-lg font-normal transition-[background,scale] active:scale-98 pointer-coarse:active:bg-neutral-800'>
+                <div onClick={() => setModalType('mySessions')} className='absolute top-4 left-4 bg-black hover:bg-neutral-800 border border-neutral-600 text-2xl p-2 px-4 rounded-lg font-normal transition-[background,scale] active:scale-98 pointer-coarse:active:bg-neutral-800 animate-fade animate-once animate-ease-out'>
                     My Sessions
                 </div>
             </div>

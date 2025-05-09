@@ -24,6 +24,7 @@
         "cloc": "^2.4.0-cloc",
         "dotenv": "^16.4.7",
         "framer-motion": "^12.9.4",
+        "glazejs": "^2.0.1",
         "gsap": "^3.13.0",
         "jotai": "^2.12.2",
         "jszip": "^3.10.1",
@@ -40,6 +41,7 @@
         "react-toastify": "^11.0.5",
         "split-type": "^0.3.4",
         "tailwindcss": "^4.1.2",
+        "tailwindcss-animated": "^2.0.0",
         "unique-names-generator": "^4.7.1",
         "uuidv4": "^6.2.13",
         "zod": "^3.24.2"
@@ -55,6 +57,7 @@
         "eslint": "^9",
         "eslint-config-next": "15.2.3",
         "supabase": "^2.20.3",
+        "tailwindcss-motion": "^1.1.0",
         "ts-node": "^10.9.2",
         "typescript": "^5.8.2"
     },

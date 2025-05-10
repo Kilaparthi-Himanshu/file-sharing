@@ -117,7 +117,7 @@ const SessionBanner = ({ session }: { session: sessionData }) => {
                     <span className={`relative inline-flex size-3 rounded-full bg-green-400`}></span>
                 </span>
             </div>
-            <div className='w-max h-full flex items-center justify-center border-l border-neutral-600 p-4 hover:bg-neutral-800 transition-[background]' onClick={() => btnRef.current.click()}>
+            <div className='w-max h-full flex items-center justify-center border-l border-neutral-600 p-4 hover:bg-neutral-800 transition-[background] rounded-r-lg' onClick={() => btnRef.current.click()}>
                 <DeleteSessionButton sessionId={session.session_id} buttonRef={btnRef}>
                     <HiOutlineTrash size={26} className='text-red-600' />
                 </DeleteSessionButton>

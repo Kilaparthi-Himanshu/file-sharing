@@ -8,9 +8,9 @@ import { useDeleteSession } from '@/app/utils/hooks/session/useDeleteSession';
 import { useQueryClient } from '@tanstack/react-query';
 
 type DeleteModalProps = {
-    isOpen?: boolean
+    isOpen?: boolean;
     setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
-    sessionId: string
+    sessionId: string;
 }
 
 const DeleteModal = ({setIsOpen, sessionId}: DeleteModalProps) => {;

@@ -10,9 +10,15 @@ const config: Config = {
           '0%': { backgroundPosition: '100%' },
           '100%': { backgroundPosition: '-100%' },
         },
+        gradient: {
+            '0%': { backgroundPosition: '0% 50%' },
+            '50%': { backgroundPosition: '100% 50%' },
+            '100%': { backgroundPosition: '0% 50%' },
+        },
       },
       animation: {
         shine: 'shine 5s linear infinite',
+        gradient: 'gradient 8s linear infinite'
       },
     },
   },

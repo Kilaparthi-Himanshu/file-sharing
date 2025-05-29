@@ -6,6 +6,7 @@ import CreateSessionModal from '../components/session/CreateSessionModal';
 import JoinSessionModal from '../components/session/JoinSessionModal';
 import { ToastContainer } from 'react-toastify';
 import { MySessionsModal } from '../components/session/MySessionsModal';
+import { HiUserGroup } from "react-icons/hi";
 
 export default function SessionOptions()  {
     const [modalType, setModalType] = useState<'create' | 'join' | 'mySessions' | null>(null);
@@ -33,8 +34,9 @@ export default function SessionOptions()  {
                     )}
                 </AnimatePresence>
 
-                <div onClick={() => setModalType('mySessions')} className='absolute top-4 left-4 bg-black hover:bg-neutral-800 border border-neutral-600 text-2xl p-2 px-4 rounded-lg font-normal transition-[background,scale] active:scale-98 pointer-coarse:active:bg-neutral-800 animate-fade animate-once animate-ease-out'>
+                <div onClick={() => setModalType('mySessions')} className='absolute top-4 left-4 bg-black hover:bg-neutral-800 border border-neutral-600 text-2xl p-2 px-4 rounded-lg font-normal transition-[background,scale] active:scale-98 pointer-coarse:active:bg-neutral-800 animate-fade animate-once animate-ease-out flex justify-end items-center gap-4'>
                     My Sessions
+                    <HiUserGroup size={26} />
                 </div>
             </div>
             <ToastContainer />

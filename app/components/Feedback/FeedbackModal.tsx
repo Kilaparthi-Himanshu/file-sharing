@@ -14,7 +14,6 @@ type FeedbackModalTypes = {
     setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-
 const FeedbackModal = ({ feedbackType, setIsOpen }: Omit<FeedbackModalTypes, 'isOpen'>) => {
     const [errorMessage, setErrorMessage] = useState<string>("");
     const feedbackLabel: Record<FeedbackTypes, string> = {

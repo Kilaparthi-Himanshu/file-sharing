@@ -85,7 +85,7 @@ export default function SendFiles({ sessionId }: { sessionId: string }) {
 
     const handleFiles = (files: FileList) => {
         const formatedDate = formatTime(new Date());
-        const filesWithTime = [...Array.from(files)].map(file => ({file, addedAt: formatedDate}));
+        const filesWithTime = Array.from(files).map(file => ({file, addedAt: formatedDate}));
         setPendingFiles(prevFiles => [...prevFiles, ...filesWithTime]);
     }
 
@@ -107,7 +107,7 @@ export default function SendFiles({ sessionId }: { sessionId: string }) {
             }
         }
 
-        const data = await addFiles({ files: pendingFiles, password: password, sessionId, uploaded_by:  participantId});
+        await addFiles({ files: pendingFiles, password: password, sessionId, uploaded_by:  participantId});
 
         setSentFiles(prevFiles => [...prevFiles, 
             ...pendingFiles.map(file => ({ 
@@ -190,18 +190,29 @@ export default function SendFiles({ sessionId }: { sessionId: string }) {
                 {pendingFiles.length > 0 ? (
                     <div className={`sm:absolute bottom-2 right-2 flex flex-row gap-1 lg:gap-2 ${pendingFiles.length > 0 && 'right-14'}`}>
                             <button 
-                                className={`px-6 py-2 bg-neutral-900 active:bg-neutral-950 transition-[background,scale] active:scale-96 border border-neutral-700 text-lg rounded-xl ${pendingFiles.length > 0 && 'max-sm:px-3 max-sm:py-1'}`}
+                                className={`px-6 py-2 bg-neutral-900 active:bg-neutral-950 transition-[background,scale] active:scale-96 border border-neutral-700 text-lg rounded-xl ${pendingFiles.length > 0 && 'max-md:px-1 max-md:py-1'}`}
                                 onClick={handleUpload}
                             >
                                 Send
                             </button>
 
                             <button 
-                                className="px-6 py-2 bg-neutral-900 active:bg-neutral-950 transition-[background,scale] active:scale-96 border border-neutral-700 text-lg rounded-xl max-sm:px-3 max-sm:py-1"
+                                className="px-6 py-2 bg-neutral-900 active:bg-neutral-950 transition-[background,scale] active:scale-96 border border-neutral-700 text-lg rounded-xl max-md:px-1 max-md:py-1"
                                 onMouseDown={(e) => e.stopPropagation()}
                                 onPointerDown={(e) => e.stopPropagation()}
                             >
                                 Add
+                            </button>
+
+                            <button 
+                                className="px-6 py-2 bg-neutral-900 active:bg-neutral-950 transition-[background,scale] active:scale-96 border border-neutral-700 text-lg rounded-xl max-md:px-1 max-md:py-1"
+                                onClick={(event) => {
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    setPendingFiles([]);
+                                }}
+                            >
+                                Delete All
                             </button>
                     </div>
                 ) : (

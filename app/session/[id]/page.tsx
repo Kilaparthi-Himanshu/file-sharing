@@ -25,10 +25,10 @@ export default async function Session({ params, searchParams }: Props) {
                 <RefreshSessionCookies sessionId={id} />
 
                 <main className='w-screen h-[100dvh] bg-black flex items-center justify-center text-white max-lg:flex-col noise-texture'>
-                    <div className='w-full max-lg:h-1/2 h-full flex items-center justify-center p-20 max-sm:px-5 max-sm:pb-5 max-lg:px-10 max-lg:pb-10 lg:max-w-1/2'>
+                    <div className='w-full max-lg:h-[60%] h-full flex items-center justify-center p-20 max-sm:px-5 max-sm:pb-5 max-lg:px-10 max-lg:pb-10 lg:max-w-1/2'>
                         <SendFiles sessionId={id} />
                     </div>
-                    <div className='w-full max-lg:h-1/2 h-full flex items-center justify-center p-20 max-sm:px-5 max-sm:pb-5 max-lg:px-10 max-lg:pb-10 lg:max-w-1/2'>
+                    <div className='w-full max-lg:h-1/2 h-full flex items-center justify-center p-20 max-sm:px-5 max-sm:pb-5 max-lg:px-10 max-lg:pb-10 lg:max-w-1/2 max-lg:pt-0'>
                         <ReceiveFiles sessionId={id} participantId={participantId} />
                     </div>
                 </main>

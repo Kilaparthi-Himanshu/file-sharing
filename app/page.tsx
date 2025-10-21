@@ -3,6 +3,8 @@ import { ButtonsUi } from "./components/ButtonsUi";
 import { Feedback } from "./components/Feedback/Feedback";
 import { OpeningPageTextAnimation } from "./components/misc/OpeningPageTextAnimation";
 import { Metadata } from 'next';
+import PixelBlast from "./components/misc/PixelBlast";
+import * as THREE from 'three';
 
 export const metadata: Metadata = {
     title: 'BlinkShare – Fast, Secure File Sharing',
@@ -31,8 +33,14 @@ export const metadata: Metadata = {
 };
 
 export default function Home() {
+    const randomColor = new THREE.Color().setHSL(Math.random(), 0.6, 0.5).getStyle();
+    // const randomColor = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+
     return (
         <div className="bg-black h-[100dvh] w-[100dvw] flex flex-col gap-15 items-center justify-center p-4 noise-texture">
+            {/* <div className="w-full h-full absolute">
+                <PixelBlast edgeFade={0.0} color={randomColor} />
+            </div> */}
             <span className="text-white text-7xl font-bold text-center max-sm:text-5xl">
                 <OpeningPageTextAnimation />
             </span>

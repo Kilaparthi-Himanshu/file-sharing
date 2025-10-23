@@ -37,7 +37,7 @@ export default function Home() {
     // const randomColor = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
 
     return (
-        <div className="bg-black h-[100dvh] w-[100dvw] flex flex-col gap-15 items-center justify-center p-4 noise-texture">
+        <div className="bg-black h-[100dvh] w-[100dvw] flex flex-col gap-16 items-center justify-center p-4 noise-texture">
             {/* <div className="w-full h-full absolute">
                 <PixelBlast edgeFade={0.0} color={randomColor} />
             </div> */}

@@ -6,7 +6,7 @@ import SplitText from 'gsap/SplitText';
 
 gsap.registerPlugin(SplitText);
 
-export const OpeningPageTextAnimation = () => {
+export const OpeningPageTextAnimation = ({ shadowColor }: { shadowColor?: string }) => {
     const textRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -35,7 +35,7 @@ export const OpeningPageTextAnimation = () => {
     }, []);
 
     return (
-        <div id='title' ref={textRef} className='tracking-[10px] text-shadow-lg text-shadow-blue-500/80'>
+        <div id='title' ref={textRef} className={`tracking-[10px] text-shadow-lg ${shadowColor ? shadowColor : 'text-shadow-blue-500/80'}`}>
            BlinkShare
         </div>
     );

@@ -5,6 +5,7 @@ import AnimatedCursor from "react-animated-cursor"
 import { ReactQueryProvider } from "../components/ReactQueryProvider";
 import AuthProvider from "../providers/AuthProvider";
 
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -20,7 +21,7 @@ export const metadata: Metadata = {
   description: "Share any files within a blink of an eye!",
 };
 
-export default function DevelopersLayout({
+export default function DashboardLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;

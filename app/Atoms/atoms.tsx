@@ -1,4 +1,6 @@
+import { User } from "@supabase/supabase-js";
 import { atom } from "jotai";
+import { DeveloperProfileType } from "../utils/hooks/useDeveloperProfile";
 
 export const selectModeAtom = atom<"File" | "Folder" | "Text">("File");
 
@@ -13,3 +15,7 @@ export const sessionDetails = atom<{
 export const sessionPassword = atom<string | null>(null);
 
 export const lifeTimeAtom = atom<number>(30);
+
+export const userAtom = atom<User | null>(null);
+
+export const profileAtom = atom<DeveloperProfileType | null>(null);

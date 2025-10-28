@@ -15,6 +15,9 @@ import { supabase } from '../utils/supabase/client';
 import ModalRenderer from '../components/ModalRenderer';
 import { SignInModal } from '../components/developers/SignInModal';
 import { ToastContainer } from "react-toastify";
+import { useAtomValue } from 'jotai';
+import { profileAtom } from '../Atoms/atoms';
+import { useRouter } from 'next/navigation';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -43,38 +46,19 @@ export default function Developers () {
         });
     });
 
-    const [user, setUser] = useState(null);
-    const [isSignedIn, setIsSignedIn] = useState(false);
     const [signInModalOpen, setSignInModalOpen] = useState(false);
-
-    useEffect(() => {
-        async function fetchUserSession() {
-            const { data, error } = await supabase
-                .auth
-                .getUser();
-
-            if (error) {
-                console.error(error);
-                return;
-            }
-
-            console.log(data);
-
-            setIsSignedIn(!!data.user);
-        }
-
-        fetchUserSession();
-    });
+    const profile = useAtomValue(profileAtom);
+    const router = useRouter();
 
     return (
         <div className='w-full'>
             <button 
                 className='fixed top-4 right-4 py-2 bg-emerald-500 hover:bg-emerald-600 px-6 rounded-xl z-200 transition-all outline-2 outline-transparent hover:outline-emerald-300/70 outline-offset-2 text-neutral-900 font-semibold active:scale-95' 
                 onClick={() => {
-                    return isSignedIn ? window.location.href = '/developers/dashboard' : setSignInModalOpen(true);
+                    return profile ? router.push('/dashboard') : setSignInModalOpen(true);
                 }}
             >
-                {isSignedIn ? 'Dashboard' : 'Sign In'}
+                {profile ? 'Dashboard' : 'Sign In'}
             </button>
 
             <ModalRenderer isOpen={signInModalOpen}>
@@ -191,8 +175,9 @@ export default function Developers () {
                             </p>
 
                             <button
-                                onClick={() => {
-                                    window.location.href = "/developers/docs";
+                                onClick={async () => {
+                                    // window.location.href = "/developers/docs";
+                                    await supabase.auth.signOut();
                                 }}
                                 className="px-10 py-4 bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-xl transition-all outline-2 outline-transparent hover:outline-emerald-300/70 outline-offset-4"
                             >

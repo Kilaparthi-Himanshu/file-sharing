@@ -18,11 +18,11 @@ export default async function joinSession({ displayName, sessionId, password } :
         .eq('id', sessionId )
         .single();
 
-    if (hashedPasswordDataError)  return { status: 'error', message: 'Unable to Retrive Password' }
+    if (hashedPasswordDataError) return { status: 'error', message: 'Unable to Retrive Password' }
 
     const isMatch = await bycrypt.compare(password, hashedPasswordData.password);
 
-    if (!isMatch)  return { status: 'error', message: 'Wrong Password!' }
+    if (!isMatch) return { status: 'error', message: 'Wrong Password!' }
  
     const { data, error: participantCreationError} = await supabase.from('session_participants').insert([
         { display_name: displayName, session_id: sessionId, is_connected: true }

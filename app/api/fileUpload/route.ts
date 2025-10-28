@@ -1,4 +1,4 @@
-import { createClient } from "@/app/utils/supabase/server";
+import { createClient } from "@/app/utils/supabase/client";
 import { NextRequest, NextResponse } from "next/server";
 
 const API_ENABLED = false;

@@ -5,6 +5,19 @@ import { createClient } from './app/utils/supabase/server';
 export async function middleware(request: NextRequest) {
     const pathname = request.nextUrl.pathname;
 
+    if (pathname.startsWith('/dashboard')) {
+        const supabase = await createClient();
+
+        const { data, error } = await supabase.auth.getUser();
+
+        if (error || !data?.user) {
+            const redirectUrl = new URL('/developers', request.url);
+            return NextResponse.redirect(redirectUrl);
+        }
+
+        return NextResponse.next();
+    }
+
     if (pathname.startsWith('/session')) {
         // Match routes like /session/abc where abc is not a number
         const postMatch = pathname.match(/^\/session\/([^/]+)$/);
@@ -77,5 +90,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/session/:id*'],
+    matcher: ['/dashboard/:path*', '/session/:id*'],
 };

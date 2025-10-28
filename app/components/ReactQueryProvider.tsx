@@ -18,7 +18,7 @@ export function ReactQueryProvider({ children }: ReactQueryProviderProps) {
 
     return (
         <QueryClientProvider client={queryClient}>
-        {children}
+            {children}
         </QueryClientProvider>
     );
 }

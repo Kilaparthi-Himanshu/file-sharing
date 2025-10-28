@@ -28,3 +28,5 @@ export async function createClient() {
     }
   )
 }
+
+// Used in Server (RSCs, Route Handlers, Server Actions, Middleware)

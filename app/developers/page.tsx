@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { OpeningPageTextAnimation } from '../components/misc/OpeningPageTextAnimation';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
@@ -11,6 +11,10 @@ import { CgLock } from "react-icons/cg";
 import { AiOutlineThunderbolt } from "react-icons/ai";
 import { IoMdCloudOutline } from "react-icons/io";
 import { FaRegClock } from "react-icons/fa6";
+import { supabase } from '../utils/supabase/client';
+import ModalRenderer from '../components/ModalRenderer';
+import { SignInModal } from '../components/developers/SignInModal';
+import { ToastContainer } from "react-toastify";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -27,7 +31,7 @@ export default function Developers () {
         gsap.to('#features', {
             duration: 0.5,
             ease: "power1.out",
-            delay: 0.3,
+            delay: 0.5,
             opacity: 1,
             stagger: 0.2,
             scrollTrigger: {
@@ -39,8 +43,44 @@ export default function Developers () {
         });
     });
 
+    const [user, setUser] = useState(null);
+    const [isSignedIn, setIsSignedIn] = useState(false);
+    const [signInModalOpen, setSignInModalOpen] = useState(false);
+
+    useEffect(() => {
+        async function fetchUserSession() {
+            const { data, error } = await supabase
+                .auth
+                .getUser();
+
+            if (error) {
+                console.error(error);
+                return;
+            }
+
+            console.log(data);
+
+            setIsSignedIn(!!data.user);
+        }
+
+        fetchUserSession();
+    });
+
     return (
         <div className='w-full'>
+            <button 
+                className='fixed top-4 right-4 py-2 bg-emerald-500 hover:bg-emerald-600 px-6 rounded-xl z-200 transition-all outline-2 outline-transparent hover:outline-emerald-300/70 outline-offset-2 text-neutral-900 font-semibold active:scale-95' 
+                onClick={() => {
+                    return isSignedIn ? window.location.href = '/developers/dashboard' : setSignInModalOpen(true);
+                }}
+            >
+                {isSignedIn ? 'Dashboard' : 'Sign In'}
+            </button>
+
+            <ModalRenderer isOpen={signInModalOpen}>
+                <SignInModal setIsOpen={setSignInModalOpen} />
+            </ModalRenderer>
+
             <div className="bg-black flex flex-col gap-16 items-center justify-center">
                 <div className='min-h-[100dvh] flex flex-col items-center justify-center gap-15'>
                     <span className="text-white text-7xl font-bold text-center max-sm:text-5xl opacity-0" id="opening-text">
@@ -77,7 +117,7 @@ export default function Developers () {
                         <h2 className="text-4xl font-bold mb-10 text-white">Features</h2>
 
                         <div className='grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-24'>
-                            <div className='order-1 bg-neutral-900 outline-2 outline-emerald-300/70 outline-offset-4 w-[300px] h-[300px] rounded-4xl flex flex-col items-center justify-center p-2 opacity-0' id="features">
+                            <div className='order-1 bg-neutral-900 outline-2 outline-emerald-300/70 outline-offset-4 w-[290px] h-[290px] rounded-4xl flex flex-col items-center justify-center p-2 opacity-0' id="features">
                                 <div className='w-full flex items-center justify-center p-6 rounded-full'>
                                     <CgLock size={80} className='text-emerald-500' />
                                 </div>
@@ -87,7 +127,7 @@ export default function Developers () {
                                 </div>
                             </div>
 
-                            <div className='order-2 bg-emerald-800 outline-2 outline-emerald-300/70 outline-offset-4 w-[300px] h-[300px] rounded-4xl flex flex-col items-center justify-center p-2 opacity-0' id="features">
+                            <div className='order-2 bg-emerald-800 outline-2 outline-emerald-300/70 outline-offset-4 w-[290px] h-[290px] rounded-4xl flex flex-col items-center justify-center p-2 opacity-0' id="features">
                                 <div className='w-full flex items-center justify-center p-6 rounded-full'>
                                     <AiOutlineThunderbolt size={80} className='text-neutral-900' />
                                 </div>
@@ -97,7 +137,7 @@ export default function Developers () {
                                 </div>
                             </div>
 
-                            <div className='order-3 md:max-xl:order-4 bg-neutral-900 outline-2 outline-emerald-300/70 outline-offset-4 w-[300px] h-[300px] rounded-4xl flex flex-col items-center justify-center p-2 opacity-0' id="features">
+                            <div className='order-3 md:max-xl:order-4 bg-neutral-900 outline-2 outline-emerald-300/70 outline-offset-4 w-[290px] h-[290px] rounded-4xl flex flex-col items-center justify-center p-2 opacity-0' id="features">
                                 <div className='w-full flex items-center justify-center p-6 rounded-full'>
                                     <FaRegClock size={80} className='text-emerald-500' />
                                 </div>
@@ -107,7 +147,7 @@ export default function Developers () {
                                 </div>
                             </div>
 
-                            <div className='order-4 md:max-xl:order-3 bg-emerald-800 outline-2 outline-emerald-300/70 outline-offset-4 w-[300px] h-[300px] rounded-4xl flex flex-col items-center justify-center p-2 opacity-0' id="features">
+                            <div className='order-4 md:max-xl:order-3 bg-emerald-800 outline-2 outline-emerald-300/70 outline-offset-4 w-[290px] h-[290px] rounded-4xl flex flex-col items-center justify-center p-2 opacity-0' id="features">
                                 <div className='w-full flex items-center justify-center p-6 rounded-full'>
                                     <IoMdCloudOutline size={80} className='text-neutral-900' />
                                 </div>
@@ -129,11 +169,13 @@ export default function Developers () {
                                     <p className="text-xl font-semibold mb-2">Upload your file</p>
                                     <p className="text-neutral-400">via dashboard or API</p>
                                 </div>
+
                                 <div className="flex flex-col items-center">
                                     <div className="text-emerald-500 text-6xl font-bold mb-4">2</div>
                                     <p className="text-xl font-semibold mb-2">We secure and store it</p>
                                     <p className="text-neutral-400">encrypted & access-controlled</p>
                                 </div>
+
                                 <div className="flex flex-col items-center">
                                     <div className="text-emerald-500 text-6xl font-bold mb-4">3</div>
                                     <p className="text-xl font-semibold mb-2">Share the expiring link</p>
@@ -150,12 +192,7 @@ export default function Developers () {
 
                             <button
                                 onClick={() => {
-                                    const isLoggedIn = false; // replace with your auth logic
-                                    if (isLoggedIn) {
-                                        window.location.href = "/developers/dashboard";
-                                    } else {
-                                        window.location.href = "/developers/login";
-                                    }
+                                    window.location.href = "/developers/docs";
                                 }}
                                 className="px-10 py-4 bg-emerald-500 hover:bg-emerald-600 text-black font-bold rounded-xl transition-all outline-2 outline-transparent hover:outline-emerald-300/70 outline-offset-4"
                             >
@@ -165,6 +202,8 @@ export default function Developers () {
                     </div>
                 </div>
             </div>
+
+            <ToastContainer />
         </div>
     );
 }

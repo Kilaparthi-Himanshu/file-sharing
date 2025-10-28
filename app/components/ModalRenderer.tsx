@@ -9,5 +9,3 @@ const ModalRenderer = ({ isOpen, children }: { isOpen: boolean, children: React.
 }
 
 export default ModalRenderer;
-
-// This Component is not being used for now.

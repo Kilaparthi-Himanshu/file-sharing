@@ -2,14 +2,14 @@ import { AnimatePresence, motion } from 'framer-motion';
 import React from 'react';
 import { FaRegCopy } from 'react-icons/fa';
 
-export const CopyButton = ({ textIsCopied, handleCopy }: {textIsCopied: boolean, handleCopy: () => void
+export const CopyButton = ({ absolute, textIsCopied, handleCopy }: {absolute?: boolean, textIsCopied: boolean, handleCopy: () => void
 }) => {
     return (
         <AnimatePresence mode="wait">
             {!textIsCopied ? (
                 <motion.div
                     key="copyIcon"
-                    className="absolute bg-neutral-900 rounded-full w-max h-max right-2 bottom-2 p-2 active:scale-95"
+                    className={`${!absolute ? 'realtive' : 'absolute'} bg-neutral-900 rounded-full w-max h-max right-2 bottom-2 p-2 active:scale-95`}
                     title="Copy Text"
                     onClick={handleCopy}
                     initial={{ opacity: 0, y: 10 }}
@@ -22,7 +22,7 @@ export const CopyButton = ({ textIsCopied, handleCopy }: {textIsCopied: boolean,
             ) : (
                 <motion.div
                     key="textCopied"
-                    className="absolute bg-neutral-900 rounded-lg w-max h-max right-2 bottom-2 p-2"
+                    className={`${!absolute ? 'realtive' : 'absolute'} bg-neutral-900 rounded-lg w-max h-max right-2 bottom-2 p-2`}
                     title="Text Copied"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}

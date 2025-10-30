@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
 import AnimatedCursor from "react-animated-cursor"
-import { ReactQueryProvider } from "../components/ReactQueryProvider";
 import AuthProvider from "../providers/AuthProvider";
 
 const geistSans = Geist({
@@ -32,11 +31,9 @@ export default function DevelopersLayout({
                     color="78, 181, 147"
                 />
             </div>
-            <ReactQueryProvider>
-                <AuthProvider>
-                    {children}
-                </AuthProvider>
-            </ReactQueryProvider>
+            <AuthProvider>
+                {children}
+            </AuthProvider>
         </div>
     );
 }

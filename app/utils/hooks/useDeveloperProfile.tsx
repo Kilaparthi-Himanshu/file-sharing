@@ -1,14 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "../supabase/client";
-
-export type DeveloperProfileType = {
-    user_id: string;
-    created_at: string;
-    email: string;
-    full_name: string;
-    username: string;
-    subscription_status: string;
-}
+import { DeveloperProfileType } from "@/types/supabase_database.types";
 
 export function useDeveloperProfile(userId?: string) {
     return useQuery<DeveloperProfileType | null>({

@@ -29,7 +29,6 @@ export default function DashboardLayout({
 }>) {
     const profile = useAtomValue(profileAtom);
     const [openSidebar, setOpenSidebar] = useState(false);
-    const [menu, setMenu] = useState<SideBarOptionTypes>('api_keys');
 
     return (
         <div className={`selection:bg-emerald-600! selection:text-white min-h-screen ${geistSans.variable} ${geistMono.variable} antialiased`}>
@@ -39,11 +38,11 @@ export default function DashboardLayout({
                 />
             </div>
             <AuthProvider>
-                <div className='w-screen h-screen bg-black flex flex-col flex-1'>
+                <div className='w-screen h-screen bg-black flex flex-col'>
                     <Topbar openSidebar={openSidebar} setOpenSidebar={setOpenSidebar} />
-                    <div className='w-full flex flex-row flex-1 bg-black p-2 gap-2 relative'>
+                    <div className='w-full h-full flex flex-row p-2 gap-2 relative overflow-hidden'>
                         <Sidebar openSidebar={openSidebar}/>
-                        <div className='bg-neutral-900 h-full w-full rounded-2xl'>
+                        <div className='bg-neutral-900 h-full w-full rounded-2xl overflow-y-auto'>
                             {children}
                         </div>
                     </div>

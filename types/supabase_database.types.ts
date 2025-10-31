@@ -11,7 +11,7 @@ export type ApiKeyDataType = {
     id: string;
     created_at: string;
     user_id: string;
-    last_used: number;
+    last_used: string;
     usage_count: number;
     is_active: boolean;
     api_key: string;

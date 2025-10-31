@@ -63,7 +63,7 @@ export default function ApiKeys() {
             <span className='text-4xl font-semibold text-white'>API Keys</span>
 
             <div className='bg-neutral-950 w-full h-max rounded-2xl flex flex-col border border-neutral-700'>
-                <div className='flex flex-row w-full p-4 items-center justify-center'>
+                <div className='flex flex-row gap-4 w-full p-4 items-center justify-center'>
                     <span className='flex-1 text-white text-lg font-semibold'>BlinkShare API Key</span>
                     <div className='flex-1 relative flex items-center gap-2'>
                         {apiKeyData?.api_key && 
@@ -92,6 +92,17 @@ export default function ApiKeys() {
                             </div>
                         }
                     </div>
+
+                    {apiKeyData?.api_key && 
+                        <div 
+                            className='text-white bg-neutral-900 w-[60px] h-full flex items-center justify-center rounded-sm border border-neutral-500 transition-all active:scale-95 text-sm' 
+                            onClick={() => {
+                                !textisCopied && handleCopy();
+                            }}
+                        >
+                            {textisCopied ? 'Copied!' : <FaRegCopy size={18} />}
+                        </div>
+                    }
                 </div>
             </div>
 

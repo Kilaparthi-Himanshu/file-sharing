@@ -1,6 +1,6 @@
 import { User } from "@supabase/supabase-js";
 import { atom } from "jotai";
-import { DeveloperProfileType } from "../utils/hooks/useDeveloperProfile";
+import { DeveloperProfileType } from "@/types/supabase_database.types";
 
 export const selectModeAtom = atom<"File" | "Folder" | "Text">("File");
 

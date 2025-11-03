@@ -30,7 +30,6 @@ export async function signInUser({ email, password }: Pick<SignUpDetailsTypes, "
         });
 
     if (error) {
-        console.error(error);
         return { 
             status: 'error', 
             message: error.message 
@@ -40,5 +39,45 @@ export async function signInUser({ email, password }: Pick<SignUpDetailsTypes, "
     return { 
         status: 'success', 
         message: 'Signed In successfully!' 
+    };
+}
+
+export async function resetPassword({ email }: Pick<SignUpDetailsTypes, "email">) {
+    const { error } = await supabase
+        .auth
+        .resetPasswordForEmail(email, {
+            redirectTo: `${window.location.href}/reset`
+        });
+
+    if (error) {
+        return { 
+            status: 'error', 
+            message: error.message 
+        };
+    }
+
+    return { 
+        status: 'success', 
+        message: 'Reset Link Sent Successfully!' 
+    };
+}
+
+export async function updateUser({ password }: Pick<SignUpDetailsTypes, "password">) {
+    const { error } = await supabase
+        .auth
+        .updateUser({
+            password
+        });
+
+    if (error) {
+        return { 
+            status: 'error', 
+            message: error.message 
+        };
+    }
+
+    return { 
+        status: 'success', 
+        message: 'Password Updated Successfully!' 
     };
 }

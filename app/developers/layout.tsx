@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
 import AnimatedCursor from "react-animated-cursor"
 import AuthProvider from "../providers/AuthProvider";
+import { ToastContainer } from "react-toastify";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,6 +35,8 @@ export default function DevelopersLayout({
             <AuthProvider>
                 {children}
             </AuthProvider>
+
+            <ToastContainer />
         </div>
     );
 }

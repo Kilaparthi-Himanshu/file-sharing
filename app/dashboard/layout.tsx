@@ -10,6 +10,7 @@ import { useAtomValue } from 'jotai';
 import { profileAtom, userAtom } from '../Atoms/atoms';
 import Sidebar, { SideBarOptionTypes } from '../components/Dashboard/Sidebar';
 import Topbar from '../components/Dashboard/Topbar';
+import { ToastContainer } from "react-toastify";
 
 
 const geistSans = Geist({
@@ -48,6 +49,8 @@ export default function DashboardLayout({
                     </div>
                 </div>
             </AuthProvider>
+
+            <ToastContainer />
         </div>
     );
 }

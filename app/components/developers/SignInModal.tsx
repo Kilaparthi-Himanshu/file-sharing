@@ -6,7 +6,7 @@ import { IoClose } from 'react-icons/io5';
 import { usePasswordEye } from '@/app/utils/hooks/usePasswordEye';
 import { notifyError, notifySuccess } from '../Alerts';
 import { useMutation } from '@tanstack/react-query';
-import { signUpUser, SignUpDetailsTypes, signInUser } from '@/app/utils/auth';
+import { signUpUser, signInUser, resetPassword } from '@/app/utils/auth';
 import { SpinnerRenderer } from '../Spinner';
 
 export const SignInModal = ({ 
@@ -26,15 +26,16 @@ export const SignInModal = ({
 
     const { isHidden, PasswordEye } = usePasswordEye();
     const [errorMessage, setErrorMessage] = useState<string>("");
-    const [actionType, setActionType] = useState<'signup' | 'signin'>('signin');
-
+    const [actionType, setActionType] = useState<'signup' | 'signin' | 'forgotPassword'>('signin');
     const { mutateAsync: signUp, isPending: isPendingSignUp } = useMutation({
         mutationFn: signUpUser
     });
-
     const { mutateAsync: signIn, isPending: isPendingSignIn } = useMutation({
         mutationFn: signInUser
-    })
+    });
+    const { mutateAsync: passwordReset, isPending: isPendingResetPassword } = useMutation({
+        mutationFn: resetPassword
+    });
 
     const handleClose = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -98,14 +99,43 @@ export const SignInModal = ({
         notifySuccess({ 
             message: data.message, 
             onClose: () => setIsOpen(false),
-            time: 1000, 
+            time: 2000, 
+            hideProgressBar: false 
+        });
+    }
+
+    const handleForgotPassword = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setErrorMessage("");
+
+        const formData = new FormData(e.currentTarget as HTMLFormElement);
+        const email = formData.get('email')?.toString();
+
+        if (!email) {
+            setErrorMessage("Email Field Must Be Filled!");
+            return;
+        }
+
+        const data = await passwordReset({ email });
+
+        if (data.status == 'error') {
+            setErrorMessage("Invalid!");
+            notifyError(data.message);
+            return;
+        }
+
+        setErrorMessage("Success!");
+        notifySuccess({ 
+            message: data.message, 
+            onClose: () => setIsOpen(false),
+            time: 2000, 
             hideProgressBar: false 
         });
     }
 
     return (
         <>
-            {(isPendingSignUp || isPendingSignIn) && <SpinnerRenderer />}
+            {(isPendingSignUp || isPendingSignIn || isPendingResetPassword) && <SpinnerRenderer />}
 
             <motion.div
                 className='fixed top-0 left-0 w-[100dvw] h-[100dvh] bg-black/70 backdrop-blur-md flex items-center justify-center z-205 text-white p-2 font-sans'
@@ -130,8 +160,10 @@ export const SignInModal = ({
                             onSubmit={(e) => {
                                 if (actionType === 'signup') {
                                     handleSignUp(e);
-                                } else {
+                                } else if (actionType === 'signin') {
                                     handleSignIn(e);
+                                } else if (actionType === 'forgotPassword') {
+                                    handleForgotPassword(e);
                                 }
                             }} 
                             className='w-full h-full flex flex-col items-center justify-center gap-8'
@@ -165,13 +197,14 @@ export const SignInModal = ({
                                 </div>
                             </div>
 
+                            {actionType !== 'forgotPassword' && 
                             <div className='w-full flex flex-col gap-2'>
-                                <span>Passowrd:</span>
+                                <span>Password:</span>
                                 <div className='w-full relative'>
                                     <input name='password' type={isHidden ? 'password' : 'text'} className={`border border-neutral-600 w-full h-12 rounded-lg flex items-center p-2 text-center text-xl font-sans focus:outline-4 outline-neutral-700 focus:border-neutral-400 focus:border-2 transition-[outline,border] duration-[50ms,0ms]`} placeholder='Enter Password'/>
                                     <PasswordEye />
                                 </div>
-                            </div>
+                            </div>}
 
                             <div className="w-full flex items-center justify-between">
                                 <button className="w-40 h-auto min-h-12 self-start border border-neutral-600 rounded-lg bg-neutral-800 hover:bg-neutral-900 transition-[background,scale] active:scale-98 disabled:opacity-70">
@@ -190,7 +223,7 @@ export const SignInModal = ({
                                             Already have an account?
                                         </span>
 
-                                        <button className="underline" type="button" onClick={() => setActionType('signin')}>
+                                        <button className="underline hover:scale-105 transition-all" type="button" onClick={() => setActionType('signin')}>
                                             Sign In
                                         </button>
                                     </div>
@@ -200,12 +233,16 @@ export const SignInModal = ({
                                             Don't have an account?
                                         </span>
 
-                                        <button className="underline" type="button" onClick={() => setActionType('signup')}>
+                                        <button className="underline hover:scale-105 transition-all" type="button" onClick={() => setActionType('signup')}>
                                             Sign Up
                                         </button>
                                     </div>
                                 )}
                             </div>
+
+                            <button type='button' className='h-max underline text-lg hover:scale-105 transition-all' onClick={() => setActionType('forgotPassword')}>
+                                Forgot Password
+                            </button>
                         </form>
                     </motion.div>
                 </AnimatePresence>

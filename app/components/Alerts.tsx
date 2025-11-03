@@ -1,10 +1,11 @@
 import { toast, Bounce } from "react-toastify";
 
-type succesProps = {
+type SuccesPropsType = {
     message: string;
     onClose?: () => void;
     time?: number;
-    hideProgressBar?: boolean
+    hideProgressBar?: boolean;
+    className?: string
 }
 
 export const notifyError = (message: string) => toast.error(message, {
@@ -25,7 +26,7 @@ export const notifyError = (message: string) => toast.error(message, {
     }
 });
 
-export const notifySuccess = ({ message, onClose, time, hideProgressBar }: succesProps) => toast.success(message, {
+export const notifySuccess = ({ message, onClose, time, hideProgressBar, className }: SuccesPropsType) => toast.success(message, {
     position: "top-center",
     autoClose: time || 5000,
     hideProgressBar: hideProgressBar ?? true,
@@ -39,5 +40,6 @@ export const notifySuccess = ({ message, onClose, time, hideProgressBar }: succe
         background: 'black',
         border: '1px solid rgb(28, 28, 28)'
     },
-    onClose
+    onClose,
+    className: className
 });

@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { OpeningPageTextAnimation } from '../components/misc/OpeningPageTextAnimation';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
-import CodeBlockComponent from '../components/developers/CodeBlock';
+import CodeBlockComponent from '../components/Developers/CodeBlock';
 import dedent from "dedent";
 import ScrollTrigger from "gsap/ScrollTrigger";
 import { CgLock } from "react-icons/cg";
@@ -13,8 +13,7 @@ import { IoMdCloudOutline } from "react-icons/io";
 import { FaRegClock } from "react-icons/fa6";
 import { supabase } from '../utils/supabase/client';
 import ModalRenderer from '../components/ModalRenderer';
-import { SignInModal } from '../components/developers/SignInModal';
-import { ToastContainer } from "react-toastify";
+import { SignInModal } from '../components/Developers/SignInModal';
 import { useAtomValue } from 'jotai';
 import { profileAtom } from '../Atoms/atoms';
 import { useRouter } from 'next/navigation';
@@ -187,8 +186,6 @@ export default function Developers () {
                     </div>
                 </div>
             </div>
-
-            <ToastContainer />
         </div>
     );
 }

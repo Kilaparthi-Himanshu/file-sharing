@@ -9,6 +9,9 @@ import { useAtomValue } from 'jotai';
 import React, { useState } from 'react';
 import { FaRegCopy } from "react-icons/fa";
 import { useFormattedDate } from '@/app/utils/hooks/useFormattedDate';
+import { IoMdRefresh } from 'react-icons/io';
+import { deleteApiKey } from '@/app/functions/dashbaord/deleteApiKey';
+import { notifySuccess } from '@/app/components/Alerts';
 
 export default function ApiKeys() {
     const [textisCopied, setTextIsCopied] = useState(false);
@@ -51,6 +54,17 @@ export default function ApiKeys() {
             console.error(res);
         }
         setLoading(false);
+        notifySuccess({ message: "Generated New API Key Successfully!", time: 2500, hideProgressBar: false, className: 'text-center' });
+    }
+
+    const handleRegenerate = async () => {
+        const res = await deleteApiKey(profile!.user_id);
+        if (res.status === 'success') {
+            queryClient.invalidateQueries({ queryKey: ['api_key', profile?.user_id] });
+        } else {
+            console.error(res);
+        }
+        handleGenerate();
     }
 
     const isBusy = isLoading || loading;
@@ -62,9 +76,12 @@ export default function ApiKeys() {
         <div className='w-full flex flex-col items-center p-10 gap-8'>
             <span className='text-4xl font-semibold text-white'>API Keys</span>
 
-            <div className='bg-neutral-950 w-full h-max rounded-2xl flex flex-col border border-neutral-700'>
+            <div className='bg-neutral-950 w-full h-[80px] rounded-2xl flex flex-col border border-neutral-700 items-center justify-center'>
                 <div className='flex flex-row gap-4 w-full p-4 items-center justify-center'>
-                    <span className='flex-1 text-white text-lg font-semibold'>BlinkShare API Key</span>
+                    <span className='flex-1 text-white text-lg font-semibold'>
+                        BlinkShare API Key
+                    </span>
+
                     <div className='flex-1 relative flex items-center gap-2'>
                         {apiKeyData?.api_key && 
                             <div className='absolute right-2 h-full flex items-center justify-center w-[60px]'>
@@ -73,6 +90,7 @@ export default function ApiKeys() {
                                     onClick={() => {
                                         !textisCopied && handleCopy();
                                     }}
+                                    title='Copy API Key'
                                 >
                                     {textisCopied ? 'Copied!' : <FaRegCopy size={18} />}
                                 </div>
@@ -80,7 +98,7 @@ export default function ApiKeys() {
                         }
 
                         {apiKeyData?.api_key ? 
-                            <input type="text" name='sessionId' className={`border-2 border-neutral-600 w-full h-10 rounded-lg flex items-center p-2 font-sans focus:outline-4 outline-neutral-700 focus:border-neutral-400 focus:border-2 transition-[outline,border] duration-[50ms,0ms] text-neutral-400`} defaultValue={apiKeyData.api_key} readOnly/>
+                            <input type="text" name='sessionId' className={`border-2 border-neutral-600 w-full h-12 rounded-lg flex items-center p-2 font-sans focus:outline-4 outline-neutral-700 focus:border-neutral-400 focus:border-2 transition-[outline,border] duration-[50ms,0ms] text-neutral-400`} defaultValue={apiKeyData.api_key} readOnly/>
                         :
                             <div className='w-full h-full flex items-center justify-center'>
                                 <div 
@@ -95,12 +113,11 @@ export default function ApiKeys() {
 
                     {apiKeyData?.api_key && 
                         <div 
-                            className='text-white bg-neutral-900 w-[60px] h-full flex items-center justify-center rounded-sm border border-neutral-500 transition-all active:scale-95 text-sm' 
-                            onClick={() => {
-                                !textisCopied && handleCopy();
-                            }}
+                            className='text-white bg-neutral-900 w-max h-full flex items-center justify-center rounded-lg border-2 border-neutral-600 transition-all active:scale-95 text-sm p-2'
+                            onClick={handleRegenerate}
+                            title='Regenerate API Key'
                         >
-                            {textisCopied ? 'Copied!' : <FaRegCopy size={18} />}
+                            <IoMdRefresh size={25} />
                         </div>
                     }
                 </div>

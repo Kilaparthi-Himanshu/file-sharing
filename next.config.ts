@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
     experimental: {
         viewTransition: true,
     },
-};
+    transpilePackages: ["blink-secure-links"],
+};  
 
 export default nextConfig;

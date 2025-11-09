@@ -10,7 +10,7 @@ export async function generateApiKey() {
     if (!user || userError) return { status: 'error', message: 'Not Signed In' };
 
     const rawKey = randomBytes(32).toString('hex');
-    const publicKey = `blink_${rawKey}`;
+    const publicKey = `blink_public_${rawKey}`;
 
     const { error } = await supabase
         .from('api_keys')

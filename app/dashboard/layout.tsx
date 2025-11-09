@@ -28,7 +28,6 @@ export default function DashboardLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-    const profile = useAtomValue(profileAtom);
     const [openSidebar, setOpenSidebar] = useState(false);
 
     return (

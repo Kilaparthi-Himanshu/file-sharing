@@ -5,7 +5,7 @@ export function useFormattedDate(timestamp: string | undefined) {
         if (!timestamp) return null;
 
         const date = new Date(timestamp);
-        return date.toLocaleString("en-IN", {
+        return date.toLocaleString(undefined, {
             weekday: "short",
             day: "2-digit",
             month: "short",

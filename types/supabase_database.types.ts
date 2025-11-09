@@ -4,7 +4,7 @@ export type DeveloperProfileType = {
     email: string;
     full_name: string;
     username: string;
-    subscription_status: string;
+    plan: string;
 }
 
 export type ApiKeyDataType = {
@@ -16,3 +16,11 @@ export type ApiKeyDataType = {
     is_active: boolean;
     api_key: string;
 }
+
+export type ApiUsageDataType = {
+    date: string;
+    usage_count: number;
+    user_id: string;
+    first_used: string;
+    last_used: string;
+}[]

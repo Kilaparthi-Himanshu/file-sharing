@@ -18,9 +18,7 @@ const sideBarComponents = [{
         <FaUserLarge size={20} />
     ),
     link: '/dashboard/profile'
-}] as const;
-
-export type SideBarOptionTypes = (typeof sideBarComponents)[number]['key'];
+}];
 
 export default function Sidebar({
     openSidebar,

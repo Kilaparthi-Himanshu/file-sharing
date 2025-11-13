@@ -1,15 +1,12 @@
-import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
-import { withCORS } from "../../utils";
+import { createClient } from "@supabase/supabase-js";
+import { withCORS } from "@/app/api/utils";
 
 const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     {
-        auth: {
-            autoRefreshToken: false,
-            persistSession: false,
-        },
+        auth: { autoRefreshToken: false, persistSession: false },
     }
 );
 
@@ -17,13 +14,17 @@ export async function OPTIONS() {
     return withCORS(new NextResponse(null, { status: 204 }));
 }
 
-export async function GET(
+export async function POST(
     req: Request,
     { params }: { params: Promise<{ id: string }> }
 ) {
     const { id: shortId } = await params;
 
     try {
+        const { secretKey } = await req.json();
+        if (!secretKey)
+            return withCORS(NextResponse.json({ error: "Missing secret key" }, { status: 400 }));
+
         // Fetch link data
         const { data: link, error } = await supabaseAdmin
             .from("links")
@@ -31,9 +32,8 @@ export async function GET(
             .eq("short_id", shortId)
             .single();
 
-        if (error || !link) {
+        if (error || !link)
             return withCORS(NextResponse.json({ error: "Link not found" }, { status: 404 }));
-        }
 
         // Check expiry and activity status
         const now = new Date();
@@ -56,10 +56,7 @@ export async function GET(
             ));
         }
 
-        // Remote Procedure Call which increases the click_count
-        await supabaseAdmin.rpc("increment_link_clicks", { p_short_id: shortId });
-
-        // Fetch the actual file and stream it
+        // Download ciphertext
         const upstream = await fetch(link.file_url, {
             method: "GET",
             headers: {
@@ -86,3 +83,18 @@ export async function GET(
         return withCORS(NextResponse.json({ error: "Internal server error" }, { status: 500 }));
     }
 }
+
+async function decryptServerSide(encryptedBlob: Blob, userKey: string): Promise<Buffer> {
+    const buffer = Buffer.from(await encryptedBlob.arrayBuffer());
+    const salt = buffer.subarray(0, 16);
+    const iv = buffer.subarray(16, 28);
+    const ciphertext = buffer.subarray(28);
+
+    const crypto = await import("crypto");
+    const keyMaterial = crypto.pbkdf2Sync(userKey, salt, 100000, 32, "sha256");
+
+    const decipher = crypto.createDecipheriv("aes-256-gcm", keyMaterial, iv);
+    const decrypted = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
+    return decrypted;
+}
+

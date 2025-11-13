@@ -74,7 +74,7 @@ export async function POST(req: Request) {
             .insert([{
                 user_id: userId,
                 api_key: apiKey,
-                file_url: signed,
+                file_url: signed?.signedUrl,
                 short_id: shortId,
                 expires_at: expiresAt.toISOString(),
                 max_clicks: maxClicks
@@ -89,7 +89,7 @@ export async function POST(req: Request) {
                 ? "http://localhost:3000"
                 : "https://blinkshare.vercel.app";
 
-        const secureUrl = `${base}/api/link/${shortId}`;
+        const secureUrl = `${base}/api/link/encrypted/${shortId}`;
         return withCORS(NextResponse.json({ url: secureUrl }));
     }   catch (err: any) {
         console.error("Error in createLink: ", err);

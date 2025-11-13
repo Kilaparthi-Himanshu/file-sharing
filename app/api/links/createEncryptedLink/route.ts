@@ -62,19 +62,15 @@ export async function POST(req: Request) {
 
         if (uploadError) throw uploadError;
 
-        // Public signed URL (valid until file expiry)
-        const { data: signed } = await supabaseAdmin
-            .storage
-            .from("encrypted-data")
-            .createSignedUrl(upload.path, durationMs / 1000);
-
         // Store in Supabase
         const { error: insertError } = await supabaseAdmin
             .from('links')
             .insert([{
                 user_id: userId,
                 api_key: apiKey,
-                file_url: signed?.signedUrl,
+                file_url: null,
+                file_path: upload.path,
+                link_type: 'encrypted',
                 short_id: shortId,
                 expires_at: expiresAt.toISOString(),
                 max_clicks: maxClicks

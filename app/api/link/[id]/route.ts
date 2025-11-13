@@ -75,10 +75,36 @@ export async function GET(
         }
 
         const headers = new Headers();
-        headers.set(
-            "Content-Type",
-            upstream.headers.get("content-type") || "application/octet-stream"
-        );
+
+        // Set Content-Type
+        const contentType = upstream.headers.get("content-type") || "application/octet-stream";
+        headers.set("Content-Type", contentType);
+
+        // Set Content-Disposition a.k.a type and name of the file
+        // For example, it looks like this: "Content-Disposition": `attachment; filename="BlinkShare.png"
+        const contentDisp = upstream.headers.get("Content-Disposition");
+
+        if (contentDisp) {
+            // If it exists in upstream
+            headers.set("Content-Disposition", contentDisp);
+            console.log("CD: ", contentDisp);
+        } else {
+            // If it does not exist in upstream
+            const urlObj = new URL(link.file_url);
+            const last = urlObj.pathname.split("/").pop();
+
+            // Fallback file name
+            let filename = "download";
+
+            if (last && last.includes(".")) {
+                filename = last;
+            } else {
+                const ext = contentType.split("/")[1] || "bin";
+                filename = `download.${ext}`;
+            }
+
+            headers.set("Content-Disposition", `attachment; filename="${filename}"`);
+        }
 
         return withCORS(new NextResponse(upstream.body, { headers }));
     } catch (err) {

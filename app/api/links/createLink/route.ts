@@ -74,6 +74,8 @@ export async function POST(req: Request) {
                 user_id: userId,
                 api_key: apiKey,
                 file_url: fileUrl,
+                file_path: null,
+                link_type: 'proxy',
                 short_id: shortId,
                 expires_at: expiresAt.toISOString(),
                 max_clicks: maxClicks

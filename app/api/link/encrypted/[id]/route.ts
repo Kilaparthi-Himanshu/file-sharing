@@ -57,27 +57,39 @@ export async function POST(
         }
 
         // Download ciphertext
-        const upstream = await fetch(link.file_url, {
-            method: "GET",
-            headers: {
-                // In future add custom headers either provided by user or for supabase bucket
+        const { data: blob } = await supabaseAdmin
+            .storage
+            .from("encrypted-data")
+            .download(link.file_path);
+
+        if (!blob) return withCORS(NextResponse.json({ error: "File not found" }, { status: 404 }));
+
+        // Decrypt
+        const decrypted = await decryptServerSide(blob, secretKey);
+
+        // Extract metadata
+        const filename = new TextDecoder().decode(decrypted.subarray(0, 200)).trim();
+        const mimeType = new TextDecoder().decode(decrypted.subarray(200, 300)).trim();
+        const fileBytes = decrypted.subarray(300);
+
+        // Create a stream (required for identical proxy behavior)
+        const stream = new ReadableStream({
+            start(controller) {
+                controller.enqueue(new Uint8Array(fileBytes));
+                controller.close();
             }
         });
 
-        if (!upstream.ok) {
-            return withCORS(NextResponse.json(
-                { error: "Failed to fetch file from source" },
-                { status: 502 }
-            ));
-        }
-
-        const headers = new Headers();
-        headers.set(
-            "Content-Type",
-            upstream.headers.get("content-type") || "application/octet-stream"
+        // Return EXACTLY like createLink endpoint
+        return withCORS(
+            new NextResponse(stream, {
+                headers: {
+                    "Content-Type": mimeType || "application/octet-stream",
+                    "Content-Disposition": `attachment; filename="${filename}"`,
+                }
+            })
         );
 
-        return withCORS(new NextResponse(upstream.body, { headers }));
     } catch (err) {
         console.error("Error serving link:", err);
         return withCORS(NextResponse.json({ error: "Internal server error" }, { status: 500 }));
@@ -86,15 +98,36 @@ export async function POST(
 
 async function decryptServerSide(encryptedBlob: Blob, userKey: string): Promise<Buffer> {
     const buffer = Buffer.from(await encryptedBlob.arrayBuffer());
+
+    // --- Parse salt + iv
     const salt = buffer.subarray(0, 16);
     const iv = buffer.subarray(16, 28);
-    const ciphertext = buffer.subarray(28);
 
+    // --- Remaining bytes = ciphertext + tag
+    const encrypted = buffer.subarray(28);
+
+    // AES-GCM tag is ALWAYS last 16 bytes
+    const tag = encrypted.subarray(encrypted.length - 16);
+    const ciphertext = encrypted.subarray(0, encrypted.length - 16);
+
+    // --- Derive same key using PBKDF2
     const crypto = await import("crypto");
-    const keyMaterial = crypto.pbkdf2Sync(userKey, salt, 100000, 32, "sha256");
+    const keyMaterial = crypto.pbkdf2Sync(
+        userKey,
+        salt,
+        100000,
+        32,       // 256-bit key
+        "sha256"
+    );
 
+    // --- Create decipher
     const decipher = crypto.createDecipheriv("aes-256-gcm", keyMaterial, iv);
-    const decrypted = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
+    decipher.setAuthTag(tag);
+
+    const decrypted = Buffer.concat([
+        decipher.update(ciphertext),
+        decipher.final()
+    ]);
+
     return decrypted;
 }
-

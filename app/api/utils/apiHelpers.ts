@@ -11,28 +11,35 @@ export async function withCORS(res: NextResponse) {
     res.headers.set('Access-Control-Allow-Origin', '*');
     res.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-blink-key, x-blink-env');
+
+    // Expose file download headers
+    res.headers.set(
+        "Access-Control-Expose-Headers",
+        "Content-Disposition, Content-Type"
+    );
+
     return res;
 }
 
 // RATE LIMIT
-export async function rateLimit(req: Request) {
-    const ip = req.headers.get("x-forwarded-for") || "unknown";
-    const apiKey = req.headers.get("x-blink-key") || "no-key";
-    const key = `ratelimit:${ip}-${apiKey}`;
+// export async function rateLimit(req: Request) {
+//     const ip = req.headers.get("x-forwarded-for") || "unknown";
+//     const apiKey = req.headers.get("x-blink-key") || "no-key";
+//     const key = `ratelimit:${ip}-${apiKey}`;
 
-    const now = Date.now();
-    const windowMs = 5000; // 5s window
+//     const now = Date.now();
+//     const windowMs = 5000; // 5s window
 
-    // Check last request timestamp
-    const last = await redis.get<number>(key);
-    if (last && now - last < windowMs) {
-        return false;
-    }
+//     // Check last request timestamp
+//     const last = await redis.get<number>(key);
+//     if (last && now - last < windowMs) {
+//         return false;
+//     }
 
-    // Store current timestamp with TTL
-    await redis.set(key, now, { ex: 5 });
-    return true;
-}
+//     // Store current timestamp with TTL
+//     await redis.set(key, now, { ex: 5 });
+//     return true;
+// }
 
 // SSRF GUARD
 export async function validateUrl(fileUrl: string) {

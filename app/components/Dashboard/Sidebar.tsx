@@ -27,7 +27,7 @@ export default function Sidebar({
 }) {
     return (
         <nav className={`overflow-hidden duration-200 ease-in-out
-        transform transition-all bg-neutral-900 h-full w-[300px] min-w-[250px] rounded-2xl flex flex-col items-center p-3 gap-3 max-md:absolute max-md:left-2 max-md:bottom-2 max-md:top-2 max-md:h-auto max-md:bg-neutral-950 max-md:max-w-[250px] max-md:z-400 ${openSidebar ? 'max-md:translate-x-0' : 'max-md:-translate-x-[105%]'}`}>
+        transform transition-all bg-neutral-900 h-full w-[300px] min-w-[250px] rounded-2xl flex flex-col items-center p-3 gap-3 max-md:absolute max-md:left-2 max-md:bottom-2 max-md:top-2 max-md:h-auto max-md:bg-neutral-950 max-md:max-w-[250px] max-md:z-400 custom-shadow ${openSidebar ? 'max-md:translate-x-0' : 'max-md:-translate-x-[105%]'}`}>
             {sideBarComponents.map(comp => 
                 <SidebarCard comp={comp} key={comp.key}/>
             )}

@@ -6,7 +6,7 @@ import { supabase } from '@/app/utils/supabase/client';
 import { ApiKeyDataType, ApiUsageDataType } from '@/types/supabase_database.types';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAtomValue } from 'jotai';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { FaRegCopy } from "react-icons/fa";
 import { useFormattedDate } from '@/app/utils/hooks/useFormattedDate';
 import { IoMdRefresh } from 'react-icons/io';
@@ -95,7 +95,7 @@ export default function ApiKeys() {
     const createdAtFormatted = useFormattedDate(apiKeyData?.created_at);
 
     return (
-        <div className='w-full flex flex-col items-center p-8 gap-8'>
+        <div className='w-full h-full flex flex-col items-center p-8 gap-8'>
             <span className='text-4xl font-semibold text-white'>API Keys</span>
 
             <div className='bg-neutral-950 w-full h-[80px] rounded-2xl flex flex-col border border-neutral-700 items-center justify-center'>
@@ -164,7 +164,7 @@ export default function ApiKeys() {
                 </div>
             </div>
 
-            <div className='bg-neutral-950 w-full h-max rounded-2xl flex flex-col border border-neutral-700 p-4 text-white text-lg gap-7'>
+            <div className='bg-neutral-950 w-full flex-1 overflow-y-auto rounded-2xl flex flex-col border border-neutral-700 p-4 text-white text-lg gap-7'>
                 <span className='w-full text-white text-lg font-semibold underline'>
                     API Details:
                 </span>

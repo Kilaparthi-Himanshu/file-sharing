@@ -39,6 +39,27 @@
         background: rgb(110, 110, 110) !important;
     }
 
+    .custom-scrollbar2::-webkit-scrollbar {
+        width: 10px !important;  /* Width of vertical scrollbar */
+        padding-right: 2px !important;
+    }
+
+    .custom-scrollbar2::-webkit-scrollbar-track {
+        background: transparent;  /* Scrollbar track */
+        border-radius: 6px !important;
+        border: 1px solid gray;
+    }
+
+    .custom-scrollbar2::-webkit-scrollbar-thumb {
+        background: rgb(207, 207, 207) !important;  /* Scrollbar handle */
+        border-radius: 6px !important;
+    }
+
+    /* Hover effects */
+    .custom-scrollbar2::-webkit-scrollbar-thumb:hover {
+        background: rgb(110, 110, 110) !important;
+    }
+
     .char {
         transition: transform 0.5s;
     }
@@ -54,6 +75,12 @@
     .noise-texture {
         background-image: url("https://transparenttextures.com/patterns/3px-tile.png");
         background-color: #000000;
+    }
+
+    .custom-shadow {
+        @media (width < 48rem /* 768px */) {
+            box-shadow: inset -1px 1px 2px #444444;
+        }
     }
 }
 

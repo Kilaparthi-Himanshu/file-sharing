@@ -56,6 +56,9 @@ export async function POST(
             ));
         }
 
+        // Remote Procedure Call which increases the click_count
+        await supabaseAdmin.rpc("increment_link_clicks", { p_short_id: shortId });
+
         // Download ciphertext
         const { data: blob } = await supabaseAdmin
             .storage

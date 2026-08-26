@@ -36,27 +36,29 @@ export function ApiUsageTable({
     const quota = getQuota(plan ?? 'free');
 
     return (
-        <Table>
+        <Table className="relative">
             <TableCaption>API Usage Metrics per day.</TableCaption>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead className="font-semibold text-white">
-                            Date
-                        </TableHead>
 
-                        <TableHead className="font-semibold text-white">
-                            First Used
-                        </TableHead>
+            <TableHeader>
+                <TableRow>
+                    <TableHead className="font-semibold text-white">
+                        Date
+                    </TableHead>
 
-                        <TableHead className="font-semibold text-white">
-                            Last Used
-                        </TableHead>
+                    <TableHead className="font-semibold text-white">
+                        First Used
+                    </TableHead>
 
-                        <TableHead className="font-semibold text-white">
-                            Usage Count
-                        </TableHead>
-                    </TableRow>
-                </TableHeader>
+                    <TableHead className="font-semibold text-white">
+                        Last Used
+                    </TableHead>
+
+                    <TableHead className="font-semibold text-white">
+                        Daily Usage Count
+                    </TableHead>
+                </TableRow>
+            </TableHeader>
+
             <TableBody>
                 {apiUsageData?.map((usage) => (
                     <TableRow key={`${usage.user_id}_${usage.date}`}>
@@ -78,10 +80,11 @@ export function ApiUsageTable({
                     </TableRow>
                 ))}
             </TableBody>
-            <TableFooter>
+
+            <TableFooter className="sticky bottom-0 z-20 bg-neutral-800">
                 <TableRow>
-                <TableCell colSpan={3}>Total</TableCell>
-                <TableCell className="text-blue-400 font-semibold">{totalUsage}</TableCell>
+                    <TableCell colSpan={3}>Total</TableCell>
+                    <TableCell className="text-blue-400 font-semibold">{totalUsage}</TableCell>
                 </TableRow>
             </TableFooter>
         </Table>

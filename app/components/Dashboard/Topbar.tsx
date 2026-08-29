@@ -11,6 +11,7 @@ import { FiLogOut } from "react-icons/fi";
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/app/utils/supabase/client';
+import { FaHome } from "react-icons/fa";
 
 export default function Topbar({
     openSidebar,
@@ -29,7 +30,13 @@ export default function Topbar({
                         <FiMenu size={26} />
                     </button>
                 </div>
-                <div className='w-full flex items-center justify-end px-2 h-max gap-2'>
+                <div className='w-full flex items-center justify-end px-4 h-max gap-2'>
+                    <FaHome
+                        className='text-neutral-200 active:scale-90 rounded-full transition-all duration-20 mr-auto' 
+                        size={32}
+                        onClick={() => window.location.href = '/'}
+                    />
+
                     <PlanBanner plan={profile?.plan} />
 
                     <ProfileBanner profile={profile} />

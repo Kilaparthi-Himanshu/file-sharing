@@ -1,10 +1,15 @@
 import React, { useRef, useState } from 'react';
 import { FaRegFile } from 'react-icons/fa6';
+import { InstantSession } from '@/lib/instant/InstantSession';
 
 export default function InstantSend() {
     const [files, setFiles] = useState<File[]>([]);
     const fileRef = useRef<HTMLInputElement>(null);
     const [errorMessage, setErrorMessage] = useState<string>("");
+
+    const sessionRef = useRef<InstantSession | null>(null);
+    const [transferId, setTransferId] = useState<string>("");
+    const [connectedPeers, setConnectedPeers] = useState(0);
 
      const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
         event.preventDefault();
@@ -37,26 +42,50 @@ export default function InstantSend() {
         event.target.value = "";
     };
 
-    const handleSend = () => {
+    const handleSend = async () => {
         if (files.length === 0) {
             setErrorMessage("Please Select a File");
             return;
         }
 
-        setErrorMessage("");
+        try {
+            setErrorMessage("");
 
-        // Later:
-        // create Instant transfer ID
-        // establish signaling session
-        // wait for receivers
-        // transfer files
+            const session = new InstantSession(
+                "sender",
+                {
+                    onSessionCreated: (id) => {
+                        setTransferId(id);
+                    },
+                    onPeerConnected: () => {
+                        setConnectedPeers(previous => previous + 1);
+                    },
+                    onPeerDisconnected: () => {
+                        setConnectedPeers(previous => Math.max(0, previous - 1));
+                    },
+                    onError: (error) => {
+                        setErrorMessage(error.message);
+                    },
+                }
+            );
+
+            sessionRef.current = session;
+
+            await session.create();
+        } catch (error) {
+            setErrorMessage(
+                error instanceof Error
+                    ? error.message
+                    : "Failed to create session"
+            );
+        }
     };
 
     return (
-        <div className="flex flex-col gap-8 items-center justify-between w-full h-full">
+        <div className="flex flex-col gap-8 items-center flex-1 min-w-0 h-full min-h-0">
             <span className="text-4xl font-bold">SEND</span>
 
-            <div className='border-2 border-dashed border-purple-500 w-full h-full rounded-xl flex flex-col items-center justify-center gap-6 p-4 pt-10 group'
+            <div className='border-2 border-dashed border-purple-500 w-full min-h-56 flex-1 rounded-xl flex flex-col items-center justify-center gap-6 p-4 pt-10 group'
                 onClick={() => fileRef?.current?.click()}
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
@@ -66,8 +95,8 @@ export default function InstantSend() {
                 <span className="text-white">PDF, image, video, or audio</span>
             </div>
 
-            <div className="w-full" onClick={() => fileRef?.current?.click()}>
-                <div className="border border-purple-500 w-full min-h-12 max-h-max rounded-lg flex items-center p-2 overflow-hidden">
+            <div className="w-full h-max min-h-12" onClick={() => fileRef?.current?.click()}>
+                <div className="border border-purple-500 w-full h-full rounded-lg flex items-center p-2 overflow-hidden">
                     <input 
                         type="file"
                         multiple
@@ -77,7 +106,7 @@ export default function InstantSend() {
                     />
 
                     {files.length > 0 ? (
-                        <div className="w-full max-h-60 overflow-y-auto border border-purple-500 rounded-lg p-2 custom-scrollbar">
+                        <div className="w-full h-full min-h-0 overflow-y-auto border border-purple-500 rounded-lg p-2 custom-scrollbar">
                             <div className="flex flex-col gap-2">
                                 {files.map((file, index) => (
                                     <div
@@ -95,7 +124,23 @@ export default function InstantSend() {
                 </div>
             </div>
 
-            <div className="w-full flex items-center justify-between">
+            {transferId && (
+                <div className="w-full border border-purple-500 rounded-lg p-4 text-center shrink-0">
+                    <div className="text-sm text-purple-300">
+                        Share this ID
+                    </div>
+
+                    <div className="text-3xl font-bold tracking-[8px] -mr-[8px]">
+                        {transferId}
+                    </div>
+
+                    <div className="text-sm text-neutral-300 mt-2">
+                        Receivers connected: {connectedPeers}
+                    </div>
+                </div>
+            )}
+
+            <div className="w-full flex items-center justify-between shrink-0">
                 <button className="w-40 h-12 self-start border border-purple-600 rounded-lg bg-purple-700 hover:bg-purple-800 transition-[background,scale] cursor-pointer active:scale-98" onClick={handleSend}>
                     Send
                 </button>

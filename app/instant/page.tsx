@@ -12,7 +12,7 @@ import { lifeTimeAtom } from "../Atoms/atoms";
 import { useAtom } from "jotai";
 import ShinyText from "../components/misc/ShinyText";
 import InstantSend from "../components/Instant/InstantSend";
-import InstanReceive from "../components/Instant/InstanReceive";
+import InstanReceive from "../components/Instant/InstantReceive";
 
 const Instant = () => {
     const [file, setFile] = useState<File | null>(null);
@@ -84,10 +84,10 @@ const Instant = () => {
 
     return(
         <div className='bg-black h-[100dvh] w-screen flex flex-col gap-15 items-center justify-center p-4 text-white overflow-hidden noise-texture'>
-            <div className='border-2 border-purple-700 w-280 h-200 rounded-xl flex gap-8 items-center px-8 py-8 max-lg:w-80 bg-purple-950 to-blue-950'>
+            <div className='border-2 border-purple-700 w-280 h-200 rounded-xl flex gap-8 items-center px-8 py-8 bg-purple-950 to-blue-950'>
                 <InstantSend />
 
-                <div className="border h-full border-purple-800" />
+                <div className="border h-full w-0 border-purple-800" />
 
                 <InstanReceive />
 

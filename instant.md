@@ -129,3 +129,76 @@ file-sharing/
 │
 └── supabase/
     └── functions/
+
+PHASE 1
+───────
+Transfer protocol
+      │
+      ├── transfer ID
+      ├── file metadata
+      ├── multiple files
+      └── messages
+
+PHASE 2
+───────
+Chunk streaming
+      │
+      ├── File.slice()
+      ├── chunks
+      ├── sequencing
+      └── reconstruction
+
+PHASE 3
+───────
+Flow control
+      │
+      ├── bufferedAmount
+      ├── backpressure
+      └── adaptive chunk sizing
+
+PHASE 4
+───────
+Multiple peers
+      │
+      ├── independent queues
+      └── independent progress
+
+PHASE 5
+───────
+Multiple simultaneous transfers
+      │
+      ├── ABC123
+      ├── DEF456
+      └── GHI789
+
+PHASE 6
+───────
+Encryption
+      │
+      └── streaming encryption
+
+PHASE 7
+───────
+Adaptive processing
+      │
+      └── compression when worthwhile
+
+PHASE 8
+───────
+Performance tuning
+      │
+      ├── chunk size
+      ├── workers
+      ├── memory copies
+      ├── queue depth
+      └── throughput measurement
+
+PHASE 9
+───────
+Resume/recovery
+      │
+      └── reconnect + continue
+
+PHASE 10
+────────
+Download destination

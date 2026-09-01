@@ -17,6 +17,7 @@ export class InstantSession {
     private signaling: SignalingClient | null = null;
 
     private readonly peers = new Map<string, InstantPeer>();
+    private readonly connectedPeers = new Set<string>();
 
     private status: InstantSessionStatus = "idle";
 
@@ -205,8 +206,13 @@ export class InstantSession {
         peer.close();
 
         this.peers.delete(message.from);
+        this.connectedPeers.delete(message.from);
 
-        this.callbacks.onPeerDisconnected?.(message.from);
+        this.callbacks.onPeerDisconnected?.(message.from, this.connectedPeers.size);
+
+        if (this.connectedPeers.size === 0) {
+            this.setStatus("connecting");
+        }
     }
 
     private createPeer(remotePeerId: string, initiator: boolean): InstantPeer {
@@ -219,12 +225,20 @@ export class InstantSession {
                     void this.signaling?.send(message);
                 },
                 onConnected: () => {
-                    this.callbacks.onPeerConnected?.(this.peerId);
+                    this.connectedPeers.add(remotePeerId);
+
+                    this.callbacks.onPeerConnected?.(remotePeerId, this.connectedPeers.size);
 
                     this.setStatus("connected");
                 },
                 onDisconnected: () => {
-                    this.callbacks.onPeerDisconnected?.(remotePeerId);
+                    this.connectedPeers.delete(remotePeerId);
+
+                    this.callbacks.onPeerDisconnected?.(remotePeerId, this.connectedPeers.size);
+
+                    if (this.connectedPeers.size === 0) {
+                        this.setStatus("connecting");
+                    }
                 },
                 onData: (data) => {
                     console.log("Instant data received", data);
@@ -262,6 +276,7 @@ export class InstantSession {
         }
 
         this.peers.clear();
+        this.connectedPeers.clear();
 
         await this.signaling?.disconnect();
 
@@ -277,6 +292,10 @@ export class InstantSession {
 
     get peerCount(): number {
         return this.peers.size;
+    }
+
+    get connectedPeerCount(): number {
+        return this.connectedPeers.size;
     }
 
     get connectionStatus(): InstantSessionStatus {

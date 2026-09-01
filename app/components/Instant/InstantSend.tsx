@@ -57,11 +57,11 @@ export default function InstantSend() {
                     onSessionCreated: (id) => {
                         setTransferId(id);
                     },
-                    onPeerConnected: () => {
-                        setConnectedPeers(previous => previous + 1);
+                    onPeerConnected: (_peerId, count) => {
+                        setConnectedPeers(count);
                     },
-                    onPeerDisconnected: () => {
-                        setConnectedPeers(previous => Math.max(0, previous - 1));
+                    onPeerDisconnected: (_peerId, count) => {
+                        setConnectedPeers(count);
                     },
                     onError: (error) => {
                         setErrorMessage(error.message);

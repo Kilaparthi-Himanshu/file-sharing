@@ -26,8 +26,8 @@ export type InstantSessionStatus =
 
 export type InstantSessionCallbacks = {
     onSessionCreated?: (id: string) => void;
-    onPeerConnected?: (peerId: string) => void;
-    onPeerDisconnected?: (peerId: string) => void;
+    onPeerConnected?: (peerId: string, connectedPeers: number) => void;
+    onPeerDisconnected?: (peerId: string, connectedPeers: number) => void;
     onStatusChange?: (status: InstantSessionStatus) => void;
     onError?: (error: Error) => void;
 }

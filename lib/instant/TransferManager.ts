@@ -3,7 +3,7 @@ import {
     createFileEndMessage, 
     encodeControlMessage, 
     TransferMessage
-} from "./protocal/TransferProtocol";
+} from "./protocol/TransferProtocol";
 
 import { InstantPeer } from "./InstantPeer";
 
@@ -34,6 +34,12 @@ export class TransferManager {
 
     async sendFile(fileId: string, file: File): Promise<void> {
         try {
+            console.log(
+                "[TransferManager] FILE START:",
+                file.name,
+                file.size
+            );
+
             this.sendControl(createFileStartMessage(fileId, file));
 
             let offset = 0;
@@ -52,6 +58,13 @@ export class TransferManager {
 
                 this.peer.send(chunk);
 
+                console.log(
+                    "[TransferManager] CHUNK SENT:",
+                    offset,
+                    "/",
+                    file.size
+                );
+
                 offset = end;
 
                 this.callbacks.onProgress?.({
@@ -65,6 +78,11 @@ export class TransferManager {
             }
 
             await this.waitForBuffer();
+
+            console.log(
+                "[TransferManager] FILE END:",
+                fileId
+            );
 
             this.sendControl(createFileEndMessage(fileId));
 

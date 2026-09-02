@@ -1,3 +1,15 @@
+import type {
+    FileStartMessage,
+} from "./protocol/TransferProtocol";
+
+import type {
+    ReceivedFile,
+} from "./TransferReceiver";
+
+import type {
+    TransferProgress as SendTransferProgress,
+} from "./TransferManager";
+
 export type InstantRole = "sender" | "receiver";
 
 export type SignalType = 
@@ -30,6 +42,32 @@ export type InstantSessionCallbacks = {
     onPeerDisconnected?: (peerId: string, connectedPeers: number) => void;
     onStatusChange?: (status: InstantSessionStatus) => void;
     onError?: (error: Error) => void;
+    /**
+     * Sender-side progress.
+     */
+    onSendProgress?: (peerId: string, progress: SendTransferProgress) => void;
+    /**
+     * Fired when one file has been completely
+     * sent to one receiver.
+     */
+    onFileSent?: (peerId: string, fileId: string) => void;
+    /**
+     * Receiver-side file metadata.
+     */
+    onFileStart?: (file: FileStartMessage) => void;
+    /**
+     * Receiver-side progress.
+     */
+    onReceiverProgress?: (
+        fileId: string,
+        bytesReceived: number,
+        totalBytes: number,
+        progress: number
+    ) => void;
+    /**
+     * Receiver-side completed file.
+     */
+    onFileCompleted?: (file: ReceivedFile) => void;
 }
 
 export function generateTransferId(): string {

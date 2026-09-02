@@ -202,3 +202,18 @@ Resume/recovery
 PHASE 10
 ────────
 Download destination
+
+*File Transfer Example Pipeline:*
+                 WebRTC
+Sender ─────────────────────────► Receiver
+  │                                  │
+  │ file-start                       │ file-start
+  │ 256 KiB ───────────────────────► │
+  │ 256 KiB ───────────────────────► │
+  │ ...                              │
+  │ final chunk ───────────────────► │
+  │ file-end                         │ file-end
+  │                                  │
+  ▼                                  ▼
+File                              Blob
+2,018,657 B                       2,018,657 B

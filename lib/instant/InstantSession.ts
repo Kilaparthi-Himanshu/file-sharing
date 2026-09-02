@@ -25,12 +25,12 @@ export class InstantSession {
 
     private readonly connectedPeers = new Set<string>();
 
-        /**
+    /**
      * Logical transfer.
      *
      * One Transfer represents all files selected for
      * this particular transfer ID.
-    */
+     */
     private transfer: Transfer | null = null;
 
     /**
@@ -38,14 +38,14 @@ export class InstantSession {
      *
      * Every peer gets its own TransferManager because
      * every WebRTC DataChannel is an independent connection.
-    */
+     */
     private readonly transferManagers = new Map<string,TransferManager>();
 
     /**
      * Receiver:
      *
      * Every peer gets its own TransferReceiver.
-    */
+     */
     private readonly transferReceivers = new Map<string, TransferReceiver>();
 
     private status: InstantSessionStatus = "idle";
@@ -63,7 +63,7 @@ export class InstantSession {
             throw new Error("Only a sender can create an Instant session");
         }
 
-        if (file.length === 0) {
+        if (files.length === 0) {
             throw new Error("A transfer must contain at least one file");
         }
 
@@ -255,8 +255,224 @@ export class InstantSession {
             remotePeerId,
             initiator,
             {
-                
+                onSignal: (message) => {
+                    void this.signaling?.send(message);
+                },
+                onConnected: () => {
+                    this.connectedPeers.add(remotePeerId);
+
+                    this.callbacks.onPeerConnected?.(remotePeerId, this.connectedPeers.size);
+
+                    this.setStatus("connected");
+
+                    void this.handlePeerConnected(remotePeerId, peer);
+                },
+                onDisconnected: () => {
+                    this.connectedPeers.delete(remotePeerId);
+
+                    this.transferManagers.delete(remotePeerId);
+
+                    this.transferReceivers.delete(remotePeerId);
+
+                    this.callbacks.onPeerDisconnected?.(remotePeerId, this.connectedPeers.size);
+
+                    if (this.connectedPeers.size === 0) {
+                        this.setStatus("connecting");
+                    }
+                },
+                onData: (data) => {
+                    void this.handlePeerData(remotePeerId, data);
+                }
             }
         );
+
+        this.peers.set(remotePeerId, peer);
+
+        return peer;
+    }
+
+    /**
+     * Called once a WebRTC DataChannel is ready.
+     */
+    private async handlePeerConnected(remotePeerId: string, peer: InstantPeer): Promise<void> {
+        if (this.role === "sender") {
+            await this.startSendingToPeer(remotePeerId, peer);
+
+            return;
+        }
+
+        /**
+         * Receiver gets a TransferReceiver for this peer.
+         */
+        if (!this.transferReceivers.has(remotePeerId)) {
+            const receiver =
+                new TransferReceiver({
+                    onFileStart: (file) => {
+                        this.callbacks.onFileStart?.(file);
+                    },
+                    onProgress: (
+                        fileId,
+                        bytesReceived,
+                        totalBytes,
+                        progress
+                    ) => {
+                        this.callbacks.onReceiverProgress?.(
+                            fileId,
+                            bytesReceived,
+                            totalBytes,
+                            progress
+                        );
+                    },
+                    onComplete: (file) => {
+                        this.callbacks.onFileCompleted?.(file);
+                    },
+                    onError: (error) => {
+                        this.handleError(error);
+                    },
+                });
+
+            this.transferReceivers.set(remotePeerId, receiver);
+        }
+    }
+
+    /**
+     * Start sending the complete logical transfer
+     * to one specific receiver.
+     */
+    private async startSendingToPeer(remotePeerId: string, peer: InstantPeer): Promise<void> {
+        if (!this.transfer) {
+            this.handleError(
+                new Error("Cannot send: transfer does not exist")
+            );
+
+            return;
+        }
+
+        /**
+         * Don't create another manager if this peer
+         * has already started receiving this transfer.
+         */
+        if (this.transferManagers.has(remotePeerId)) {
+            return;
+        }
+
+        const manager = new TransferManager(
+            peer,
+            {
+                onProgress: (progress) => {
+                    this.callbacks.onSendProgress?.(
+                        remotePeerId,
+                        progress
+                    );
+                },
+                onComplete: (fileId) => {
+                    this.callbacks.onFileSent?.(
+                        remotePeerId,
+                        fileId
+                    );
+                },
+                onError: (error) => {
+                    this.handleError(error);
+                },
+            }
+        );
+
+        this.transferManagers.set(remotePeerId, manager);
+
+        try {
+            /**
+             * Send every file sequentially on this
+             * particular peer.
+             */
+            for (const transferFile of this.transfer.transferFiles) {
+                await manager.sendFile(
+                    transferFile.id,
+                    transferFile.file,
+                );
+            }
+        } catch (error) {
+            this.handleError(error);
+        }
+    }
+
+    /**
+     * Route incoming WebRTC data to the receiver.
+     */
+    private async handlePeerData(
+        remotePeerId: string, 
+        data: MessageEvent["data"]
+    ): Promise<void> {
+        if (this.role !== "receiver") {
+            return;
+        }
+
+        const receiver = this.transferReceivers.get(remotePeerId);
+
+        if (!receiver) {
+            this.handleError(
+                new Error("Received data before receiver was initialized")
+            );
+        }
+
+        await receiver?.handleData(data);
+    }
+
+    private setStatus(status: InstantSessionStatus): void {
+        this.status = status;
+
+        this.callbacks.onStatusChange?.(status);
+    }
+
+    private handleError(error: unknown): void {
+        const normailzedError =
+            error instanceof Error
+                ? error
+                : new Error(String(error));
+
+        console.error("[InstantSession]", normailzedError);
+
+        this.setStatus("error");
+
+        this.callbacks.onError?.(normailzedError);
+    }
+
+    async destroy(): Promise<void> {
+        for (const peer of this.peers.values()) {
+            peer.close();
+        }
+
+        this.peers.clear();
+
+        this.connectedPeers.clear();
+
+        this.transferManagers.clear();
+
+        this.transferReceivers.clear();
+
+        this.transfer = null;
+
+        await this.signaling?.disconnect();
+
+        this.signaling = null;
+
+        this.transferId = null;
+
+        this.setStatus("idle");
+    }
+
+    get id(): string | null {
+        return this.transferId;
+    }
+
+    get peerCount(): number {
+        return this.peers.size;
+    }
+
+    get connectedPeerCount(): number {
+        return this.connectedPeers.size;
+    }
+
+    get connectionStatus(): InstantSessionStatus {
+        return this.status;
     }
 }

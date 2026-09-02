@@ -2,7 +2,7 @@ import {
     decodeControlMessage,
     FileEndMessage,
     FileStartMessage
-} from "./protocal/TransferProtocol";
+} from "./protocol/TransferProtocol";
 
 export type ReceivedFile = {
     id: string;
@@ -48,6 +48,11 @@ export class TransferReceiver {
                 switch (message.type) {
                     case "file-start":
                         this.handleFileStart(message);
+                        console.log(
+                            "[TransferReceiver] FILE START:",
+                            message.name,
+                            message.size
+                        );
                         return;
 
                     case "file-end":
@@ -100,6 +105,13 @@ export class TransferReceiver {
 
         file.bytesReceived += chunk.size;
 
+        console.log(
+            "[TransferReceiver] CHUNK RECEIVED:",
+            file.bytesReceived,
+            "/",
+            file.size
+        );
+
         this.callbacks.onProgress?.(
             file.id,
             file.bytesReceived,
@@ -124,11 +136,25 @@ export class TransferReceiver {
             );
         }
 
+        console.log(
+            "[TransferReceiver] FILE END:",
+            file.name,
+            file.bytesReceived,
+            "/",
+            file.size
+        );
+
         const blob = new Blob(
             file.chunks,
             {
                 type: file.mimeType,
             },
+        );
+
+        console.log(
+            "[TransferReceiver] BLOB CREATED:",
+            blob.size,
+            blob.type
         );
 
         this.callbacks.onComplete?.({

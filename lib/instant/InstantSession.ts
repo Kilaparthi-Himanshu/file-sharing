@@ -9,15 +9,44 @@ import {
     SignalMessage,
 } from "./types";
 
+import { Transfer } from "./Transfer";
+import { TransferManager } from "./TransferManager";
+import { TransferReceiver, ReceivedFile } from "./TransferReceiver";
+
 export class InstantSession {
     private readonly peerId: string;
     private readonly role: InstantRole;
 
     private transferId: string | null = null;
+
     private signaling: SignalingClient | null = null;
 
     private readonly peers = new Map<string, InstantPeer>();
+
     private readonly connectedPeers = new Set<string>();
+
+        /**
+     * Logical transfer.
+     *
+     * One Transfer represents all files selected for
+     * this particular transfer ID.
+    */
+    private transfer: Transfer | null = null;
+
+    /**
+     * Sender:
+     *
+     * Every peer gets its own TransferManager because
+     * every WebRTC DataChannel is an independent connection.
+    */
+    private readonly transferManagers = new Map<string,TransferManager>();
+
+    /**
+     * Receiver:
+     *
+     * Every peer gets its own TransferReceiver.
+    */
+    private readonly transferReceivers = new Map<string, TransferReceiver>();
 
     private status: InstantSessionStatus = "idle";
 
@@ -29,11 +58,13 @@ export class InstantSession {
         this.peerId = generatePeerId();
     }
 
-    async create(): Promise<string> {
+    async create(files: File[]): Promise<string> {
         if (this.role !== "sender") {
-            throw new Error(
-                "Only a sender can create and Instant session"
-            );
+            throw new Error("Only a sender can create an Instant session");
+        }
+
+        if (file.length === 0) {
+            throw new Error("A transfer must contain at least one file");
         }
 
         if (this.transferId) {
@@ -42,31 +73,35 @@ export class InstantSession {
 
         this.transferId = generateTransferId();
 
-        await this.connectSignaling();
+        /**
+         * Create the logical transfer.
+         *
+         * The transfer ID is the same ID that receivers
+         * will enter.
+        */
+       this.transfer = new Transfer(files, this.transferId);
 
-        this.setStatus("connecting");
+       await this.connectSignaling();
 
-        this.callbacks.onSessionCreated?.(
-            this.transferId
-        );
+       this.setStatus("connecting");
 
-        return this.transferId;
+       this.callbacks.onSessionCreated?.(this.transferId);
+
+       return this.transferId;
     }
 
     async join(transferId: string): Promise<void> {
         if (this.role !== "receiver") {
-            throw new Error(
-                "Only a receiver can join an instant session"
-            );
+            throw new Error("Only a receiver can join an Instant session");
         }
 
         if (!transferId) {
-            throw new Error(
-                "Transfer ID is required"
-            );
+            throw new Error("Transfer ID is required");
         }
 
-        this.transferId = transferId.toUpperCase();
+        this.transferId = transferId
+            .trim()
+            .toUpperCase();
 
         await this.connectSignaling();
 
@@ -80,18 +115,14 @@ export class InstantSession {
 
     private async connectSignaling(): Promise<void> {
         if (!this.transferId) {
-            throw new Error(
-                "Transfer ID has not been set"
-            );
+            throw new Error("Transfer ID has not been set");
         }
 
-        this.signaling = new SignalingClient(
-            this.transferId
-        );
+        this.signaling = new SignalingClient(this.transferId);
 
         this.signaling.onMessage(
             (message) => {
-                void this.handleSignal(message);
+                void this.handleSignal(message)
             }
         );
 
@@ -112,15 +143,19 @@ export class InstantSession {
                 case "join":
                     await this.handleJoin(message);
                     break;
+
                 case "offer":
                     await this.handleOffer(message);
                     break;
+
                 case "answer":
                     await this.handleAnswer(message);
                     break;
+
                 case "ice-candidate":
                     await this.handleIceCandidate(message);
                     break;
+
                 case "leave":
                     await this.handleLeave(message);
                     break;
@@ -141,10 +176,7 @@ export class InstantSession {
             return;
         }
 
-        const peer = this.createPeer(
-            remotePeerId,
-            true
-        );
+        const peer = this.createPeer(remotePeerId, true);
 
         await peer.createOffer();
     }
@@ -163,10 +195,7 @@ export class InstantSession {
         let peer = this.peers.get(remotePeerId);
 
         if (!peer) {
-            peer = this.createPeer(
-                remotePeerId,
-                false
-            );
+            peer = this.createPeer(remotePeerId, false);
         }
 
         await peer.handleOffer(message.offer);
@@ -206,7 +235,12 @@ export class InstantSession {
         peer.close();
 
         this.peers.delete(message.from);
+
         this.connectedPeers.delete(message.from);
+
+        this.transferManagers.delete(message.from);
+
+        this.transferReceivers.delete(message.from);
 
         this.callbacks.onPeerDisconnected?.(message.from, this.connectedPeers.size);
 
@@ -221,84 +255,8 @@ export class InstantSession {
             remotePeerId,
             initiator,
             {
-                onSignal: (message) => {
-                    void this.signaling?.send(message);
-                },
-                onConnected: () => {
-                    this.connectedPeers.add(remotePeerId);
-
-                    this.callbacks.onPeerConnected?.(remotePeerId, this.connectedPeers.size);
-
-                    this.setStatus("connected");
-                },
-                onDisconnected: () => {
-                    this.connectedPeers.delete(remotePeerId);
-
-                    this.callbacks.onPeerDisconnected?.(remotePeerId, this.connectedPeers.size);
-
-                    if (this.connectedPeers.size === 0) {
-                        this.setStatus("connecting");
-                    }
-                },
-                onData: (data) => {
-                    console.log("Instant data received", data);
-                },
-            },
+                
+            }
         );
-
-        this.peers.set(remotePeerId, peer);
-
-        return peer;
-    }
-
-    private setStatus(status: InstantSessionStatus): void {
-        this.status = status;
-
-        this.callbacks.onStatusChange?.(status);
-    }
-
-    private handleError(error: unknown): void {
-        const normailzedError = 
-            error instanceof Error
-                ? error
-                : new Error(String(error));
-
-        console.error("[InstantSession]", normailzedError);
-
-        this.setStatus("error");
-
-        this.callbacks.onError?.(normailzedError);
-    }
-
-    async destroy(): Promise<void> {
-        for (const peer of this.peers.values()) {
-            peer.close();
-        }
-
-        this.peers.clear();
-        this.connectedPeers.clear();
-
-        await this.signaling?.disconnect();
-
-        this.signaling = null;
-        this.transferId = null;
-
-        this.setStatus("idle");
-    }
-
-    get id(): string | null {
-        return this.transferId;
-    }
-
-    get peerCount(): number {
-        return this.peers.size;
-    }
-
-    get connectedPeerCount(): number {
-        return this.connectedPeers.size;
-    }
-
-    get connectionStatus(): InstantSessionStatus {
-        return this.status;
     }
 }

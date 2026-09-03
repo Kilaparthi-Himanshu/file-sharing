@@ -3,14 +3,7 @@ import {
     FileEndMessage,
     FileStartMessage
 } from "./protocol/TransferProtocol";
-
-export type ReceivedFile = {
-    id: string;
-    name: string;
-    mimeType: string;
-    size: number;
-    blob: Blob;
-}
+import { ReceivedFile } from "./types";
 
 export type TransferReceiverCallbacks = {
     onFileStart?: (file: FileStartMessage) => void;
@@ -58,6 +51,9 @@ export class TransferReceiver {
                     case "file-end":
                         await this.handleFileEnd(message);
                         return;
+
+                    default:
+                        throw new Error("Invalid transfer control message");
                 }
             }
 

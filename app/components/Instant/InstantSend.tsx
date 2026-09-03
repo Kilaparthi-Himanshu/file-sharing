@@ -1,7 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { FaRegFile } from 'react-icons/fa6';
 import { InstantSession } from '@/lib/instant/InstantSession';
-import { progress } from 'framer-motion';
 
 export default function InstantSend() {
     const [files, setFiles] = useState<File[]>([]);
@@ -93,7 +92,7 @@ export default function InstantSend() {
                     : "Failed to create session"
             );
         }
-    };
+    }
 
     return (
         <div className="flex flex-col gap-8 items-center flex-1 min-w-0 h-full min-h-0">

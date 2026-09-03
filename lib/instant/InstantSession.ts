@@ -11,7 +11,7 @@ import {
 
 import { Transfer } from "./Transfer";
 import { TransferManager } from "./TransferManager";
-import { TransferReceiver, ReceivedFile } from "./TransferReceiver";
+import { TransferReceiver } from "./TransferReceiver";
 
 export class InstantSession {
     private readonly peerId: string;
@@ -41,14 +41,16 @@ export class InstantSession {
      */
     private readonly transferManagers = new Map<string,TransferManager>();
 
-    /**
-     * Receiver:
-     *
-     * Every peer gets its own TransferReceiver.
-     */
-    private readonly transferReceivers = new Map<string, TransferReceiver>();
+    // /**
+    //  * Receiver:
+    //  *
+    //  * Every peer gets its own TransferReceiver.
+    //  */
+    // private readonly transferReceivers = new Map<string, TransferReceiver>();
 
     private status: InstantSessionStatus = "idle";
+
+    private readonly transferReceiver: TransferReceiver;
 
     constructor(
         role: InstantRole,
@@ -56,6 +58,23 @@ export class InstantSession {
     ) {
         this.role = role;
         this.peerId = generatePeerId();
+
+        this.transferReceiver = new TransferReceiver({
+            onFileStart: (file) => {
+                console.log("[InstantSession] Receiving file: ", file.name);
+            },
+            onProgress: (fileId, bytesReceived, totalBytes, progress) => {
+                console.log("[InstantSession] Received progress: ", fileId, progress);
+            },
+            onComplete: (file) => {
+                console.log("[InstantSession] File received: ", file.name);
+
+                this.callbacks.onFileReceived?.(file);
+            },
+            onError: (error) => {
+                this.handleError(error);
+            },
+        });
     }
 
     async create(files: File[]): Promise<string> {
@@ -240,7 +259,7 @@ export class InstantSession {
 
         this.transferManagers.delete(message.from);
 
-        this.transferReceivers.delete(message.from);
+        // this.transferReceivers.delete(message.from);
 
         this.callbacks.onPeerDisconnected?.(message.from, this.connectedPeers.size);
 
@@ -272,7 +291,7 @@ export class InstantSession {
 
                     this.transferManagers.delete(remotePeerId);
 
-                    this.transferReceivers.delete(remotePeerId);
+                    // this.transferReceivers.delete(remotePeerId);
 
                     this.callbacks.onPeerDisconnected?.(remotePeerId, this.connectedPeers.size);
 
@@ -281,7 +300,13 @@ export class InstantSession {
                     }
                 },
                 onData: (data) => {
-                    void this.handlePeerData(remotePeerId, data);
+                    // void this.handlePeerData(remotePeerId, data);
+
+                    if (this.role !== "receiver") {
+                        return;
+                    }
+
+                    void this.transferReceiver.handleData(data);
                 }
             }
         );
@@ -304,35 +329,35 @@ export class InstantSession {
         /**
          * Receiver gets a TransferReceiver for this peer.
          */
-        if (!this.transferReceivers.has(remotePeerId)) {
-            const receiver =
-                new TransferReceiver({
-                    onFileStart: (file) => {
-                        this.callbacks.onFileStart?.(file);
-                    },
-                    onProgress: (
-                        fileId,
-                        bytesReceived,
-                        totalBytes,
-                        progress
-                    ) => {
-                        this.callbacks.onReceiverProgress?.(
-                            fileId,
-                            bytesReceived,
-                            totalBytes,
-                            progress
-                        );
-                    },
-                    onComplete: (file) => {
-                        this.callbacks.onFileCompleted?.(file);
-                    },
-                    onError: (error) => {
-                        this.handleError(error);
-                    },
-                });
+        // if (!this.transferReceivers.has(remotePeerId)) {
+        //     const receiver =
+        //         new TransferReceiver({
+        //             onFileStart: (file) => {
+        //                 this.callbacks.onFileStart?.(file);
+        //             },
+        //             onProgress: (
+        //                 fileId,
+        //                 bytesReceived,
+        //                 totalBytes,
+        //                 progress
+        //             ) => {
+        //                 this.callbacks.onReceiverProgress?.(
+        //                     fileId,
+        //                     bytesReceived,
+        //                     totalBytes,
+        //                     progress
+        //                 );
+        //             },
+        //             onComplete: (file) => {
+        //                 this.callbacks.onFileCompleted?.(file);
+        //             },
+        //             onError: (error) => {
+        //                 this.handleError(error);
+        //             },
+        //         });
 
-            this.transferReceivers.set(remotePeerId, receiver);
-        }
+        //     this.transferReceivers.set(remotePeerId, receiver);
+        // }
     }
 
     /**
@@ -398,24 +423,24 @@ export class InstantSession {
     /**
      * Route incoming WebRTC data to the receiver.
      */
-    private async handlePeerData(
-        remotePeerId: string, 
-        data: MessageEvent["data"]
-    ): Promise<void> {
-        if (this.role !== "receiver") {
-            return;
-        }
+    // private async handlePeerData(
+    //     remotePeerId: string, 
+    //     data: MessageEvent["data"]
+    // ): Promise<void> {
+    //     if (this.role !== "receiver") {
+    //         return;
+    //     }
 
-        const receiver = this.transferReceivers.get(remotePeerId);
+    //     const receiver = this.transferReceivers.get(remotePeerId);
 
-        if (!receiver) {
-            this.handleError(
-                new Error("Received data before receiver was initialized")
-            );
-        }
+    //     if (!receiver) {
+    //         this.handleError(
+    //             new Error("Received data before receiver was initialized")
+    //         );
+    //     }
 
-        await receiver?.handleData(data);
-    }
+    //     await receiver?.handleData(data);
+    // }
 
     private setStatus(status: InstantSessionStatus): void {
         this.status = status;
@@ -447,7 +472,7 @@ export class InstantSession {
 
         this.transferManagers.clear();
 
-        this.transferReceivers.clear();
+        // this.transferReceivers.clear();
 
         this.transfer = null;
 

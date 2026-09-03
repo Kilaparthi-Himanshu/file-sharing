@@ -3,10 +3,6 @@ import type {
 } from "./protocol/TransferProtocol";
 
 import type {
-    ReceivedFile,
-} from "./TransferReceiver";
-
-import type {
     TransferProgress as SendTransferProgress,
 } from "./TransferManager";
 
@@ -35,6 +31,14 @@ export type InstantSessionStatus =
     | "connected"
     | "disconnected"
     | "error";
+
+export type ReceivedFile = {
+    id: string;
+    name: string;
+    mimeType: string;
+    size: number;
+    blob: Blob;
+}
 
 export type InstantSessionCallbacks = {
     onSessionCreated?: (id: string) => void;
@@ -68,6 +72,7 @@ export type InstantSessionCallbacks = {
      * Receiver-side completed file.
      */
     onFileCompleted?: (file: ReceivedFile) => void;
+    onFileReceived?: (file: ReceivedFile) => void;
 }
 
 export function generateTransferId(): string {

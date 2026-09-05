@@ -183,6 +183,42 @@ export class InstantPeer {
         this.dataChannel.send(new Uint8Array(data));
     }
 
+    setBufferedAmountLowThreshold(threshold: number): void {
+        if (!this.dataChannel) {
+            throw new Error("Data Channel does not exist");
+        }
+
+        this.dataChannel.bufferedAmountLowThreshold = threshold;
+    }
+
+    waitForBufferedAmountLow(): Promise<void> {
+        if (!this.dataChannel) {
+            throw new Error("Data Channel does not exist");
+        }
+
+        if (this.dataChannel.bufferedAmount <= this.dataChannel.bufferedAmountLowThreshold) {
+            return Promise.resolve();
+        }
+
+        return new Promise<void>((resolve) => {
+            const channel = this.dataChannel!;
+
+            const handleBufferedAmountLow = () => {
+                channel.removeEventListener(
+                    "bufferedamountlow",
+                    handleBufferedAmountLow
+                );
+
+                resolve();
+            }
+
+            channel.addEventListener(
+                "bufferedamountlow",
+                handleBufferedAmountLow
+            );
+        });
+    }
+
     close(): void {
         this.dataChannel?.close();
         this.connection.close();

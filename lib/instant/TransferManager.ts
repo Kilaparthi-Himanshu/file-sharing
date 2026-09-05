@@ -108,17 +108,8 @@ export class TransferManager {
             return;
         }
 
-        await new Promise<void>((resolve) => {
-            const checkBuffer = () => {
-                if (this.peer.bufferedAmount <= TransferManager.BUFFER_LOW_WATERMARK) {
-                    resolve();
-                    return;
-                }
+        this.peer.setBufferedAmountLowThreshold(TransferManager.BUFFER_LOW_WATERMARK);
 
-                requestAnimationFrame(checkBuffer);
-            }
-
-            checkBuffer();
-        });
+        await this.peer.waitForBufferedAmountLow();
     }
 }

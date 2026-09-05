@@ -154,7 +154,7 @@ export default function InstantSend() {
             )}
 
             <div className="w-full flex items-center justify-between shrink-0">
-                <button className="w-40 h-12 self-start border border-purple-600 rounded-lg bg-purple-700 hover:bg-purple-800 transition-[background,scale] cursor-pointer active:scale-98" onClick={handleSend}>
+                <button className="w-40 h-12 self-start border border-blue-500 rounded-lg bg-blue-600 hover:bg-blue-700 transition-[background,scale] cursor-pointer active:scale-98" onClick={handleSend}>
                     Send
                 </button>
 

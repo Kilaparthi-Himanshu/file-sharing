@@ -4,6 +4,16 @@ import { InstantSession } from '@/lib/instant/InstantSession';
 import { ReceivedFile } from '@/lib/instant/types';
 import { DownloadManager } from '@/lib/instant/DownloadManager';
 
+type ReceivedFileItem = Omit<ReceivedFile, "blob"> & {
+    bytesReceived: number;
+    transferProgress: number;
+
+    file: ReceivedFile | null;
+
+    downloading: boolean;
+    downloadProgress: number;
+}
+
 export default function InstanReceive() {
     const [transferId, setTransferId] = useState<string>("");
     const [errorMessage, setErrorMessage] = useState<string>("");
@@ -11,7 +21,7 @@ export default function InstanReceive() {
     const sessionRef = useRef<InstantSession | null>(null);
     const [connected, setConnected] = useState(false);
 
-    const [receivedFiles, setReceivedFiles] = useState<ReceivedFile[]>([]);
+    const [receivedFiles, setReceivedFiles] = useState<ReceivedFileItem[]>([]);
 
     const downloadManagerRef = useRef<DownloadManager | null>(null);
 
@@ -58,13 +68,54 @@ export default function InstanReceive() {
                     onPeerDisconnected: () => {
                         setConnected(false);
                     },
+                    onFileStart: (file) => {
+                        setReceivedFiles((previous) => [
+                            ...previous,
+                            {
+                                id: file.fileId,
+                                name: file.name,
+                                mimeType: file.mimeType,
+                                size: file.size,
+
+                                bytesReceived: 0,
+                                transferProgress: 0,
+
+                                file: null,
+
+                                downloading: false,
+                                downloadProgress: 0,
+                            }
+                        ]);
+                    },
+                    onReceiverProgress: (fileId, bytesReceived, totalBytes, progress) => {
+                        setReceivedFiles((previous) => 
+                            previous.map((item) => 
+                                item.id === fileId
+                                    ? {
+                                        ...item,
+                                        bytesReceived,
+                                        size: totalBytes,
+                                        transferProgress: progress,
+                                    }
+                                    : item
+                            )
+                        );
+                    },
                     onFileReceived(file) {
                         console.log("[InstantReceive] FILE RECEIVED: ", file.name, file.size);
 
-                        setReceivedFiles((previous) => [
-                            ...previous,
-                            file,
-                        ]);
+                        setReceivedFiles((previous) =>
+                            previous.map((item) =>
+                                item.id === file.id
+                                    ? {
+                                        ...item,
+                                        file,
+                                        bytesReceived: file.size,
+                                        transferProgress: 100,
+                                    }
+                                    : item
+                            )
+                        );
 
                         void downloadReceivedFile(file);
                     },
@@ -87,11 +138,61 @@ export default function InstanReceive() {
     }
 
     const downloadReceivedFile = async (file: ReceivedFile) => {
+        setReceivedFiles((previous) => 
+            previous.map((item) =>
+                item.id === file.id
+                    ? {
+                        ...item,
+                        downloading: true,
+                        downloadProgress: 0,
+                    }
+                    : item
+            )
+        );
+
         try {
-            await downloadManagerRef.current!.save(file);
+            await downloadManagerRef.current!.save(
+                file,
+                (_bytesReceived, _totalBytes, progress) => {
+                    setReceivedFiles((previous) =>
+                        previous.map((item) =>
+                            item.id === file.id
+                                ? {
+                                    ...item,
+                                    downloading: true,
+                                    downloadProgress: progress,
+                                }
+                                : item
+                        )
+                    );
+                }
+            );
+
+            setReceivedFiles((previous) =>
+                previous.map((item) =>
+                    item.id === file.id
+                        ? {
+                            ...item,
+                            downloading: false,
+                            downloadProgress: 100,
+                        }
+                        : item
+                )
+            );
 
             console.log("[InstantReceive] FILE SAVED: ", file.name);
         } catch (error) {
+            setReceivedFiles((previous) =>
+                previous.map((item) =>
+                    item.id === file.id
+                        ? {
+                            ...item,
+                            downloading: false,
+                        }
+                        : item
+                )
+            );
+
             setErrorMessage(
                 error instanceof Error
                     ? error.message
@@ -106,7 +207,7 @@ export default function InstanReceive() {
                 <button
                     type="button"
                     onClick={handleChooseDownloadFolder}
-                    className="border border-purple-600 rounded-lg px-4 py-2 hover:bg-purple-800 transition cursor-pointer"
+                    className="border px-4 py-2 border-blue-500 rounded-lg bg-blue-600 hover:bg-blue-700 transition cursor-pointer"
                 >
                     Choose Download Folder
                 </button>
@@ -144,12 +245,62 @@ export default function InstanReceive() {
                                         {(file.size / 1024 / 1024).toFixed(2)} MB
                                     </div>
 
-                                    <button
-                                        onClick={() => void downloadReceivedFile(file)}
-                                        className="mt-2 px-4 py-2 border border-purple-600 rounded-lg bg-purple-700 hover:bg-purple-800"
-                                    >
-                                        Download
-                                    </button>
+                                    {/* Transfer progress */}
+                                    <div className="mt-3">
+                                        <div className="flex justify-between text-xs text-neutral-400 mb-1">
+                                            <span>
+                                                {file.transferProgress >= 100
+                                                    ? "Received"
+                                                    : "Receiving"}
+                                            </span>
+
+                                            <span>
+                                                {file.transferProgress.toFixed(0)}%
+                                            </span>
+                                        </div>
+
+                                        <div className="w-full h-2 bg-purple-950 rounded-full overflow-hidden">
+                                            <div
+                                                className="h-full bg-linear-to-r from-purple-500 to-blue-500 transition-[width] duration-100"
+                                                style={{
+                                                    width: `${file.transferProgress}%`,
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Download progress */}
+                                    {file.downloading && (
+                                        <div className="mt-3">
+                                            <div className="flex justify-between text-xs text-neutral-400 mb-1">
+                                                <span>
+                                                    Saving...
+                                                </span>
+
+                                                <span>
+                                                    {file.downloadProgress.toFixed(0)}%
+                                                </span>
+                                            </div>
+
+                                            <div className="w-full h-2 bg-purple-950 rounded-full overflow-hidden">
+                                                <div
+                                                    className="h-full bg-green-500 transition-[width] duration-100"
+                                                    style={{
+                                                        width: `${file.downloadProgress}%`,
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {file.file && !file.downloading && (
+                                        <button
+                                            onClick={() => void downloadReceivedFile(file.file!)}
+                                            className="mt-3 px-4 py-2 border border-blue-500 rounded-lg bg-blue-600 hover:bg-blue-700 transition-[background,scale] cursor-pointer active:scale-98"
+                                        >
+                                            Download Again
+                                        </button>
+                                    )}
                                 </div>
                             ))}
                         </div>
@@ -162,7 +313,7 @@ export default function InstanReceive() {
             </div>
 
             <div className="w-full flex items-center justify-between">
-                <button className="w-40 h-12 self-start border border-purple-600 rounded-lg bg-purple-700 hover:bg-purple-800 transition-[background,scale] cursor-pointer active:scale-98" onClick={handleReceive}>
+                <button className="w-40 h-12 self-start border border-blue-500 rounded-lg bg-blue-600 hover:bg-blue-700 transition-[background,scale] cursor-pointer active:scale-98" onClick={handleReceive}>
                     Receive
                 </button>
 

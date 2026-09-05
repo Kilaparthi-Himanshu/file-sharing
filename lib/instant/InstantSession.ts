@@ -62,13 +62,18 @@ export class InstantSession {
         this.transferReceiver = new TransferReceiver({
             onFileStart: (file) => {
                 console.log("[InstantSession] Receiving file: ", file.name);
+
+                this.callbacks.onFileStart?.(file);
             },
             onProgress: (fileId, bytesReceived, totalBytes, progress) => {
                 console.log("[InstantSession] Received progress: ", fileId, progress);
+
+                this.callbacks.onReceiverProgress?.(fileId, bytesReceived, totalBytes, progress);
             },
             onComplete: (file) => {
                 console.log("[InstantSession] File received: ", file.name);
 
+                this.callbacks.onFileCompleted?.(file);
                 this.callbacks.onFileReceived?.(file);
             },
             onError: (error) => {

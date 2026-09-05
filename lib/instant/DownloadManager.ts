@@ -1,5 +1,11 @@
 import { ReceivedFile } from "./types";
 
+export type DownloadProgressCallback = (
+    bytesWritten: number,
+    totalBytes: number,
+    progress: number,
+) => void;
+
 type DirectoryPickerOptions = {
     id?: string;
     mode?: "read" | "readwrite";
@@ -39,16 +45,16 @@ export class DownloadManager {
         });
     }
 
-    async save(file: ReceivedFile): Promise<void> {
+    async save(file: ReceivedFile, onProgress?: DownloadProgressCallback): Promise<void> {
         if (this.directory) {
-            this.saveToDirectory(file);
+            await this.saveToDirectory(file, onProgress);
             return;
         }
 
         this.downloadToBrowser(file);
     }
 
-    private async saveToDirectory(file: ReceivedFile): Promise<void> {
+    private async saveToDirectory(file: ReceivedFile, onProgress?: DownloadProgressCallback): Promise<void> {
         const fileName = await this.getAvailableFileName(file.name);
 
         const fileHandle = await this.directory!.getFileHandle(
@@ -59,7 +65,30 @@ export class DownloadManager {
         const writable = await fileHandle.createWritable();
 
         try {
-            await writable.write(file.blob);
+            const CHUNK_SIZE = 1024 * 1024;
+
+            let offset = 0;
+
+            while (offset < file.blob.size) {
+                const end = Math.min(
+                    offset + CHUNK_SIZE,
+                    file.blob.size
+                );
+
+                const chunk = file.blob.slice(offset, end);
+
+                await writable.write(chunk);
+
+                offset = end;
+
+                onProgress?.(
+                    offset,
+                    file.blob.size,
+                    file.blob.size === 0
+                        ? 100
+                        : (offset / file.blob.size) * 100
+                );
+            }
         } finally {
             await writable.close();
         }

@@ -87,7 +87,7 @@ const Instant = () => {
             <div className='border-2 border-purple-700 w-280 h-200 rounded-xl flex gap-8 items-center px-8 py-8 bg-purple-950 to-blue-950'>
                 <InstantSend />
 
-                <div className="border h-full w-0 border-purple-800" />
+                <div className="h-full w-[4px] bg-linear-to-b from-purple-500 to-blue-500 rounded-full" />
 
                 <InstanReceive />
 

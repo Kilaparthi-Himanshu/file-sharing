@@ -33,6 +33,7 @@ export type InstantSessionStatus =
     | "error";
 
 export type ReceivedFile = {
+    receptionId: string;
     id: string;
     name: string;
     mimeType: string;
@@ -58,11 +59,12 @@ export type InstantSessionCallbacks = {
     /**
      * Receiver-side file metadata.
      */
-    onFileStart?: (file: FileStartMessage) => void;
+    onFileStart?: (receptionId: string, file: FileStartMessage) => void;
     /**
      * Receiver-side progress.
      */
     onReceiverProgress?: (
+        receptionId: string,
         fileId: string,
         bytesReceived: number,
         totalBytes: number,

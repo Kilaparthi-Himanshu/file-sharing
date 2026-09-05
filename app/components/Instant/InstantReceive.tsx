@@ -14,7 +14,7 @@ type ReceivedFileItem = Omit<ReceivedFile, "blob"> & {
     downloadProgress: number;
 }
 
-export default function InstanReceive() {
+export default function InstantReceive() {
     const [transferId, setTransferId] = useState<string>("");
     const [errorMessage, setErrorMessage] = useState<string>("");
 
@@ -68,10 +68,11 @@ export default function InstanReceive() {
                     onPeerDisconnected: () => {
                         setConnected(false);
                     },
-                    onFileStart: (file) => {
+                    onFileStart: (receptionId, file) => {
                         setReceivedFiles((previous) => [
                             ...previous,
                             {
+                                receptionId,
                                 id: file.fileId,
                                 name: file.name,
                                 mimeType: file.mimeType,
@@ -87,12 +88,13 @@ export default function InstanReceive() {
                             }
                         ]);
                     },
-                    onReceiverProgress: (fileId, bytesReceived, totalBytes, progress) => {
+                    onReceiverProgress: (receptionId, fileId, bytesReceived, totalBytes, progress) => {
                         setReceivedFiles((previous) => 
                             previous.map((item) => 
-                                item.id === fileId
+                                item.receptionId === receptionId
                                     ? {
                                         ...item,
+                                        id: fileId,
                                         bytesReceived,
                                         size: totalBytes,
                                         transferProgress: progress,
@@ -106,7 +108,7 @@ export default function InstanReceive() {
 
                         setReceivedFiles((previous) =>
                             previous.map((item) =>
-                                item.id === file.id
+                                item.receptionId === file.receptionId
                                     ? {
                                         ...item,
                                         file,
@@ -234,7 +236,7 @@ export default function InstanReceive() {
                         <div className="flex flex-col gap-3">
                             {receivedFiles.map((file, index) => (
                                 <div
-                                    key={`${file.id}-${index}`}
+                                    key={file.receptionId}
                                     className="border border-purple-500 rounded-lg p-3"
                                 >
                                     <div className="font-semibold truncate">

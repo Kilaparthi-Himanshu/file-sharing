@@ -203,7 +203,7 @@ PHASE 10
 ────────
 Download destination
 
-*File Transfer Example Pipeline:*
+**File Transfer Example Pipeline:**
                  WebRTC
 Sender ─────────────────────────► Receiver
   │                                  │
@@ -217,3 +217,9 @@ Sender ────────────────────────�
   ▼                                  ▼
 File                              Blob
 2,018,657 B                       2,018,657 B
+
+**IDs:**
+transferId → which shared transfer?
+fileId → which file inside that transfer?
+peerId → which WebRTC participant?
+receptionId → which specific reception instance?

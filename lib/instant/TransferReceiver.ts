@@ -6,8 +6,9 @@ import {
 import { ReceivedFile } from "./types";
 
 export type TransferReceiverCallbacks = {
-    onFileStart?: (file: FileStartMessage) => void;
+    onFileStart?: (receptionId: string, file: FileStartMessage) => void;
     onProgress?: (
+        receptionId: string,
         fileId: string,
         bytesReceived: number,
         totalBytes: number,
@@ -18,6 +19,7 @@ export type TransferReceiverCallbacks = {
 }
 
 type IncomingFile = {
+    receptionId: string;
     id: string;
     name: string;
     mimeType: string;
@@ -76,6 +78,7 @@ export class TransferReceiver {
         }
 
         const file: IncomingFile = {
+            receptionId: crypto.randomUUID(),
             id: message.fileId,
             name: message.name,
             mimeType: message.mimeType,
@@ -86,7 +89,7 @@ export class TransferReceiver {
 
         this.files.set(message.fileId, file);
 
-        this.callbacks.onFileStart?.(message);
+        this.callbacks.onFileStart?.(file.receptionId, message);
     }
 
     private async handleChunk(data: ArrayBuffer | Blob): Promise<void> {
@@ -109,6 +112,7 @@ export class TransferReceiver {
         );
 
         this.callbacks.onProgress?.(
+            file.receptionId,
             file.id,
             file.bytesReceived,
             file.size,
@@ -154,6 +158,7 @@ export class TransferReceiver {
         );
 
         this.callbacks.onComplete?.({
+            receptionId: file.receptionId,
             id: file.id,
             name: file.name,
             mimeType: file.mimeType,

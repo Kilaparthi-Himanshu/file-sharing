@@ -60,15 +60,15 @@ export class InstantSession {
         this.peerId = generatePeerId();
 
         this.transferReceiver = new TransferReceiver({
-            onFileStart: (file) => {
-                console.log("[InstantSession] Receiving file: ", file.name);
+            onFileStart: (receptionId, file) => {
+                console.log("[InstantSession] Receiving file: ", file.name, receptionId);
 
-                this.callbacks.onFileStart?.(file);
+                this.callbacks.onFileStart?.(receptionId, file);
             },
-            onProgress: (fileId, bytesReceived, totalBytes, progress) => {
-                console.log("[InstantSession] Received progress: ", fileId, progress);
+            onProgress: (receptionId, fileId, bytesReceived, totalBytes, progress) => {
+                console.log("[InstantSession] Received progress: ", receptionId, fileId, progress);
 
-                this.callbacks.onReceiverProgress?.(fileId, bytesReceived, totalBytes, progress);
+                this.callbacks.onReceiverProgress?.(receptionId, fileId, bytesReceived, totalBytes, progress);
             },
             onComplete: (file) => {
                 console.log("[InstantSession] File received: ", file.name);

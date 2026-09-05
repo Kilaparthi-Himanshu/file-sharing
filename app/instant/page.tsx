@@ -12,7 +12,7 @@ import { lifeTimeAtom } from "../Atoms/atoms";
 import { useAtom } from "jotai";
 import ShinyText from "../components/misc/ShinyText";
 import InstantSend from "../components/Instant/InstantSend";
-import InstanReceive from "../components/Instant/InstantReceive";
+import InstantReceive from "../components/Instant/InstantReceive";
 
 const Instant = () => {
     const [file, setFile] = useState<File | null>(null);
@@ -89,7 +89,7 @@ const Instant = () => {
 
                 <div className="h-full w-[4px] bg-linear-to-b from-purple-500 to-blue-500 rounded-full" />
 
-                <InstanReceive />
+                <InstantReceive />
 
                 {showFileIdDisplay && (
                     <FileIdDisplay fileId={fileId} />

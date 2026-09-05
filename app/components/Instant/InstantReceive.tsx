@@ -17,12 +17,11 @@ type ReceivedFileItem = Omit<ReceivedFile, "blob"> & {
 export default function InstantReceive() {
     const [transferId, setTransferId] = useState<string>("");
     const [errorMessage, setErrorMessage] = useState<string>("");
-
-    const sessionRef = useRef<InstantSession | null>(null);
     const [connected, setConnected] = useState(false);
-
+    const [downloadDirectory, setDownloadDirectory] = useState<string | null>(null);
     const [receivedFiles, setReceivedFiles] = useState<ReceivedFileItem[]>([]);
 
+    const sessionRef = useRef<InstantSession | null>(null);
     const downloadManagerRef = useRef<DownloadManager | null>(null);
 
     if (downloadManagerRef.current === null) {
@@ -34,6 +33,8 @@ export default function InstantReceive() {
             setErrorMessage("");
 
             await downloadManagerRef.current!.chooseDirectory();
+
+            setDownloadDirectory(downloadManagerRef.current!.directoryName);
 
             setErrorMessage("Download folder selected");
         } catch (error) {
@@ -47,6 +48,20 @@ export default function InstantReceive() {
                     : "Failed to select download folder"
             )
         }
+    }
+
+    const handleResetDownloadFolder = () => {
+        downloadManagerRef.current!.clearDirectory();
+
+        setDownloadDirectory(null);
+        setErrorMessage("Download folder reset");
+    }
+
+    const handleClearReceivedFiles = () => {
+        sessionRef.current?.clearReceivedFiles();
+
+        setReceivedFiles([]);
+        setErrorMessage("Received files cleared");
     }
 
     const handleReceive = async () => {
@@ -205,7 +220,36 @@ export default function InstantReceive() {
 
     return (
         <div className="flex flex-col gap-8 items-center justify-between flex-1 min-w-0 h-full">
-            <div className='absolute top-2 right-2'>
+            <div className="absolute top-2 right-2 flex items-center gap-3">
+                {downloadDirectory && (
+                    <>
+                        <div className="text-sm text-neutral-300">
+                            Download folder:{" "}
+                            <span className="font-semibold text-blue-400">
+                                {downloadDirectory}
+                            </span>
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={handleResetDownloadFolder}
+                            className="border px-4 py-2 border-red-500 rounded-lg bg-red-600 hover:bg-red-700 transition cursor-pointer"
+                        >
+                            Reset
+                        </button>
+                    </>
+                )}
+
+                {receivedFiles.length > 0 && (
+                    <button
+                        type="button"
+                        onClick={handleClearReceivedFiles}
+                        className="border px-4 py-2 border-red-500 rounded-lg bg-red-600 hover:bg-red-700 transition cursor-pointer"
+                    >
+                        Clear Files
+                    </button>
+                )}
+
                 <button
                     type="button"
                     onClick={handleChooseDownloadFolder}
@@ -319,7 +363,7 @@ export default function InstantReceive() {
                     Receive
                 </button>
 
-                <span className={`text-lg ${errorMessage == "Connected!" ? 'text-green-400' : 'text-red-400'} ml-2`}>
+                <span className={`text-lg ${errorMessage == "Connected!" ? 'text-green-400' : 'text-blue-400'} ml-2`}>
                     {errorMessage}
                 </span>
             </div>

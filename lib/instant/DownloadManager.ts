@@ -33,6 +33,10 @@ export class DownloadManager {
         return this.directory !== null;
     }
 
+    get directoryName(): string | null {
+        return this.directory?.name ?? null;
+    }
+
     async chooseDirectory(): Promise<void> {
         if (!("showDirectoryPicker" in window)) {
             throw new Error("Automatic downloads are not supported by this browser");

@@ -490,6 +490,10 @@ export class InstantSession {
         this.setStatus("idle");
     }
 
+    clearReceivedFiles(): void {
+        this.transferReceiver.reset();
+    }
+
     get id(): string | null {
         return this.transferId;
     }

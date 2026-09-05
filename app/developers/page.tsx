@@ -18,6 +18,8 @@ import { useAtomValue } from 'jotai';
 import { profileAtom } from '../Atoms/atoms';
 import { useRouter } from 'next/navigation';
 
+const COMING_SOON = true;
+
 gsap.registerPlugin(ScrollTrigger);
 
 export default function Developers () {
@@ -54,10 +56,12 @@ export default function Developers () {
             <button 
                 className='fixed top-4 right-4 py-2 bg-emerald-500 hover:bg-emerald-600 px-6 rounded-xl z-200 transition-all outline-2 outline-transparent hover:outline-emerald-300/70 outline-offset-2 text-neutral-900 font-semibold active:scale-95' 
                 onClick={() => {
-                    return profile ? router.push('/dashboard') : setSignInModalOpen(true);
+                    if (COMING_SOON) return;
+
+                    profile ? router.push('/dashboard') : setSignInModalOpen(true);
                 }}
             >
-                {profile ? 'Dashboard' : 'Sign In'}
+                {COMING_SOON ? 'Coming Soon' : profile ? 'Dashboard' : 'Sign In'}
             </button>
 
             <ModalRenderer isOpen={signInModalOpen}>
@@ -175,6 +179,7 @@ export default function Developers () {
 
                             <button
                                 onClick={async () => {
+                                    if (COMING_SOON) return;
                                     // window.location.href = "/developers/docs";
                                     await supabase.auth.signOut();
                                 }}

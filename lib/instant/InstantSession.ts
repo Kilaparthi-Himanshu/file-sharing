@@ -76,6 +76,11 @@ export class InstantSession {
                 this.callbacks.onFileCompleted?.(file);
                 this.callbacks.onFileReceived?.(file);
             },
+            onAbort: (files) => {
+                for (const file of files) {
+                    this.callbacks.onReceptionAborted?.(file.receptionId, file.fileId);
+                }
+            },
             onError: (error) => {
                 this.handleError(error);
             },
@@ -298,6 +303,10 @@ export class InstantSession {
 
                     // this.transferReceivers.delete(remotePeerId);
 
+                    if (this.role === "receiver" && this.connectedPeers.size === 0) {
+                        this.transferReceiver.abort();
+                    }
+
                     this.callbacks.onPeerDisconnected?.(remotePeerId, this.connectedPeers.size);
 
                     if (this.connectedPeers.size === 0) {
@@ -508,5 +517,13 @@ export class InstantSession {
 
     get connectionStatus(): InstantSessionStatus {
         return this.status;
+    }
+
+    get debugRefeiverMemory(): {
+        activeFiles: number;
+        activeChunks: number;
+        activeBytes: number;
+    } {
+        return this.transferReceiver.debugMemory;
     }
 }

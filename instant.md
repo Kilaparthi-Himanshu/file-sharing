@@ -223,3 +223,24 @@ transferId → which shared transfer?
 fileId → which file inside that transfer?
 peerId → which WebRTC participant?
 receptionId → which specific reception instance?
+
+**File Transfer Lifecycle**
+WebRTC chunks
+      ↓
+TransferReceiver.chunks[]
+      ↓
+file-end
+      ↓
+new Blob(...)
+      ↓
+TransferReceiver deletes IncomingFile
+      ↓
+ReceivedFile.blob
+      ↓
+React state
+      ↓
+Clear Files
+      ↓
+React releases reference
+      ↓
+Blob becomes eligible for GC

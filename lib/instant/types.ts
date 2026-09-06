@@ -73,6 +73,7 @@ export type InstantSessionCallbacks = {
     /**
      * Receiver-side completed file.
      */
+    onReceptionAborted?: (receptionId: string, fileId: string) => void;
     onFileCompleted?: (file: ReceivedFile) => void;
     onFileReceived?: (file: ReceivedFile) => void;
 }

@@ -15,6 +15,7 @@ export type TransferReceiverCallbacks = {
         progress: number,
     ) => void;
     onComplete?: (file: ReceivedFile) => void;
+    onAbort?: (files: { receptionId: string; fileId: string }[]) => void;
     onError?: (error: Error) => void;
 }
 
@@ -183,5 +184,42 @@ export class TransferReceiver {
 
     reset(): void {
         this.files.clear();
+    }
+
+    abort(): void {
+        if (this.files.size === 0) {
+            return;
+        }
+
+        const interruptedFiles = Array.from(
+            this.files.values()
+        ).map((file) => ({
+            receptionId: file.receptionId,
+            fileId: file.id,
+        }));
+
+        this.callbacks.onAbort?.(interruptedFiles);
+
+        this.files.clear();
+    }
+
+    get debugMemory(): {
+        activeFiles: number;
+        activeChunks: number;
+        activeBytes: number;
+    } {
+        let activeChunks = 0;
+        let activeBytes = 0;
+
+        for (const file of this.files.values()) {
+            activeChunks += file.chunks.length;
+            activeBytes += file.bytesReceived;
+        }
+
+        return {
+            activeFiles: this.files.size,
+            activeChunks,
+            activeBytes,
+        }
     }
 }

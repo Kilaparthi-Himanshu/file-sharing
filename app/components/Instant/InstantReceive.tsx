@@ -4,6 +4,11 @@ import { InstantSession } from '@/lib/instant/InstantSession';
 import { ReceivedFile } from '@/lib/instant/types';
 import { DownloadManager } from '@/lib/instant/DownloadManager';
 
+type ReceivedFileStatus =
+    | "receiving"
+    | "received"
+    | "interrupted";
+
 type ReceivedFileItem = Omit<ReceivedFile, "blob"> & {
     bytesReceived: number;
     transferProgress: number;
@@ -12,6 +17,8 @@ type ReceivedFileItem = Omit<ReceivedFile, "blob"> & {
 
     downloading: boolean;
     downloadProgress: number;
+
+    status: ReceivedFileStatus;
 }
 
 export default function InstantReceive() {
@@ -58,9 +65,12 @@ export default function InstantReceive() {
     }
 
     const handleClearReceivedFiles = () => {
-        sessionRef.current?.clearReceivedFiles();
+        setReceivedFiles((previous) =>
+            previous.filter((file) =>
+                file.status === "receiving"
+            )
+        );
 
-        setReceivedFiles([]);
         setErrorMessage("Received files cleared");
     }
 
@@ -100,6 +110,8 @@ export default function InstantReceive() {
 
                                 downloading: false,
                                 downloadProgress: 0,
+
+                                status: "receiving",
                             }
                         ]);
                     },
@@ -129,12 +141,29 @@ export default function InstantReceive() {
                                         file,
                                         bytesReceived: file.size,
                                         transferProgress: 100,
+
+                                        status: "received",
                                     }
                                     : item
                             )
                         );
 
                         void downloadReceivedFile(file);
+                    },
+                    onReceptionAborted: (receptionId) => {
+                        setReceivedFiles((previous) =>
+                            previous.map((item) =>
+                                item.receptionId === receptionId
+                                    ? {
+                                        ...item,
+                                        status: "interrupted",
+                                        downloading: false
+                                    }
+                                    : item
+                            )
+                        );
+
+                        setErrorMessage("Transfer Interrupted");
                     },
                     onError: (error) => {
                         setErrorMessage(error.message);
@@ -220,6 +249,16 @@ export default function InstantReceive() {
 
     return (
         <div className="flex flex-col gap-8 items-center justify-between flex-1 min-w-0 h-full">
+            <div className='absolute top-2 left-2'>
+                <button
+                    type="button"
+                    onClick={() => console.log(sessionRef.current?.debugRefeiverMemory)}
+                    className="border px-4 py-2 border-green-500 rounded-lg bg-green-600 hover:bg-green-700 transition cursor-pointer"
+                >
+                    Print Debug Memory
+                </button>
+            </div>
+
             <div className="absolute top-2 right-2 flex items-center gap-3">
                 {downloadDirectory && (
                     <>
@@ -295,9 +334,11 @@ export default function InstantReceive() {
                                     <div className="mt-3">
                                         <div className="flex justify-between text-xs text-neutral-400 mb-1">
                                             <span>
-                                                {file.transferProgress >= 100
+                                                {file.status === "received"
                                                     ? "Received"
-                                                    : "Receiving"}
+                                                    : file.status === "interrupted"
+                                                        ? "Interrupted"
+                                                        : "Receiving"}
                                             </span>
 
                                             <span>

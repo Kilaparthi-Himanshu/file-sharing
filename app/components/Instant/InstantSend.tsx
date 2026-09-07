@@ -11,9 +11,14 @@ export default function InstantSend() {
     const [transferId, setTransferId] = useState<string>("");
     const [connectedPeers, setConnectedPeers] = useState(0);
 
-     const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
         event.preventDefault();
-    };
+    }
+
+    const resetTransferUI = () => {
+        setTransferId("");
+        setConnectedPeers(0);
+    }
 
     const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
         event.preventDefault();
@@ -25,8 +30,9 @@ export default function InstantSend() {
         }
 
         setFiles(Array.from(droppedFiles));
+        resetTransferUI();
         setErrorMessage("");
-    };
+    }
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFiles = event.target.files;
@@ -36,11 +42,12 @@ export default function InstantSend() {
         }
 
         setFiles(Array.from(selectedFiles));
-         setErrorMessage("");
+        resetTransferUI();
+        setErrorMessage("");
 
         // Allows selecting the exact same files again later.
         event.target.value = "";
-    };
+    }
 
     const handleSend = async () => {
         if (files.length === 0) {

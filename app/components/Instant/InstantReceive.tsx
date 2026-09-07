@@ -3,6 +3,7 @@ import ShinyText from '../misc/ShinyText';
 import { InstantSession } from '@/lib/instant/InstantSession';
 import { ReceivedFile } from '@/lib/instant/types';
 import { DownloadManager } from '@/lib/instant/DownloadManager';
+import { Spinner } from '../Spinner';
 
 type ReceivedFileStatus =
     | "receiving"
@@ -25,6 +26,7 @@ export default function InstantReceive() {
     const [transferId, setTransferId] = useState<string>("");
     const [errorMessage, setErrorMessage] = useState<string>("");
     const [connected, setConnected] = useState(false);
+    const [joining, setJoining] = useState(false);
     const [downloadDirectory, setDownloadDirectory] = useState<string | null>(null);
     const [receivedFiles, setReceivedFiles] = useState<ReceivedFileItem[]>([]);
 
@@ -75,10 +77,14 @@ export default function InstantReceive() {
     }
 
     const handleReceive = async () => {
+        if (joining) return;
+
         if (!transferId) {
             setErrorMessage("Please Enter an ID");
             return;
         }
+
+        setJoining(true);
 
         try {
             setErrorMessage("");
@@ -87,6 +93,7 @@ export default function InstantReceive() {
                 "receiver",
                 {
                     onPeerConnected: () => {
+                        setJoining(false);
                         setConnected(true);
                         setErrorMessage("Connected!");
                     },
@@ -166,6 +173,7 @@ export default function InstantReceive() {
                         setErrorMessage("Transfer Interrupted");
                     },
                     onError: (error) => {
+                        setJoining(false);
                         setErrorMessage(error.message);
                     }
                 }
@@ -175,6 +183,8 @@ export default function InstantReceive() {
 
             await session.join(transferId.trim().toUpperCase());
         } catch (error) {
+            setJoining(false);
+
             setErrorMessage(
                 error instanceof Error
                     ? error.message
@@ -301,6 +311,8 @@ export default function InstantReceive() {
             <span className="text-4xl font-bold">RECEIVE</span>
 
             <div className="w-full h-full bg-purple-900/20 rounded-xl relative overflow-hidden">
+                {joining && <Spinner />}
+
                 {receivedFiles.length === 0 ? (
                     <div className="w-full h-full flex items-center justify-center">
                         <ShinyText
@@ -396,11 +408,11 @@ export default function InstantReceive() {
             </div>
 
             <div className="w-full relative">
-                <input type='text' value={transferId} onChange={(e) => setTransferId(e.target.value)} className={`border border-purple-500 w-full h-12 rounded-lg flex items-center p-2 text-center text-xl ${transferId ? 'tracking-[8px]' : 'max-lg:text-sm'}  font-sans focus:outline-4 outline-purple-700 focus:border-purple-400 focus:border-2 transition-[outline,border] duration-[50ms,0ms]`} maxLength={6} placeholder='Enter ID' required />
+                <input type='text' value={transferId} onChange={(e) => setTransferId(e.target.value)} disabled={joining} className={`border border-purple-500 w-full h-12 rounded-lg flex items-center p-2 text-center text-xl ${transferId ? 'tracking-[8px]' : 'max-lg:text-sm'}  font-sans focus:outline-4 outline-purple-700 focus:border-purple-400 focus:border-2 transition-[outline,border] duration-[50ms,0ms]`} maxLength={6} placeholder='Enter ID' required />
             </div>
 
             <div className="w-full flex items-center justify-between">
-                <button className="w-40 h-12 self-start border border-blue-500 rounded-lg bg-blue-600 hover:bg-blue-700 transition-[background,scale] cursor-pointer active:scale-98" onClick={handleReceive}>
+                <button className="w-40 h-12 self-start border border-blue-500 rounded-lg bg-blue-600 hover:bg-blue-700 transition-[background,scale] cursor-pointer active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed" onClick={handleReceive} disabled={joining}>
                     Receive
                 </button>
 

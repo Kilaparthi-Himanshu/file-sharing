@@ -244,3 +244,32 @@ Clear Files
 React releases reference
       ↓
 Blob becomes eligible for GC
+
+**Presence Flow**
+Sender
+  ↓
+creates transfer ID: 9ZQ5RW
+  ↓
+tracks Presence
+  ↓
+Receiver enters 9ZQ5RW
+  ↓
+Presence sync
+  ↓
+hasSender() === true
+  ↓
+Broadcast join
+  ↓
+WebRTC negotiation
+  ↓
+DataChannel
+  ↓
+FILE START
+  ↓
+chunks
+  ↓
+FILE END
+  ↓
+Blob
+  ↓
+Download

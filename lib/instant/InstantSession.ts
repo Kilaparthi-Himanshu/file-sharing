@@ -112,6 +112,9 @@ export class InstantSession {
 
        await this.connectSignaling();
 
+       // Advertise that this transfer currently has an active sender.
+       await this.signaling!.trackSender(this.peerId);
+
        this.setStatus("connecting");
 
        this.callbacks.onSessionCreated?.(this.transferId);
@@ -128,18 +131,30 @@ export class InstantSession {
             throw new Error("Transfer ID is required");
         }
 
-        this.transferId = transferId
-            .trim()
-            .toUpperCase();
+        this.transferId = transferId.trim().toUpperCase();
 
-        await this.connectSignaling();
+        try {
+            await this.connectSignaling();
 
-        this.setStatus("connecting");
+            await this.signaling!.waitForPresenceSync();
 
-        await this.signaling!.send({
-            type: "join",
-            from: this.peerId,
-        });
+            if (!this.signaling!.hasSender()) {
+                throw new Error("No active transfer found for this ID");
+            }
+
+            this.setStatus("connecting");
+
+            await this.signaling!.send({
+                type: "join",
+                from: this.peerId,
+            });
+        } catch (error) {
+            await this.destroy();
+
+            throw error instanceof Error
+                ? error
+                : new Error(String(error));
+        }
     }
 
     private async connectSignaling(): Promise<void> {

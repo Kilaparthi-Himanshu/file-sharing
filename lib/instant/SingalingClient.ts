@@ -23,8 +23,20 @@ export class SignalingClient {
     async connect(): Promise<void> {
         const supabase = await createClient();
 
+        const topic = `instant:${this.transferId}`;
+
+        // Remove any stale/reused channel for this transfer ID
+        const existingChannel = supabase
+            .getChannels()
+            .find((channel) => channel.topic === `realtime:${topic}`);
+
+        if (existingChannel) {
+            console.log("[SignalingClient] Removing stale channel: ",existingChannel.topic);
+            await supabase.removeChannel(existingChannel);
+        }
+
         this.channel = supabase.channel(
-            `instant:${this.transferId}`,
+            topic,
             {
                 config: {
                     presence: {
@@ -77,7 +89,7 @@ export class SignalingClient {
                 }
             });
         });
-    }
+    }   
 
     async waitForPresenceSync(): Promise<void> {
         if (!this.presenceSyncPromise) {
@@ -147,9 +159,15 @@ export class SignalingClient {
             return;
         }
 
-        await this.channel.unsubscribe();
+        const supabase = await createClient();
+        const channel = this.channel;
 
         this.channel = null;
         this.handler = null;
+
+        await supabase.removeChannel(channel);
+
+        // unsubscribe() means leave the channel
+        // removeChannel() Leave it AND remove this channel object from the Supabase client's channel registry
     }
 }

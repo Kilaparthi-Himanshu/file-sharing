@@ -273,3 +273,30 @@ FILE END
 Blob
   ↓
 Download
+
+**Cancel File Flow**
+Receiver
+   │
+   │ Cancel
+   ▼
+InstantSession.cancelReception(receptionId)
+   │
+   ▼
+TransferReceiver.cancelFile()
+   │
+   ├── delete active file
+   ├── clear chunks
+   └── onCancel()
+          │
+          ├── UI → "Cancelled"
+          │
+          └── send file-cancel
+                    │
+                    ▼
+                  Sender
+                    │
+                    ▼
+             TransferManager
+                    │
+                    ▼
+              stops that file

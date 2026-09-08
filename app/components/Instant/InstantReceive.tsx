@@ -8,7 +8,8 @@ import { Spinner } from '../Spinner';
 type ReceivedFileStatus =
     | "receiving"
     | "received"
-    | "interrupted";
+    | "interrupted"
+    | "cancelled";
 
 type ReceivedFileItem = Omit<ReceivedFile, "blob"> & {
     bytesReceived: number;
@@ -172,6 +173,19 @@ export default function InstantReceive() {
 
                         setErrorMessage("Transfer Interrupted");
                     },
+                    onReceptionCancelled: (receptionId) => {
+                        setReceivedFiles((previous) =>
+                                previous.map((item) =>
+                                    item.receptionId === receptionId
+                                        ? {
+                                            ...item,
+                                            status: "cancelled",
+                                            downloading: false
+                                        }
+                                        : item
+                                )
+                            );
+                    },
                     onError: (error) => {
                         setJoining(false);
                         setErrorMessage(error.message);
@@ -196,7 +210,7 @@ export default function InstantReceive() {
     const downloadReceivedFile = async (file: ReceivedFile) => {
         setReceivedFiles((previous) => 
             previous.map((item) =>
-                item.id === file.id
+                item.receptionId === file.receptionId
                     ? {
                         ...item,
                         downloading: true,
@@ -212,7 +226,7 @@ export default function InstantReceive() {
                 (_bytesReceived, _totalBytes, progress) => {
                     setReceivedFiles((previous) =>
                         previous.map((item) =>
-                            item.id === file.id
+                            item.receptionId === file.receptionId
                                 ? {
                                     ...item,
                                     downloading: true,
@@ -226,7 +240,7 @@ export default function InstantReceive() {
 
             setReceivedFiles((previous) =>
                 previous.map((item) =>
-                    item.id === file.id
+                    item.receptionId === file.receptionId
                         ? {
                             ...item,
                             downloading: false,
@@ -255,6 +269,10 @@ export default function InstantReceive() {
                     : "Failed to save file"
             );
         }
+    }
+
+    const handleCancelReception = (receptionId: string) => {
+        sessionRef.current?.cancelReception(receptionId);
     }
 
     return (
@@ -350,7 +368,9 @@ export default function InstantReceive() {
                                                     ? "Received"
                                                     : file.status === "interrupted"
                                                         ? "Interrupted"
-                                                        : "Receiving"}
+                                                        : file.status === "cancelled"
+                                                            ? "Cancelled"
+                                                            : "Receiving"}
                                             </span>
 
                                             <span>
@@ -366,6 +386,16 @@ export default function InstantReceive() {
                                                 }}
                                             />
                                         </div>
+
+                                        {file.status === "receiving" && (
+                                            <button
+                                                type="button"
+                                                onClick={() => handleCancelReception(file.receptionId)}
+                                                className="mt-3 px-4 py-2 border border-red-500 rounded-lg bg-red-600 hover:bg-red-700 transition-[background,scale] cursor-pointer active:scale-98"
+                                            >
+                                                Cancel
+                                            </button>
+                                        )}
                                     </div>
 
                                     {/* Download progress */}

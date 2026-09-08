@@ -3,6 +3,7 @@ import {
     FileEndMessage,
     FileStartMessage
 } from "./protocol/TransferProtocol";
+
 import { ReceivedFile } from "./types";
 
 export type TransferReceiverCallbacks = {
@@ -16,6 +17,7 @@ export type TransferReceiverCallbacks = {
     ) => void;
     onComplete?: (file: ReceivedFile) => void;
     onAbort?: (files: { receptionId: string; fileId: string }[]) => void;
+    onCancel?: (receptionId: string, fileId: string) => void;
     onError?: (error: Error) => void;
 }
 
@@ -31,6 +33,8 @@ type IncomingFile = {
 
 export class TransferReceiver {
     private readonly files = new Map<string, IncomingFile>();
+
+    private readonly cancelledFiles = new Set<string>();
 
     constructor(
         private readonly callbacks: TransferReceiverCallbacks = {}
@@ -78,6 +82,8 @@ export class TransferReceiver {
             throw new Error(`File already exists: ${message.fileId}`);
         }
 
+        this.cancelledFiles.delete(message.fileId);
+
         const file: IncomingFile = {
             receptionId: crypto.randomUUID(),
             id: message.fileId,
@@ -95,6 +101,10 @@ export class TransferReceiver {
 
     private async handleChunk(data: ArrayBuffer | Blob): Promise<void> {
         const file = this.getCurrentFile();
+
+        if (!file) {
+            return;
+        }
 
         const chunk =
             data instanceof Blob
@@ -124,6 +134,11 @@ export class TransferReceiver {
     }
 
     private async handleFileEnd(message: FileEndMessage): Promise<void> {
+        if (this.cancelledFiles.has(message.fileId)) {
+            this.cancelledFiles.delete(message.fileId);
+            return;
+        }
+
         const file = this.files.get(message.fileId);
 
         if (!file) {
@@ -170,20 +185,47 @@ export class TransferReceiver {
         this.files.delete(message.fileId);
     }
 
-    private getCurrentFile(): IncomingFile {
-        const files = Array.from(this.files.values());
+    cancelFile(receptionId: string): void {
+        const entry = Array.from(
+            this.files.entries()
+        ).find(
+            ([, file]) =>
+                file.receptionId === receptionId,
+        );
 
-        const file = files[files.length - 1];
-
-        if (!file) {
-            throw new Error("Received file data before file-start");
+        if (!entry) {
+            return;
         }
 
-        return file;
+        const [fileId, file] = entry;
+
+        this.files.delete(fileId);
+
+        file.chunks.length = 0;
+
+        this.cancelledFiles.add(fileId);
+
+        this.callbacks.onCancel?.(
+            file.receptionId,
+            file.id
+        );
+    }
+
+    private getCurrentFile(): IncomingFile | null {
+        const files = Array.from(this.files.values());
+
+        return files[files.length - 1] ?? null;
+
+        // if (!file) {
+        //     throw new Error("Received file data before file-start");
+        // }
+
+        // return file;
     }
 
     reset(): void {
         this.files.clear();
+        this.cancelledFiles.clear();
     }
 
     abort(): void {
@@ -201,6 +243,7 @@ export class TransferReceiver {
         this.callbacks.onAbort?.(interruptedFiles);
 
         this.files.clear();
+        this.cancelledFiles.clear();
     }
 
     get debugMemory(): {

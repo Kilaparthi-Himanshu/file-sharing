@@ -13,6 +13,8 @@ import { Transfer } from "./Transfer";
 import { TransferManager } from "./TransferManager";
 import { TransferReceiver } from "./TransferReceiver";
 
+import { FileCancelMessage, encodeControlMessage } from "./protocol/TransferProtocol";
+
 export class InstantSession {
     private readonly peerId: string;
     private readonly role: InstantRole;
@@ -80,6 +82,11 @@ export class InstantSession {
                 for (const file of files) {
                     this.callbacks.onReceptionAborted?.(file.receptionId, file.fileId);
                 }
+            },
+            onCancel: (receptionId, fileId) => {
+                this.sendFileCancel(fileId);
+
+                this.callbacks.onReceptionCancelled?.(receptionId, fileId);
             },
             onError: (error) => {
                 this.handleError(error);
@@ -331,11 +338,27 @@ export class InstantSession {
                 onData: (data) => {
                     // void this.handlePeerData(remotePeerId, data);
 
-                    if (this.role !== "receiver") {
+                    if (this.role === "receiver") {
+                        void this.transferReceiver.handleData(data);
                         return;
                     }
 
-                    void this.transferReceiver.handleData(data);
+                    if (typeof data !== "string") {
+                        return;
+                    }
+
+                    try {
+                        const message = JSON.parse(data);
+
+                        if (message.type === "file-cancel") {
+                            this.handleFileCancel(
+                                remotePeerId,
+                                message as FileCancelMessage
+                            );
+                        }
+                    } catch (error) {
+                        this.handleError(error);
+                    }
                 }
             }
         );
@@ -387,6 +410,49 @@ export class InstantSession {
 
         //     this.transferReceivers.set(remotePeerId, receiver);
         // }
+    }
+
+    private handleFileCancel(remotePeerId: string, message: FileCancelMessage): void {
+        if (this.role !== "sender") {
+            return;
+        }
+
+        const manager = this.transferManagers.get(remotePeerId);
+
+        if (!manager) {
+            return;
+        }
+
+        manager.cancelFile(message.fileId);
+    }
+
+    cancelReception(receptionId: string): void {
+        if (this.role !== "receiver") {
+            return;
+        }
+
+        this.transferReceiver.cancelFile(receptionId);
+    }
+
+    private sendFileCancel(fileId: string): void {
+        if (this.role !== "receiver") {
+            return;
+        }
+
+        for (const peer of this.peers.values()) {
+            if (peer.state !== "connected") {
+                continue;
+            }
+
+            peer.send(
+                encodeControlMessage({
+                    type: "file-cancel",
+                    fileId,
+                })
+            );
+        }
+
+        return;
     }
 
     /**

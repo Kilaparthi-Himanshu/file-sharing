@@ -17,6 +17,7 @@ export type TransferProgress = {
 export type TransferCallbacks = {
     onProgress?: (progress: TransferProgress) => void;
     onComplete?: (fileId: string) => void;
+    onCancelled?: (fileId: string) => void;
     onError?: (error: Error) => void;
 }
 
@@ -27,13 +28,25 @@ export class TransferManager {
 
     private static readonly BUFFER_LOW_WATERMARK = 1 * 1024 * 1024;
 
+    private readonly cancelledFiles = new Set<string>();
+
     constructor(
         private readonly peer: InstantPeer,
         private readonly callbacks: TransferCallbacks = {},
     ) {}
 
+    cancelFile(fileId: string): void {
+        this.cancelledFiles.add(fileId);
+    }
+
     async sendFile(fileId: string, file: File): Promise<void> {
         try {
+            if (this.cancelledFiles.has(fileId)) {
+                this.cancelledFiles.delete(fileId);
+                this.callbacks.onCancelled?.(fileId);
+                return;
+            }
+
             console.log(
                 "[TransferManager] FILE START:",
                 file.name,
@@ -45,7 +58,19 @@ export class TransferManager {
             let offset = 0;
 
             while (offset < file.size) {
+                if (this.cancelledFiles.has(fileId)) {
+                    this.cancelledFiles.delete(fileId);
+                    this.callbacks.onCancelled?.(fileId);
+                    return;
+                }
+
                 await this.waitForBuffer();
+
+                if (this.cancelledFiles.has(fileId)) {
+                    this.cancelledFiles.delete(fileId);
+                    this.callbacks.onCancelled?.(fileId);
+                    return;
+                }
 
                 const end = Math.min(
                     offset + TransferManager.CHUNK_SIZE,
@@ -55,6 +80,12 @@ export class TransferManager {
                 const chunk = await file
                     .slice(offset, end)
                     .arrayBuffer();
+
+                if (this.cancelledFiles.has(fileId)) {
+                    this.cancelledFiles.delete(fileId);
+                    this.callbacks.onCancelled?.(fileId);
+                    return;
+                }
 
                 this.peer.send(chunk);
 
@@ -77,7 +108,19 @@ export class TransferManager {
                 });
             }
 
+            if (this.cancelledFiles.has(fileId)) {
+                this.cancelledFiles.delete(fileId);
+                this.callbacks.onCancelled?.(fileId);
+                return;
+            }
+
             await this.waitForBuffer();
+
+            if (this.cancelledFiles.has(fileId)) {
+                this.cancelledFiles.delete(fileId);
+                this.callbacks.onCancelled?.(fileId);
+                return;
+            }
 
             console.log(
                 "[TransferManager] FILE END:",

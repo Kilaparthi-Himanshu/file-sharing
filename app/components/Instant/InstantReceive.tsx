@@ -276,12 +276,12 @@ export default function InstantReceive() {
     }
 
     return (
-        <div className="flex flex-col gap-8 items-center justify-between flex-1 min-w-0 h-full">
+        <div className="flex flex-col gap-8 items-center justify-between flex-1 min-w-0 h-full min-h-0 max-lg:w-full">
             <div className='absolute top-2 left-2'>
                 <button
                     type="button"
                     onClick={() => console.log(sessionRef.current?.debugRefeiverMemory)}
-                    className="border px-4 py-2 border-green-500 rounded-lg bg-green-600 hover:bg-green-700 transition cursor-pointer"
+                    className="border px-4 py-2 border-green-500 rounded-lg bg-green-600 hover:bg-green-700 transition cursor-pointer max-sm:text-sm"
                 >
                     Print Debug Memory
                 </button>
@@ -320,19 +320,19 @@ export default function InstantReceive() {
                 <button
                     type="button"
                     onClick={handleChooseDownloadFolder}
-                    className="border px-4 py-2 border-blue-500 rounded-lg bg-blue-600 hover:bg-blue-700 transition cursor-pointer"
+                    className="border px-4 py-2 border-blue-500 rounded-lg bg-blue-600 hover:bg-blue-700 transition cursor-pointer max-sm:text-sm"
                 >
                     Choose Download Folder
                 </button>
             </div>
 
-            <span className="text-4xl font-bold">RECEIVE</span>
+            <span className="text-4xl max-lg:text-2xl font-bold">RECEIVE</span>
 
             <div className="w-full h-full bg-purple-900/20 rounded-xl relative overflow-hidden">
                 {joining && <Spinner />}
 
                 {receivedFiles.length === 0 ? (
-                    <div className="w-full h-full flex items-center justify-center">
+                    <div className="w-full h-full max-lg:min-h-40 flex items-center justify-center">
                         <ShinyText
                             text={
                                 connected

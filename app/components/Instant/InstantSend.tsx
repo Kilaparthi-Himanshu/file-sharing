@@ -102,16 +102,16 @@ export default function InstantSend() {
     }
 
     return (
-        <div className="flex flex-col gap-8 items-center flex-1 min-w-0 h-full min-h-0">
-            <span className="text-4xl font-bold">SEND</span>
+        <div className="flex flex-col gap-8 items-center justify-between flex-1 min-w-0 h-full min-h-0 max-lg:w-full">
+            <span className="text-4xl max-lg:text-2xl font-bold">SEND</span>
 
-            <div className='border-2 border-dashed border-purple-500 w-full min-h-56 flex-1 rounded-xl flex flex-col items-center justify-center gap-6 p-4 pt-10 group'
+            <div className='border-2 border-dashed border-purple-500 w-full lg:min-h-56 flex-1 rounded-xl flex flex-col items-center justify-center gap-6 max-lg:gap-3 p-4 lg:pt-10 group'
                 onClick={() => fileRef?.current?.click()}
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
             >
                 <FaRegFile size={60} className="text-white group-active:scale-90 transition-[scale]" />
-                <span className="text-xl text-center">Drag and drop a file or click to browse</span>
+                <span className="text-xl max-lg:text-lg text-center">Drag and drop a file or click to browse</span>
                 <span className="text-white">PDF, image, video, or audio</span>
             </div>
 

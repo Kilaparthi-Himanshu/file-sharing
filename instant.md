@@ -300,3 +300,26 @@ TransferReceiver.cancelFile()
                     │
                     ▼
               stops that file
+
+**How P2P or TURN is choosen**
+                         ┌─────────────────────┐
+                         │ Supabase Realtime   │
+                         │     Signaling       │
+                         └──────────┬──────────┘
+                                    │
+                         offer / answer / ICE
+                                    │
+              ┌─────────────────────┴─────────────────────┐
+              │                                           │
+        ┌─────▼─────┐                               ┌─────▼─────┐
+        │  Sender   │                               │ Receiver  │
+        │  Browser  │                               │  Browser  │
+        └─────┬─────┘                               └─────┬─────┘
+              │                                           │
+              └────────────── WebRTC ICE ─────────────────┘
+                              │
+                    ┌─────────┴─────────┐
+                    │                   │
+              Direct P2P            TURN relay
+              preferred              fallback
+                  🚀                    🛟

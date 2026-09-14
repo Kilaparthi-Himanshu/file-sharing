@@ -40,9 +40,14 @@ export class InstantPeer {
 
     private setupConnection(): void {
         this.connection.onicecandidate = (event) => {
-            if (!event.candidate) {
-                return;
-            }
+            if (!event.candidate) return;
+
+            console.log(
+                "[InstantPeer] Sending ICE candidate:",
+                this.localPeerId,
+                "→",
+                this.remotePeerId
+            );
 
             this.callbacks.onSignal({
                 type: "ice-candidate",
@@ -53,14 +58,38 @@ export class InstantPeer {
         }
 
         this.connection.onconnectionstatechange = () => {
+            console.log(
+                "[InstantPeer] Connection state:",
+                this.localPeerId,
+                "→",
+                this.remotePeerId,
+                this.connection.connectionState
+            );
+
             const state = this.connection.connectionState;
 
-            if (
-                state === "failed" ||
-                state === "closed"
-            ) {
+            if (state === "failed" || state === "closed") {
                 this.notifyDisconnected();
             }
+        }
+
+        this.connection.oniceconnectionstatechange = () => {
+            console.log(
+                "[InstantPeer] ICE state:",
+                this.localPeerId,
+                "→",
+                this.remotePeerId,
+                this.connection.iceConnectionState
+            );
+        }
+
+        this.connection.onicecandidateerror = (event) => {
+            console.error(
+                "[InstantPeer] ICE candidate error:",
+                event.errorCode,
+                event.errorText,
+                event.url
+            );
         }
 
         this.connection.ondatachannel = (event) => {
@@ -85,10 +114,24 @@ export class InstantPeer {
         channel.binaryType = "arraybuffer";
 
         channel.onopen = () => {
+            console.log(
+                "[InstantPeer] DATA CHANNEL OPEN:",
+                this.localPeerId,
+                "→",
+                this.remotePeerId
+            );
+
             this.notifyConnected();
         }
 
         channel.onclose = () => {
+            console.log(
+                "[InstantPeer] DATA CHANNEL CLOSED:",
+                this.localPeerId,
+                "→",
+                this.remotePeerId
+            );
+
             this.notifyDisconnected();
         }
 
@@ -138,9 +181,16 @@ export class InstantPeer {
     }
 
     async handleIceCandidate(candidate: RTCIceCandidateInit): Promise<void> {
+        console.log(
+            "[InstantPeer] Received ICE candidate:",
+            this.localPeerId,
+            "←",
+            this.remotePeerId,
+            candidate
+        );
+
         if (!this.remoteDescriptionSet) {
             this.pendingCandidates.push(candidate);
-
             return;
         }
 

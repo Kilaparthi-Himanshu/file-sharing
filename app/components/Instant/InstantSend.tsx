@@ -86,6 +86,9 @@ export default function InstantSend() {
                     onError: (error) => {
                         setErrorMessage(error.message);
                     },
+                },
+                {
+                    forceRelay: true,
                 }
             );
 

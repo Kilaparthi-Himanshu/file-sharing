@@ -7,6 +7,19 @@ type PeerCallbacks = {
     onData: (data: MessageEvent["data"]) => void;
 };
 
+type IceCandidateStats = RTCStats & {
+    candidateType?: RTCIceCandidateType;
+    protocol?: string;
+    address?: string;
+    port?: number;
+    relayProtocol?: string;
+};
+
+type InstantPeerOptions = {
+    iceServers: RTCIceServer[],
+    iceTransportPolicy?: RTCIceTransportPolicy,
+};
+
 export class InstantPeer {
     private readonly connection: RTCPeerConnection;
     private dataChannel: RTCDataChannel | null = null;
@@ -22,13 +35,11 @@ export class InstantPeer {
         private readonly remotePeerId: string,
         private readonly initiator: boolean,
         private readonly callbacks: PeerCallbacks,
+        options: InstantPeerOptions,
     ) {
         this.connection = new RTCPeerConnection({
-            iceServers: [
-                {
-                    urls: 'stun:stun.l.google.com:19302',
-                }
-            ],
+            iceServers: options.iceServers,
+            iceTransportPolicy: options.iceTransportPolicy ?? "all",
         });
 
         this.setupConnection();
@@ -74,6 +85,8 @@ export class InstantPeer {
         }
 
         this.connection.oniceconnectionstatechange = () => {
+            const state = this.connection.iceConnectionState;
+
             console.log(
                 "[InstantPeer] ICE state:",
                 this.localPeerId,
@@ -81,10 +94,14 @@ export class InstantPeer {
                 this.remotePeerId,
                 this.connection.iceConnectionState
             );
+
+            if (state === "connected" || state === "completed") {
+                void this.logSelectedCandidatePair();
+            }
         }
 
         this.connection.onicecandidateerror = (event) => {
-            console.error(
+            console.warn(
                 "[InstantPeer] ICE candidate error:",
                 event.errorCode,
                 event.errorText,
@@ -302,5 +319,49 @@ export class InstantPeer {
 
     get bufferedAmount(): number {
         return this.dataChannel?.bufferedAmount ?? 0;
+    }
+
+    private async logSelectedCandidatePair(): Promise<void> {
+        try {
+            const stats = await this.connection.getStats();
+
+            let selectedPair: RTCIceCandidatePairStats | null = null;
+
+            for (const report of stats.values()) {
+                if (
+                    report.type === "candidate-pair" &&
+                    report.state === "succeeded" &&
+                    report.nominated
+                ) {
+                    selectedPair = report as RTCIceCandidatePairStats;
+                    break;
+                }
+            }
+
+            if (!selectedPair) return;
+
+            const local = stats.get(
+                selectedPair.localCandidateId
+            ) as IceCandidateStats | undefined;
+
+            const remote = stats.get(
+                selectedPair.remoteCandidateId
+            ) as IceCandidateStats | undefined;
+
+            console.log(
+                "[InstantPeer] SELECTED ICE PATH:",
+                {
+                    localType: local?.candidateType,
+                    remoteType: remote?.candidateType,
+                    protocol: local?.protocol,
+                    relayProtocol: local?.relayProtocol,
+                }
+            );
+        } catch (error) {
+            console.warn(
+                "[InstantPeer] Failed to inspect ICE stats:",
+                error
+            );
+        }
     }
 }

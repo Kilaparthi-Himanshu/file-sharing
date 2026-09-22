@@ -190,6 +190,9 @@ export default function InstantReceive() {
                         setJoining(false);
                         setErrorMessage(error.message);
                     }
+                },
+                {
+                    forceRelay: true
                 }
             );
 

@@ -15,6 +15,8 @@ import { TransferReceiver } from "./TransferReceiver";
 
 import { FileCancelMessage, encodeControlMessage } from "./protocol/TransferProtocol";
 
+import { getIceServers } from "./IceConfig";
+
 export class InstantSession {
     private readonly peerId: string;
     private readonly role: InstantRole;
@@ -54,9 +56,15 @@ export class InstantSession {
 
     private readonly transferReceiver: TransferReceiver;
 
+    private iceServers: RTCIceServer[] | null = null;
+    private readonly forceRelay: boolean;
+
     constructor(
         role: InstantRole,
-        private readonly callbacks: InstantSessionCallbacks = {}
+        private readonly callbacks: InstantSessionCallbacks = {},
+        options?: {
+            forceRelay?: boolean;
+        }
     ) {
         this.role = role;
         this.peerId = generatePeerId();
@@ -92,6 +100,8 @@ export class InstantSession {
                 this.handleError(error);
             },
         });
+
+        this.forceRelay = options?.forceRelay ?? false;
     }
 
     async create(files: File[]): Promise<string> {
@@ -227,7 +237,7 @@ export class InstantSession {
             return;
         }
 
-        const peer = this.createPeer(remotePeerId, true);
+        const peer = await this.createPeer(remotePeerId, true);
 
         await peer.createOffer();
     }
@@ -246,7 +256,7 @@ export class InstantSession {
         let peer = this.peers.get(remotePeerId);
 
         if (!peer) {
-            peer = this.createPeer(remotePeerId, false);
+            peer = await this.createPeer(remotePeerId, false);
         }
 
         await peer.handleOffer(message.offer);
@@ -300,7 +310,27 @@ export class InstantSession {
         }
     }
 
-    private createPeer(remotePeerId: string, initiator: boolean): InstantPeer {
+    private async ensureIceServers(): Promise<RTCIceServer[]> {
+        if (this.iceServers) {
+            return this.iceServers;
+        }
+
+        this.iceServers = await getIceServers();
+
+        console.log(
+            "[InstantSession] ICE servers configured:",
+            this.iceServers.map((server) => ({
+                urls: server.urls,
+                hasCredentials: !!server.username,
+            }))
+        );
+
+        return this.iceServers;
+    }
+
+    private async createPeer(remotePeerId: string, initiator: boolean): Promise<InstantPeer> {
+        const iceServers = await this.ensureIceServers();
+
         const peer = new InstantPeer(
             this.peerId,
             remotePeerId,
@@ -360,7 +390,11 @@ export class InstantSession {
                         this.handleError(error);
                     }
                 }
-            }
+            },
+            {
+                iceServers,
+                iceTransportPolicy: this.forceRelay ? "relay" : "all"
+            },
         );
 
         this.peers.set(remotePeerId, peer);

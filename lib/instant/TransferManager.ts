@@ -91,9 +91,15 @@ export class TransferManager {
 
                 console.log(
                     "[TransferManager] CHUNK SENT:",
-                    offset,
-                    "/",
-                    file.size
+                    // offset,
+                    // "/",
+                    // file.size
+                    {
+                        offset,
+                        total: file.size,
+                        progress: offset / file.size,
+                        bufferedAmount: this.peer.bufferedAmount,
+                    }
                 );
 
                 offset = end;
@@ -153,6 +159,24 @@ export class TransferManager {
 
         this.peer.setBufferedAmountLowThreshold(TransferManager.BUFFER_LOW_WATERMARK);
 
+        console.log(
+            "[TransferManager] BACKPRESSURE START",
+            {
+                bufferedAmount: this.peer.bufferedAmount,
+                highWatermark: TransferManager.BUFFER_HIGH_WATERMARK,
+            }
+        );
+
+        const start = performance.now();
+
         await this.peer.waitForBufferedAmountLow();
+
+        console.log(
+            "[TransferManager] BACKPRESSURE END",
+            {
+                bufferedAmount: this.peer.bufferedAmount,
+                durationMs: Math.round(performance.now() - start)
+            }
+        );
     }
 }

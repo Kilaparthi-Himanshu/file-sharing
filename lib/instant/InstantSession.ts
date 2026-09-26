@@ -71,17 +71,17 @@ export class InstantSession {
 
         this.transferReceiver = new TransferReceiver({
             onFileStart: (receptionId, file) => {
-                console.log("[InstantSession] Receiving file: ", file.name, receptionId);
+                // console.log("[InstantSession] Receiving file: ", file.name, receptionId);
 
                 this.callbacks.onFileStart?.(receptionId, file);
             },
             onProgress: (receptionId, fileId, bytesReceived, totalBytes, progress) => {
-                console.log("[InstantSession] Received progress: ", receptionId, fileId, progress);
+                // console.log("[InstantSession] Received progress: ", receptionId, fileId, progress);
 
                 this.callbacks.onReceiverProgress?.(receptionId, fileId, bytesReceived, totalBytes, progress);
             },
             onComplete: (file) => {
-                console.log("[InstantSession] File received: ", file.name);
+                // console.log("[InstantSession] File received: ", file.name);
 
                 this.callbacks.onFileCompleted?.(file);
                 this.callbacks.onFileReceived?.(file);
@@ -591,6 +591,18 @@ export class InstantSession {
     }
 
     async destroy(): Promise<void> {
+        if (this.signaling) {
+            try {
+                await this.signaling.send({
+                    type: "leave",
+                    from: this.peerId,
+                });
+            } catch (error) {
+                // Signaling may already be disconnected.
+                console.warn("Signaling may already be disconnected.", error);
+            }
+        }
+
         for (const peer of this.peers.values()) {
             peer.close();
         }

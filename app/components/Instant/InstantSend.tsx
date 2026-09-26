@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { FaRegFile } from 'react-icons/fa6';
 import { InstantSession } from '@/lib/instant/InstantSession';
 
@@ -71,11 +71,11 @@ export default function InstantSend() {
                         setConnectedPeers(count);
                     },
                     onSendProgress: (_peerId, progress) => {
-                        console.log(
-                            "Sending:",
-                            progress.fileId,
-                            progress.progress
-                        );
+                        // console.log(
+                        //     "Sending:",
+                        //     progress.fileId,
+                        //     progress.progress
+                        // );
                     },
                     onFileSent: (_peerId, fileId) => {
                         console.log(
@@ -103,6 +103,13 @@ export default function InstantSend() {
             );
         }
     }
+
+    useEffect(() => {
+        return () => {
+            void sessionRef.current?.destroy();
+            sessionRef.current = null;
+        };
+    }, []);
 
     return (
         <div className="flex flex-col gap-8 items-center justify-between flex-1 min-w-0 h-full min-h-0 max-lg:w-full">

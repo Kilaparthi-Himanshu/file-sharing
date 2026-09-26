@@ -40,6 +40,11 @@ export class TransferManager {
     }
 
     async sendFile(fileId: string, file: File): Promise<void> {
+        const statsInterval = window.setInterval(() => {
+            void this.peer.logSelectedCandidatePair(false);
+            void this.peer.logDataChannelStats();
+        }, 1000);
+
         try {
             if (this.cancelledFiles.has(fileId)) {
                 this.cancelledFiles.delete(fileId);
@@ -56,6 +61,9 @@ export class TransferManager {
             this.sendControl(createFileStartMessage(fileId, file));
 
             let offset = 0;
+
+            let lastRateLogTime = performance.now();
+            let lastRateLogBytes = 0;
 
             while (offset < file.size) {
                 if (this.cancelledFiles.has(fileId)) {
@@ -89,20 +97,52 @@ export class TransferManager {
 
                 this.peer.send(chunk);
 
-                console.log(
-                    "[TransferManager] CHUNK SENT:",
-                    // offset,
-                    // "/",
-                    // file.size
-                    {
-                        offset,
-                        total: file.size,
-                        progress: offset / file.size,
-                        bufferedAmount: this.peer.bufferedAmount,
-                    }
-                );
+                // console.log(
+                //     "[TransferManager] CHUNK SENT:",
+                //     // offset,
+                //     // "/",
+                //     // file.size
+                //     {
+                //         offset,
+                //         total: file.size,
+                //         progress: offset / file.size,
+                //         bufferedAmount: this.peer.bufferedAmount,
+                //     }
+                // );
 
                 offset = end;
+
+                // Temporary transfer-rate diagnostics
+                const now = performance.now();
+
+                if (now - lastRateLogTime >= 1000) {
+                    const bytesSinceLastLog = offset - lastRateLogBytes;
+                    const seconds = (now - lastRateLogTime) / 1000;
+
+                    const mbps =
+                        (bytesSinceLastLog * 8) /
+                        seconds /
+                        1_000_000;
+
+                    console.log(
+                        "[TransferManager] RATE:",
+                        {
+                            mbps: mbps.toFixed(2),
+                            bufferedMB: (
+                                this.peer.bufferedAmount /
+                                1024 /
+                                1024
+                            ).toFixed(2),
+                            progress: (
+                                (offset / file.size) *
+                                100
+                            ).toFixed(2),
+                        }
+                    );
+
+                    lastRateLogTime = now;
+                    lastRateLogBytes = offset;
+                }
 
                 this.callbacks.onProgress?.({
                     fileId,
@@ -145,6 +185,8 @@ export class TransferManager {
             this.callbacks.onError?.(normailzedError);
 
             throw normailzedError;
+        } finally {
+            window.clearInterval(statsInterval);
         }
     }
 

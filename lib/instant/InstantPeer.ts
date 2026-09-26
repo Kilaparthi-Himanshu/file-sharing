@@ -96,7 +96,7 @@ export class InstantPeer {
             );
 
             if (state === "connected" || state === "completed") {
-                void this.logSelectedCandidatePair();
+                void this.logSelectedCandidatePair(true);
             }
         }
 
@@ -321,11 +321,15 @@ export class InstantPeer {
         return this.dataChannel?.bufferedAmount ?? 0;
     }
 
-    private async logSelectedCandidatePair(): Promise<void> {
+    public async logSelectedCandidatePair(logPath = true): Promise<void> {
+        type IceCandidatePairStats = RTCIceCandidatePairStats & {
+            packetsLost?: number;
+        };
+
         try {
             const stats = await this.connection.getStats();
 
-            let selectedPair: RTCIceCandidatePairStats | null = null;
+            let selectedPair: IceCandidatePairStats | null = null;
 
             for (const report of stats.values()) {
                 if (
@@ -333,7 +337,7 @@ export class InstantPeer {
                     report.state === "succeeded" &&
                     report.nominated
                 ) {
-                    selectedPair = report as RTCIceCandidatePairStats;
+                    selectedPair = report as IceCandidatePairStats;
                     break;
                 }
             }
@@ -348,18 +352,99 @@ export class InstantPeer {
                 selectedPair.remoteCandidateId
             ) as IceCandidateStats | undefined;
 
+            if (logPath) {
+                console.log(
+                    "[InstantPeer] SELECTED ICE PATH:",
+                    {
+                        localType: local?.candidateType,
+                        remoteType: remote?.candidateType,
+                        protocol: local?.protocol,
+                        relayProtocol: local?.relayProtocol,
+                    }
+                );
+            }
+
             console.log(
-                "[InstantPeer] SELECTED ICE PATH:",
+                "[InstantPeer] ICE TRANSPORT STATS:",
                 {
-                    localType: local?.candidateType,
-                    remoteType: remote?.candidateType,
-                    protocol: local?.protocol,
-                    relayProtocol: local?.relayProtocol,
+                    availableOutgoingMbps:
+                        selectedPair.availableOutgoingBitrate
+                            ? (
+                                selectedPair.availableOutgoingBitrate / 1_000_000
+                            ).toFixed(2)
+                            : undefined,
+
+                    availableIncomingMbps:
+                        selectedPair.availableIncomingBitrate
+                            ? (
+                                selectedPair.availableIncomingBitrate / 1_000_000
+                            ).toFixed(2)
+                            : undefined,
+
+                    currentRTT: selectedPair.currentRoundTripTime,
+
+                    packetsSent: selectedPair.packetsSent,
+                    packetsReceived: selectedPair.packetsReceived,
+                    packetsLost: selectedPair.packetsLost,
+
+                    bytesSent: selectedPair.bytesSent,
+                    bytesReceived: selectedPair.bytesReceived,
+
+                    // ICE connectivity / consent
+                    requestsSent: selectedPair.requestsSent,
+                    responsesReceived: selectedPair.responsesReceived,
+                    consentRequestsSent: selectedPair.consentRequestsSent,
+
+                    // Selected ICE path
+                    localCandidateType: local?.candidateType,
+                    localProtocol: local?.protocol,
+                    localRelayProtocol: local?.relayProtocol,
+
+                    remoteCandidateType: remote?.candidateType,
+                    remoteProtocol: remote?.protocol,
+                    remoteRelayProtocol: remote?.relayProtocol,
                 }
             );
         } catch (error) {
             console.warn(
                 "[InstantPeer] Failed to inspect ICE stats:",
+                error
+            );
+        }
+    }
+
+    public async logDataChannelStats(): Promise<void> {
+        try {
+            const stats = await this.connection.getStats();
+
+            let dataChannelStats: RTCStats | undefined;
+            let sctpTransportStats: RTCStats | undefined;
+
+            for (const report of stats.values()) {
+                if (report.type === "data-channel") {
+                    dataChannelStats = report;
+                }
+
+                if (report.type === "sctp-transport") {
+                    sctpTransportStats = report;
+                }
+            }
+
+            console.log(
+                "[InstantPeer] DATACHANNEL STATS:",
+                {
+                    bufferedAmount: this.dataChannel?.bufferedAmount,
+                    dataChannel: dataChannelStats,
+                }
+            );
+
+            console.log(
+                "[InstantPeer] SCTP STATS:",
+                sctpTransportStats
+            );
+        } catch (error) {
+            console.warn(
+                "[InstantPeer] Failed to inspect DataChannel/SCTP stats:",
                 error
             );
         }

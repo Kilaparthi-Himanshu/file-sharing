@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import ShinyText from '../misc/ShinyText';
 import { InstantSession } from '@/lib/instant/InstantSession';
 import { ReceivedFile } from '@/lib/instant/types';
@@ -277,6 +277,13 @@ export default function InstantReceive() {
     const handleCancelReception = (receptionId: string) => {
         sessionRef.current?.cancelReception(receptionId);
     }
+
+    useEffect(() => {
+        return () => {
+            void sessionRef.current?.destroy();
+            sessionRef.current = null;
+        };
+    }, []);
 
     return (
         <div className="flex flex-col gap-8 items-center justify-between flex-1 min-w-0 h-full min-h-0 max-lg:w-full">

@@ -115,12 +115,12 @@ export class TransferReceiver {
 
         file.bytesReceived += chunk.size;
 
-        console.log(
-            "[TransferReceiver] CHUNK RECEIVED:",
-            file.bytesReceived,
-            "/",
-            file.size
-        );
+        // console.log(
+        //     "[TransferReceiver] CHUNK RECEIVED:",
+        //     file.bytesReceived,
+        //     "/",
+        //     file.size
+        // );
 
         this.callbacks.onProgress?.(
             file.receptionId,

@@ -26,14 +26,14 @@ export class SignalingClient {
         const topic = `instant:${this.transferId}`;
 
         // Remove any stale/reused channel for this transfer ID
-        const existingChannel = supabase
-            .getChannels()
-            .find((channel) => channel.topic === `realtime:${topic}`);
+        // const existingChannel = supabase
+        //     .getChannels()
+        //     .find((channel) => channel.topic === `realtime:${topic}`);
 
-        if (existingChannel) {
-            console.log("[SignalingClient] Removing stale channel: ",existingChannel.topic);
-            await supabase.removeChannel(existingChannel);
-        }
+        // if (existingChannel) {
+        //     console.log("[SignalingClient] Removing stale channel: ",existingChannel.topic);
+        //     await supabase.removeChannel(existingChannel);
+        // }
 
         this.channel = supabase.channel(
             topic,

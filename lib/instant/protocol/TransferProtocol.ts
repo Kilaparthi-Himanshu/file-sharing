@@ -1,7 +1,8 @@
 export type TransferMessage =
     | FileStartMessage
     | FileEndMessage
-    | FileCancelMessage;
+    | FileCancelMessage
+    | TransferEndMessage;
 
 export type FileStartMessage = {
     type: "file-start";
@@ -19,6 +20,10 @@ export type FileEndMessage = {
 export type FileCancelMessage = {
     type: "file-cancel";
     fileId: string;
+}
+
+export type TransferEndMessage = {
+    type: "transfer-end";
 }
 
 export function createFileStartMessage(fileId: string, file: File,): FileStartMessage {
@@ -42,6 +47,12 @@ export function createFileCancelMessage(fileId: string): FileCancelMessage {
     return {
         type: "file-cancel",
         fileId,
+    }
+}
+
+export function createTransferEndMessage(): TransferEndMessage {
+    return {
+        type: "transfer-end",
     }
 }
 

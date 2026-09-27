@@ -16,6 +16,7 @@ export type TransferReceiverCallbacks = {
         progress: number,
     ) => void;
     onComplete?: (file: ReceivedFile) => void;
+    onTransferComplete?: () => void;
     onAbort?: (files: { receptionId: string; fileId: string }[]) => void;
     onCancel?: (receptionId: string, fileId: string) => void;
     onError?: (error: Error) => void;
@@ -48,15 +49,21 @@ export class TransferReceiver {
                 switch (message.type) {
                     case "file-start":
                         this.handleFileStart(message);
+
                         console.log(
                             "[TransferReceiver] FILE START:",
                             message.name,
                             message.size
                         );
+
                         return;
 
                     case "file-end":
                         await this.handleFileEnd(message);
+                        return;
+
+                    case "transfer-end":
+                        this.handleTransferEnd();
                         return;
 
                     default:
@@ -183,6 +190,20 @@ export class TransferReceiver {
         });
 
         this.files.delete(message.fileId);
+    }
+
+    private handleTransferEnd(): void {
+        if (this.files.size > 0) {
+            throw new Error(
+                "Transfer ended before all files were completed"
+            );
+        }
+
+         console.log(
+            "[TransferReceiver] TRANSFER COMPLETE"
+        );
+
+        this.callbacks.onTransferComplete?.();
     }
 
     cancelFile(receptionId: string): void {

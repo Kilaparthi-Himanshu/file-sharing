@@ -248,6 +248,7 @@ export class InstantPeer {
         }
 
         this.dataChannel.send(new Uint8Array(data));
+        this.dataChannel.re
     }
 
     setBufferedAmountLowThreshold(threshold: number): void {

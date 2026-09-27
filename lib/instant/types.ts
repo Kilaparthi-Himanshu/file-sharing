@@ -43,6 +43,8 @@ export type ReceivedFile = {
 
 export type InstantSessionCallbacks = {
     onSessionCreated?: (id: string) => void;
+    onSessionDestroyed?: (id: string) => void;
+    onTransferCompleted?: () => void;
     onPeerConnected?: (peerId: string, connectedPeers: number) => void;
     onPeerDisconnected?: (peerId: string, connectedPeers: number) => void;
     onStatusChange?: (status: InstantSessionStatus) => void;

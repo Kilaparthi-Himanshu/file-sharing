@@ -502,9 +502,7 @@ export class InstantSession {
         }
     }
 
-    private async ensureIceServers(): Promise<
-        RTCIceServer[]
-    > {
+    private async ensureIceServers(): Promise<RTCIceServer[]> {
         if (this.iceServers) {
             return this.iceServers;
         }
@@ -1032,7 +1030,7 @@ export class InstantSession {
         return this.status;
     }
 
-    get debugRefeiverMemory(): {
+    get debugReceiverMemory(): {
         activeFiles: number;
         activeChunks: number;
         activeBytes: number;

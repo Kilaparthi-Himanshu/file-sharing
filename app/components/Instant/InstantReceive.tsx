@@ -575,7 +575,7 @@ export default function InstantReceive() {
                                 ([id, session]) => ({
                                     id,
                                     memory:
-                                        session.debugRefeiverMemory,
+                                        session.debugReceiverMemory,
                                 })
                             );
 

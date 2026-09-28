@@ -323,3 +323,59 @@ TransferReceiver.cancelFile()
               Direct P2P            TURN relay
               preferred              fallback
                   🚀                    🛟
+
+**ACK FLOW**
+
+ACK
+ │
+ │ tells us receiver progress
+ ▼
+Application window
+ │
+ │ limits how far sender gets ahead
+ ▼
+DataChannel
+ │
+ │ has its own flow control
+ ▼
+SCTP
+ │
+ │ has congestion/retransmission
+ ▼
+TURN
+ │
+ ▼
+Network
+
+**ACK LOOP**
+
+send loop
+   │
+   ▼
+waitForWindow()
+   │
+   ├── enough ACK progress?
+   │       │
+   │       └── YES → continue
+   │
+   └── NO
+        │
+        ▼
+     WAIT
+        │
+        │
+        │ receiver sends ACK
+        ▼
+   handleAck()
+        │
+        ▼
+   ackWaiter()
+        │
+        ▼
+   waitForWindow() resumes
+        │
+        ▼
+   waitForBuffer()
+        │
+        ▼
+   peer.send(chunk)

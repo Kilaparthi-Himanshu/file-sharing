@@ -121,6 +121,21 @@ export class InstantSession {
                     progress
                 );
             },
+            onAck: (fileId, bytes) => {
+                for (const peer of this.peers.values()) {
+                    if (peer.state !== "connected") {
+                        continue;
+                    }
+
+                    peer.send(
+                        encodeControlMessage({
+                            type: "file-ack",
+                            fileId,
+                            bytes,
+                        })
+                    );
+                }
+            },
             onComplete: (file) => {
                 this.touchActivity();
 
@@ -612,13 +627,25 @@ export class InstantSession {
                             JSON.parse(data);
 
                         if (
-                            message.type ===
-                            "file-cancel"
+                            message.type === "file-cancel"
                         ) {
                             this.handleFileCancel(
                                 remotePeerId,
                                 message as FileCancelMessage
                             );
+                        }
+
+                        if (
+                            message.type === "file-ack"
+                        ) {
+                            this.transferManagers
+                                .get(remotePeerId)
+                                ?.handleAck(
+                                    message.fileId,
+                                    message.bytes
+                                );
+
+                            return;
                         }
                     } catch (error) {
                         this.handleError(

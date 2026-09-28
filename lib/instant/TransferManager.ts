@@ -22,13 +22,21 @@ export type TransferCallbacks = {
 }
 
 export class TransferManager {
-    private static readonly CHUNK_SIZE = 256 * 1024;
+    private static readonly DEFAULT_CHUNK_SIZE = 512 * 1024;
 
-    private static readonly BUFFER_HIGH_WATERMARK = 4 * 1024 * 1024;
+    private static readonly BUFFER_HIGH_WATERMARK = 2 * 1024 * 1024;
 
-    private static readonly BUFFER_LOW_WATERMARK = 1 * 1024 * 1024;
+    private static readonly BUFFER_LOW_WATERMARK = 512 * 1024;
 
     private readonly cancelledFiles = new Set<string>();
+
+    private static readonly INITIAL_WINDOW = 256 * 1024;
+
+    private static readonly MAX_WINDOW = 512 * 1024;
+
+    private readonly acked = new Map<string, number>();
+
+    private ackWaiter: (() => void) | null = null;
 
     constructor(
         private readonly peer: InstantPeer,
@@ -37,6 +45,27 @@ export class TransferManager {
 
     cancelFile(fileId: string): void {
         this.cancelledFiles.add(fileId);
+    }
+
+    handleAck(fileId: string, bytes: number): void {
+        this.acked.set(
+            fileId,
+            Math.max(
+                this.acked.get(fileId) ?? 0,
+                bytes
+            )
+        );
+
+        this.ackWaiter?.();
+        this.ackWaiter = null;
+
+        console.log(
+            "[TransferManager] ACK:",
+            JSON.stringify({
+                fileId,
+                bytes,
+            })
+        );
     }
 
     async sendFile(fileId: string, file: File): Promise<void> {
@@ -48,6 +77,7 @@ export class TransferManager {
         try {
             if (this.cancelledFiles.has(fileId)) {
                 this.cancelledFiles.delete(fileId);
+                this.acked.delete(fileId);
                 this.callbacks.onCancelled?.(fileId);
                 return;
             }
@@ -60,6 +90,24 @@ export class TransferManager {
 
             this.sendControl(createFileStartMessage(fileId, file));
 
+            const maxMessageSize = this.peer.maxMessageSize;
+
+            const chunkSize =
+                maxMessageSize !== null
+                    ? Math.min(
+                        TransferManager.DEFAULT_CHUNK_SIZE,
+                        maxMessageSize
+                    )
+                    : TransferManager.DEFAULT_CHUNK_SIZE;
+
+            console.log(
+                "[TransferManager] CHUNK CONFIG:",
+                {
+                    maxMessageSize,
+                    chunkSize,
+                }
+            );
+
             let offset = 0;
 
             let lastRateLogTime = performance.now();
@@ -68,6 +116,16 @@ export class TransferManager {
             while (offset < file.size) {
                 if (this.cancelledFiles.has(fileId)) {
                     this.cancelledFiles.delete(fileId);
+                    this.acked.delete(fileId);
+                    this.callbacks.onCancelled?.(fileId);
+                    return;
+                }
+
+                await this.waitForWindow(fileId, offset);
+
+                if (this.cancelledFiles.has(fileId)) {
+                    this.cancelledFiles.delete(fileId);
+                    this.acked.delete(fileId);
                     this.callbacks.onCancelled?.(fileId);
                     return;
                 }
@@ -76,12 +134,13 @@ export class TransferManager {
 
                 if (this.cancelledFiles.has(fileId)) {
                     this.cancelledFiles.delete(fileId);
+                    this.acked.delete(fileId);
                     this.callbacks.onCancelled?.(fileId);
                     return;
                 }
 
                 const end = Math.min(
-                    offset + TransferManager.CHUNK_SIZE,
+                    offset + chunkSize,
                     file.size
                 );
 
@@ -91,6 +150,7 @@ export class TransferManager {
 
                 if (this.cancelledFiles.has(fileId)) {
                     this.cancelledFiles.delete(fileId);
+                    this.acked.delete(fileId);
                     this.callbacks.onCancelled?.(fileId);
                     return;
                 }
@@ -156,6 +216,7 @@ export class TransferManager {
 
             if (this.cancelledFiles.has(fileId)) {
                 this.cancelledFiles.delete(fileId);
+                this.acked.delete(fileId);
                 this.callbacks.onCancelled?.(fileId);
                 return;
             }
@@ -164,6 +225,7 @@ export class TransferManager {
 
             if (this.cancelledFiles.has(fileId)) {
                 this.cancelledFiles.delete(fileId);
+                this.acked.delete(fileId);
                 this.callbacks.onCancelled?.(fileId);
                 return;
             }
@@ -174,6 +236,8 @@ export class TransferManager {
             );
 
             this.sendControl(createFileEndMessage(fileId));
+
+            this.acked.delete(fileId);
 
             this.callbacks.onComplete?.(fileId);
         } catch (error) {
@@ -192,6 +256,45 @@ export class TransferManager {
 
     private sendControl(message: TransferMessage): void {
         this.peer.send(encodeControlMessage(message));
+    }
+
+    private async waitForWindow(
+        fileId: string,
+        offset: number,
+    ): Promise<void> {
+        while (true) {
+            const acked = this.acked.get(fileId) ?? 0;
+
+            const window = Math.min(
+                TransferManager.MAX_WINDOW,
+                TransferManager.INITIAL_WINDOW + acked
+            );
+
+            if (offset - acked < window) return;
+
+            if (this.cancelledFiles.has(fileId)) return;
+
+            if (this.peer.state !== "connected") {
+                throw new Error("Peer disconnected");
+            }
+
+            console.log(
+                "[TransferManager] ACK WINDOW WAIT:",
+                JSON.stringify({
+                    fileId,
+                    offset,
+                    acked,
+                    inFlight: offset - acked,
+                    window,
+                })
+            );
+
+            await new Promise<void>((resolve) => {
+                this.ackWaiter = resolve;
+
+                setTimeout(resolve, 500);
+            });
+        }
     }
 
     private async waitForBuffer(): Promise<void> {

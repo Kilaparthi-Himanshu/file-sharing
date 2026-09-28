@@ -112,6 +112,16 @@ export class InstantPeer {
         this.connection.ondatachannel = (event) => {
             this.setupDataChannel(event.channel);
         }
+
+        this.connection.onicegatheringstatechange = () => {
+            console.log(
+                "[InstantPeer] ICE GATHERING:",
+                this.localPeerId,
+                "→",
+                this.remotePeerId,
+                this.connection.iceGatheringState
+            );
+        }
     }
 
     private createDataChannel(): void {
@@ -138,6 +148,11 @@ export class InstantPeer {
                 this.remotePeerId
             );
 
+            console.log(
+                "[InstantPeer] SCTP MAX MESSAGE SIZE:",
+                this.connection.sctp?.maxMessageSize
+            );
+
             this.notifyConnected();
         }
 
@@ -158,9 +173,23 @@ export class InstantPeer {
     }
 
     async createOffer(): Promise<void> {
+        console.log(
+            "[InstantPeer] CREATING OFFER:",
+            this.localPeerId,
+            "→",
+            this.remotePeerId
+        );
+
         const offer = await this.connection.createOffer();
 
         await this.connection.setLocalDescription(offer);
+
+        console.log(
+            "[InstantPeer] OFFER READY:",
+            this.localPeerId,
+            "→",
+            this.remotePeerId
+        );
 
         this.callbacks.onSignal({
             type: "offer",
@@ -171,7 +200,21 @@ export class InstantPeer {
     }
 
     async handleOffer(offer: RTCSessionDescriptionInit): Promise<void> {
+        console.log(
+            "[InstantPeer] OFFER RECEIVED:",
+            this.localPeerId,
+            "←",
+            this.remotePeerId
+        );
+
         await this.connection.setRemoteDescription(offer);
+
+        console.log(
+            "[InstantPeer] REMOTE OFFER SET:",
+            this.localPeerId,
+            "←",
+            this.remotePeerId
+        );
 
         this.remoteDescriptionSet = true;
 
@@ -180,6 +223,13 @@ export class InstantPeer {
         const answer = await this.connection.createAnswer();
 
         await this.connection.setLocalDescription(answer);
+
+        console.log(
+            "[InstantPeer] ANSWER READY:",
+            this.localPeerId,
+            "→",
+            this.remotePeerId
+        );
 
         this.callbacks.onSignal({
             type: "answer",
@@ -190,7 +240,21 @@ export class InstantPeer {
     }
 
     async handleAnswer(answer: RTCSessionDescriptionInit): Promise<void> {
-        await this.connection.setRemoteDescription(answer);
+         console.log(
+                "[InstantPeer] ANSWER RECEIVED:",
+                this.localPeerId,
+                "←",
+                this.remotePeerId
+            );
+
+            await this.connection.setRemoteDescription(answer);
+
+            console.log(
+                "[InstantPeer] REMOTE ANSWER SET:",
+                this.localPeerId,
+                "←",
+                this.remotePeerId
+            );
 
         this.remoteDescriptionSet = true;
 
@@ -247,7 +311,7 @@ export class InstantPeer {
             return;
         }
 
-        this.dataChannel.send(new Uint8Array(data));
+        this.dataChannel.send(data);
     }
 
     setBufferedAmountLowThreshold(threshold: number): void {
@@ -263,26 +327,84 @@ export class InstantPeer {
             throw new Error("Data Channel does not exist");
         }
 
-        if (this.dataChannel.bufferedAmount <= this.dataChannel.bufferedAmountLowThreshold) {
+        const channel = this.dataChannel;
+        const threshold = channel.bufferedAmountLowThreshold;
+
+        if (channel.readyState !== "open") {
+            throw new Error("Data Channel is not open");
+        }
+
+        if (channel.bufferedAmount <= threshold) {
             return Promise.resolve();
         }
 
-        return new Promise<void>((resolve) => {
-            const channel = this.dataChannel!;
-
-            const handleBufferedAmountLow = () => {
+        return new Promise<void>((resolve, reject) => {
+            const cleanup = () => {
                 channel.removeEventListener(
                     "bufferedamountlow",
                     handleBufferedAmountLow
                 );
 
-                resolve();
+                channel.removeEventListener(
+                    "close",
+                    handleClose
+                );
+
+                channel.removeEventListener(
+                    "error",
+                    handleError
+                );
+            }
+
+            const handleBufferedAmountLow = () => {
+                if (channel.bufferedAmount <= threshold) {
+                    cleanup();
+                    resolve();
+                }
+            }
+
+            const handleClose = () => {
+                cleanup();
+                reject(
+                    new Error(
+                        "Data Channel closed while waiting for buffer"
+                    )
+                );
+            }
+
+            const handleError = () => {
+                cleanup();
+                reject(
+                    new Error(
+                        "Data Channel error while waiting for buffer"
+                    )
+                );
             }
 
             channel.addEventListener(
                 "bufferedamountlow",
                 handleBufferedAmountLow
             );
+
+            channel.addEventListener(
+                "close",
+                handleClose
+            );
+
+            channel.addEventListener(
+                "error",
+                handleError
+            );
+
+            // Re-check after listeners are attached
+            if (channel.readyState !== "open") {
+                handleClose();
+                return;
+            }
+
+            if (channel.bufferedAmount <= threshold) {
+                handleBufferedAmountLow();
+            }
         });
     }
 
@@ -319,6 +441,10 @@ export class InstantPeer {
 
     get bufferedAmount(): number {
         return this.dataChannel?.bufferedAmount ?? 0;
+    }
+
+    get maxMessageSize(): number | null {
+        return this.connection.sctp?.maxMessageSize ?? null
     }
 
     public async logSelectedCandidatePair(logPath = true): Promise<void> {
@@ -366,7 +492,7 @@ export class InstantPeer {
 
             console.log(
                 "[InstantPeer] ICE TRANSPORT STATS:",
-                {
+                JSON.stringify({
                     availableOutgoingMbps:
                         selectedPair.availableOutgoingBitrate
                             ? (
@@ -403,7 +529,7 @@ export class InstantPeer {
                     remoteCandidateType: remote?.candidateType,
                     remoteProtocol: remote?.protocol,
                     remoteRelayProtocol: remote?.relayProtocol,
-                }
+                })
             );
         } catch (error) {
             console.warn(
@@ -432,16 +558,29 @@ export class InstantPeer {
 
             console.log(
                 "[InstantPeer] DATACHANNEL STATS:",
-                {
+                JSON.stringify({
                     bufferedAmount: this.dataChannel?.bufferedAmount,
                     dataChannel: dataChannelStats,
-                }
+                })
             );
 
             console.log(
                 "[InstantPeer] SCTP STATS:",
                 sctpTransportStats
             );
+
+            for (const report of stats.values()) {
+                if (report.type === "data-channel") {
+                    console.log("[InstantPeer] DATACHANNEL RAW STATS:", JSON.stringify({
+                        state: report.state,
+                        messagesSent: report.messagesSent,
+                        bytesSent: report.bytesSent,
+                        messagesReceived: report.messagesReceived,
+                        bytesReceived: report.bytesReceived,
+                        bufferedAmount: this.dataChannel?.bufferedAmount,
+                    }));
+                }
+            }
         } catch (error) {
             console.warn(
                 "[InstantPeer] Failed to inspect DataChannel/SCTP stats:",

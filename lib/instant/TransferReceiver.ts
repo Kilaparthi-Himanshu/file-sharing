@@ -15,6 +15,7 @@ export type TransferReceiverCallbacks = {
         totalBytes: number,
         progress: number,
     ) => void;
+    onAck?: (fileId: string, bytes: number) => void;
     onComplete?: (file: ReceivedFile) => void;
     onTransferComplete?: () => void;
     onAbort?: (files: { receptionId: string; fileId: string }[]) => void;
@@ -30,6 +31,7 @@ type IncomingFile = {
     size: number;
     chunks: Blob[];
     bytesReceived: number;
+    lastAcked: number;
 }
 
 export class TransferReceiver {
@@ -99,6 +101,7 @@ export class TransferReceiver {
             size: message.size,
             chunks: [],
             bytesReceived: 0,
+            lastAcked: 0,
         }
 
         this.files.set(message.fileId, file);
@@ -121,6 +124,18 @@ export class TransferReceiver {
         file.chunks.push(chunk);
 
         file.bytesReceived += chunk.size;
+
+        if (
+            file.bytesReceived - file.lastAcked >= 256 * 1024 ||
+            file.bytesReceived === file.size
+        ) {
+            file.lastAcked = file.bytesReceived;
+
+            this.callbacks.onAck?.(
+                file.id,
+                file.bytesReceived
+            );
+        }
 
         // console.log(
         //     "[TransferReceiver] CHUNK RECEIVED:",

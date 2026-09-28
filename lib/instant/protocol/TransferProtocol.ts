@@ -2,7 +2,8 @@ export type TransferMessage =
     | FileStartMessage
     | FileEndMessage
     | FileCancelMessage
-    | TransferEndMessage;
+    | TransferEndMessage
+    | FileAckMessage;
 
 export type FileStartMessage = {
     type: "file-start";
@@ -20,6 +21,12 @@ export type FileEndMessage = {
 export type FileCancelMessage = {
     type: "file-cancel";
     fileId: string;
+}
+
+export type FileAckMessage = {
+    type: "file-ack";
+    fileId: string;
+    bytes: number;
 }
 
 export type TransferEndMessage = {

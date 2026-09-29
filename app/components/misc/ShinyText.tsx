@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface ShinyTextProps {
-    text: string;
+    text: string | React.ReactNode;
     disabled?: boolean;
     speed?: number;
     className?: string;

@@ -9,6 +9,7 @@ import { InstantSession } from "@/lib/instant/InstantSession";
 import { ReceivedFile } from "@/lib/instant/types";
 import { DownloadManager } from "@/lib/instant/DownloadManager";
 import { Spinner } from "../Spinner";
+import { FaDownload, FaFolderOpen } from "react-icons/fa6";
 
 type ReceivedFileStatus =
     | "receiving"
@@ -560,7 +561,7 @@ export default function InstantReceive() {
     }, []);
 
     return (
-        <div className="flex flex-col gap-8 items-center justify-between flex-1 min-w-0 h-full min-h-0 max-lg:w-full">
+        <div className="flex flex-col gap-6 items-center justify-between flex-1 min-w-0 h-full min-h-0 max-lg:w-full">
 
             <div className="absolute top-2 left-2">
                 <button
@@ -594,7 +595,7 @@ export default function InstantReceive() {
 
                 {downloadDirectory && (
                     <>
-                        <div className="text-sm text-neutral-300">
+                        <div className="text-sm text-zinc-300">
                             Download folder:{" "}
                             <span className="font-semibold text-blue-400">
                                 {downloadDirectory}
@@ -636,12 +637,45 @@ export default function InstantReceive() {
                 </button>
             </div>
 
-            <span className="text-4xl max-lg:text-2xl font-bold">
-                RECEIVE
-            </span>
+            <div className="flex flex-col self-start">
+                <span className="text-4xl max-lg:text-2xl font-bold">
+                    RECEIVE
+                </span>
 
-            <div className="w-full h-full bg-purple-900/20 rounded-xl relative overflow-hidden">
+                <span className="text-zinc-600">
+                    Enter a transfer ID to connect.
+                </span>
+            </div>
 
+            <div className="w-full relative bg-zinc-900 p-3 rounded-xl flex flex-col gap-3 border border-zinc-700">
+                <span className="text-sm text-zinc-300 font-semibold">Transfer ID</span>
+
+                <div className="w-full flex gap-3">
+                    <input
+                        type="text"
+                        value={transferId}
+                        onChange={(e) =>
+                            setTransferId(
+                                e.target.value
+                            )
+                        }
+                        className={`border border-purple-500 w-full h-12 rounded-lg flex items-center p-2 text-center text-xl tracking-[8px] font-sans focus:outline-4 outline-purple-700 focus:border-purple-400 focus:border-2 transition-[outline,border] duration-[50ms,0ms] text-zinc-200`}
+                        maxLength={6}
+                        placeholder="ENTER ID"
+                        required
+                    />
+
+                    <button
+                        className="w-40 h-12 self-start border border-blue-500 rounded-lg bg-blue-600/50 hover:bg-blue-700/30 transition-[background,scale] cursor-pointer active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed"
+                        onClick={handleReceive}
+                        disabled={!transferId.trim()}
+                    >
+                        Receive
+                    </button>
+                </div>
+            </div>
+
+            <div className="w-full h-full bg-purple-900/20 rounded-xl relative overflow-hidden border border-zinc-700">
                 {joiningCount > 0 && (
                     <Spinner />
                 )}
@@ -652,7 +686,7 @@ export default function InstantReceive() {
                             text={
                                 connected
                                     ? "Connected!"
-                                    : "Waiting..."
+                                    : <div className="flex flex-col items-center justify-center"><FaDownload /> <span>Waiting...</span></div>
                             }
                             disabled={false}
                             speed={3}
@@ -660,177 +694,196 @@ export default function InstantReceive() {
                         />
                     </div>
                 ) : (
-                    <div className="w-full h-full overflow-y-auto p-4 custom-scrollbar">
+                    <div className="relative w-full h-full">
+                        <div className="absolute top-0 inset-x-0 z-10 h-11 px-4 flex justify-between items-center backdrop-blur-sm bg-gradient-to-b from-purple-900 to-purple-900/30">
+                            <span className="font-semibold text-zinc-300">Received Files</span>
 
-                        <div className="flex flex-col gap-3">
+                            <button
+                                type="button"
+                                onClick={handleClearReceivedFiles}
+                                className="border p-1 px-2 border-red-500 rounded-lg bg-red-600/50 hover:bg-red-700/30 transition cursor-pointer text-sm"
+                            >
+                                Clear All
+                            </button>
+                        </div>
 
-                            {receivedFiles.map(
-                                (file) => (
-                                    <div
-                                        key={
-                                            file.receptionId
-                                        }
-                                        className="border border-purple-500 rounded-lg p-3"
-                                    >
-
-                                        <div className="font-semibold truncate">
-                                            {
-                                                file.name
+                        <div className="h-full overflow-y-auto custom-scrollbar pt-12">
+                            <div className="flex flex-col gap-3 p-2">
+                                {receivedFiles.map(
+                                    (file) => (
+                                        <div
+                                            key={
+                                                file.receptionId
                                             }
-                                        </div>
-
-                                        <div className="text-sm text-neutral-400">
-                                            {(
-                                                file.size /
-                                                1024 /
-                                                1024
-                                            ).toFixed(
-                                                2
-                                            )}{" "}
-                                            MB
-                                        </div>
-
-                                        <div className="mt-3">
-
-                                            <div className="flex justify-between text-xs text-neutral-400 mb-1">
-
-                                                <span>
+                                            className="border border-zinc-700 rounded-lg p-3 bg-purple-900/50 flex flex-col gap-1"
+                                        >
+                                            <div className="flex justify-between">
+                                                <div className="font-semibold truncate">
                                                     {
-                                                        file.status ===
-                                                        "received"
-                                                            ? "Received"
-                                                            : file.status ===
-                                                                "interrupted"
-                                                                ? "Interrupted"
-                                                                : file.status ===
-                                                                    "cancelled"
-                                                                    ? "Cancelled"
-                                                                    : "Receiving"
+                                                        file.name
                                                     }
-                                                </span>
+                                                </div>
 
-                                                <span>
-                                                    {file.transferProgress.toFixed(
-                                                        0
-                                                    )}
-                                                    %
-                                                </span>
-
+                                                <div className="text-sm text-zinc-400">
+                                                    {(
+                                                        file.size /
+                                                        1024 /
+                                                        1024
+                                                    ).toFixed(
+                                                        2
+                                                    )}{" "}
+                                                    MB
+                                                </div>
                                             </div>
 
-                                            <div className="w-full h-2 bg-purple-950 rounded-full overflow-hidden">
+                                            <div>
 
-                                                <div
-                                                    className="h-full bg-linear-to-r from-purple-500 to-blue-500 transition-[width] duration-100"
-                                                    style={{
-                                                        width: `${file.transferProgress}%`,
-                                                    }}
-                                                />
+                                                <div className="flex justify-between text-xs text-zinc-400 mb-1">
 
-                                            </div>
-
-                                            {file.status ===
-                                                "receiving" && (
-                                                <button
-                                                    type="button"
-                                                    onClick={() =>
-                                                        handleCancelReception(
-                                                            file.receptionId
-                                                        )
-                                                    }
-                                                    className="mt-3 px-4 py-2 border border-red-500 rounded-lg bg-red-600 hover:bg-red-700 transition-[background,scale] cursor-pointer active:scale-98"
-                                                >
-                                                    Cancel
-                                                </button>
-                                            )}
-
-                                        </div>
-
-                                        {file.downloading && (
-                                            <div className="mt-3">
-
-                                                <div className="flex justify-between text-xs text-neutral-400 mb-1">
                                                     <span>
-                                                        Saving...
+                                                        {
+                                                            file.status ===
+                                                            "received"
+                                                                ? "Received"
+                                                                : file.status ===
+                                                                    "interrupted"
+                                                                    ? "Interrupted"
+                                                                    : file.status ===
+                                                                        "cancelled"
+                                                                        ? "Cancelled"
+                                                                        : "Receiving"
+                                                        }
                                                     </span>
 
                                                     <span>
-                                                        {file.downloadProgress.toFixed(
+                                                        {file.transferProgress.toFixed(
                                                             0
                                                         )}
                                                         %
                                                     </span>
+
                                                 </div>
 
                                                 <div className="w-full h-2 bg-purple-950 rounded-full overflow-hidden">
 
                                                     <div
-                                                        className="h-full bg-green-500 transition-[width] duration-100"
+                                                        className="h-full bg-linear-to-r from-purple-500 to-blue-500 transition-[width] duration-100"
                                                         style={{
-                                                            width: `${file.downloadProgress}%`,
+                                                            width: `${file.transferProgress}%`,
                                                         }}
                                                     />
 
                                                 </div>
 
-                                            </div>
-                                        )}
+                                                {file.status ===
+                                                    "receiving" && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            handleCancelReception(
+                                                                file.receptionId
+                                                            )
+                                                        }
+                                                        className="mt-3 px-4 py-2 border border-red-500 rounded-lg bg-red-600/50 hover:bg-red-700/30 transition-[background,scale] cursor-pointer active:scale-98"
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                )}
 
-                                        {file.file &&
-                                            !file.downloading && (
-                                                <button
-                                                    onClick={() =>
-                                                        void downloadReceivedFile(
-                                                            file.file!
-                                                        )
-                                                    }
-                                                    className="mt-3 px-4 py-2 border border-blue-500 rounded-lg bg-blue-600 hover:bg-blue-700 transition-[background,scale] cursor-pointer active:scale-98"
-                                                >
-                                                    Download Again
-                                                </button>
+                                            </div>
+
+                                            {file.downloading && (
+                                                <div className="mt-3">
+
+                                                    <div className="flex justify-between text-xs text-zinc-400 mb-1">
+                                                        <span>
+                                                            Saving...
+                                                        </span>
+
+                                                        <span>
+                                                            {file.downloadProgress.toFixed(
+                                                                0
+                                                            )}
+                                                            %
+                                                        </span>
+                                                    </div>
+
+                                                    <div className="w-full h-2 bg-purple-950 rounded-full overflow-hidden">
+
+                                                        <div
+                                                            className="h-full bg-green-500 transition-[width] duration-100"
+                                                            style={{
+                                                                width: `${file.downloadProgress}%`,
+                                                            }}
+                                                        />
+
+                                                    </div>
+
+                                                </div>
                                             )}
 
-                                    </div>
-                                )
-                            )}
+                                            {file.file &&
+                                                !file.downloading && (
+                                                    <button
+                                                        onClick={() =>
+                                                            void downloadReceivedFile(
+                                                                file.file!
+                                                            )
+                                                        }
+                                                        className="w-max mt-3 px-4 py-2 border border-blue-500 rounded-lg bg-blue-600/50 hover:bg-blue-700/30 transition-[background,scale] cursor-pointer active:scale-98"
+                                                    >
+                                                        Download Again
+                                                    </button>
+                                                )}
 
+                                        </div>
+                                    )
+                                )}
+                            </ div>
                         </div>
                     </div>
                 )}
             </div>
 
-            <div className="w-full relative">
-                <input
-                    type="text"
-                    value={transferId}
-                    onChange={(e) =>
-                        setTransferId(
-                            e.target.value
-                        )
+            <div className="w-full relative bg-zinc-900 p-3 rounded-xl flex gap-3 border border-zinc-700">
+                <div className="bg-zinc-800 p-2 rounded-lg size-10 flex items-center justify-center">
+                    <FaFolderOpen size={20} className="text-zinc-600" />
+                </div>
+
+                <div className="flex flex-col">
+                    <span className="font-semibold text-sm text-zinc-500">DOWNLOAD FOLDER</span>
+
+                    <span className="text-sm text-zinc-300">
+                        {downloadDirectory ? downloadDirectory : "Browser default"}
+                    </span>
+                </div>
+
+                <button
+                    type="button"
+                    onClick={
+                        handleChooseDownloadFolder
                     }
-                    className={`border border-purple-500 w-full h-12 rounded-lg flex items-center p-2 text-center text-xl ${
-                        transferId
-                            ? "tracking-[8px]"
-                            : "max-lg:text-sm"
-                    } font-sans focus:outline-4 outline-purple-700 focus:border-purple-400 focus:border-2 transition-[outline,border] duration-[50ms,0ms]`}
-                    maxLength={6}
-                    placeholder="Enter ID"
-                    required
-                />
+                    className="ml-auto border px-4 py-2 border-purple-500 rounded-lg bg-purple-600/50 hover:bg-purple-700/30 transition cursor-pointer max-sm:text-sm text-purple-200"
+                >
+                    Choose
+                </button>
+
+                {downloadDirectory && 
+                    <button
+                        type="button"
+                        onClick={
+                            handleResetDownloadFolder
+                        }
+                        className="border px-4 py-2 border-red-500 rounded-lg bg-red-600/50 hover:bg-red-700/30 transition cursor-pointer"
+                    >
+                        Reset
+                    </button>
+                }
             </div>
 
             <div className="w-full flex items-center justify-between">
-
-                <button
-                    className="w-40 h-12 self-start border border-blue-500 rounded-lg bg-blue-600 hover:bg-blue-700 transition-[background,scale] cursor-pointer active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed"
-                    onClick={handleReceive}
-                    disabled={!transferId.trim()}
-                >
-                    Receive
-                </button>
-
                 <span
-                    className={`text-lg ${
+                    className={`font-semibold ${
                         errorMessage ===
                         "Connected!"
                             ? "text-green-400"

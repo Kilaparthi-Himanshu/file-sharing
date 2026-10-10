@@ -19,3 +19,7 @@ export const lifeTimeAtom = atom<number>(30);
 export const userAtom = atom<User | null>(null);
 
 export const profileAtom = atom<DeveloperProfileType | null>(null);
+
+export const DEFAULT_MAX_WINDOW = 512 * 1024;
+
+export const maxWindowAtom = atom(DEFAULT_MAX_WINDOW);

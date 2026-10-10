@@ -41,6 +41,7 @@ export class TransferManager {
     constructor(
         private readonly peer: InstantPeer,
         private readonly callbacks: TransferCallbacks = {},
+        private readonly config: { maxWindow: number },
     ) {}
 
     cancelFile(fileId: string): void {
@@ -266,7 +267,8 @@ export class TransferManager {
             const acked = this.acked.get(fileId) ?? 0;
 
             const window = Math.min(
-                TransferManager.MAX_WINDOW,
+                // TransferManager.MAX_WINDOW,
+                this.config.maxWindow,
                 TransferManager.INITIAL_WINDOW + acked
             );
 

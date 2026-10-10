@@ -1,86 +1,16 @@
 'use client';
 
-import { FaRegFile } from "react-icons/fa";
 import { useRef, useState } from "react";
-import { uploadEncryptedFile } from "../functions/encrypt";
 import { FileIdDisplay } from "../components/FileIdDisplay";
-import { useMutation } from '@tanstack/react-query';
-import { SpinnerRenderer } from "../components/Spinner";
-import { usePasswordEye } from "../utils/hooks/usePasswordEye";
-import SliderTime from "../components/SliderTime";
-import { lifeTimeAtom } from "../Atoms/atoms";
-import { useAtom } from "jotai";
-import ShinyText from "../components/misc/ShinyText";
 import InstantSend from "../components/Instant/InstantSend";
 import InstantReceive from "../components/Instant/InstantReceive";
+import DebugMenu from "../components/Instant/DebugMenu";
 
 const Instant = () => {
-    const [file, setFile] = useState<File | null>(null);
-    const [secretKey, SetSecretKey] = useState<string>('');
     const fileRef = useRef<HTMLInputElement>(null);
     const [errorMessage, setErrorMessage] = useState<string>("");
     const [showFileIdDisplay, setShowFileIdDisplay] = useState<boolean>(false);
     const [fileId, setFileId] = useState<string>('');
-    const {isHidden, PasswordEye} = usePasswordEye();
-    const [lifeTime, setLifeTime] = useAtom(lifeTimeAtom);
-
-    const { mutateAsync: addFile, isPending: isUploadPending } = useMutation({
-        mutationFn: async (data: { file: File, secretKey: string, lifeTime: number }) => uploadEncryptedFile(data.file, data.secretKey, data.lifeTime)
-    });
-
-    const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
-        event.preventDefault();
-    };
-
-    const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
-        event.preventDefault();
-        const files = event.dataTransfer.files;
-        if (files && files[0]) {
-            setFile(files[0]);
-        }
-    };
-
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const files = event.target.files;
-        if (files && files[0]) {
-            setFile(files[0]);
-        }
-    };
-
-    const handleUpload = async () => {
-        if (!file) {
-            setErrorMessage("Please Upload a File");
-            return;
-        }
-
-        if (!secretKey) {
-            setErrorMessage("Please Enter a Secret Key");
-            return;
-        }
-
-        if (secretKey.length != 5) {
-            setErrorMessage("Secret Key must be 5 digits");
-            return;
-        }
-
-        const maxSize = 50 * 1024 * 1024; // 50MB
-        if (file.size > maxSize) {
-            setErrorMessage("Exceeds max file size of 50MB");
-            return;
-        }
-
-        setErrorMessage("");
-
-        const { fileId } = await addFile({file, secretKey, lifeTime});
-        setShowFileIdDisplay(true);
-        setFileId(fileId);
-
-        setErrorMessage("Success!");
-
-        setTimeout(() => {
-            setErrorMessage("");
-        }, 3000);
-    }
 
     return(
         <div className='bg-black max-lg:min-h-[100dvh] max-lg:h-max lg:h-[100dvh] w-screen flex flex-col gap-15 items-center justify-center p-4 text-white noise-texture pointer-coarse:max-lg:py-20'>
@@ -95,7 +25,7 @@ const Instant = () => {
                     <FileIdDisplay fileId={fileId} />
                 )}
 
-                {isUploadPending &&  <SpinnerRenderer />}
+                <DebugMenu />
             </div>
         </div>
     );

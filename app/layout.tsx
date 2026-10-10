@@ -4,8 +4,7 @@ import "./globals.css";
 import AnimatedCursor from "react-animated-cursor"
 import { ReactQueryProvider } from "./components/ReactQueryProvider";
 import { IoAlertCircleOutline } from "react-icons/io5";
-import { Provider } from "jotai";
-import { store } from "./Atoms/store";
+import StoreProvider from "./Atoms/StoreProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -47,9 +46,9 @@ export default function RootLayout({
                     />
                 </div>
                 <ReactQueryProvider>
-                    <Provider store={store}>
+                    <StoreProvider>
                         {children}
-                    </Provider>
+                    </StoreProvider>
                 </ReactQueryProvider>
             </body>
         </html>

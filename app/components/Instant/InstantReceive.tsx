@@ -563,7 +563,7 @@ export default function InstantReceive() {
     return (
         <div className="flex flex-col gap-6 items-center justify-between flex-1 min-w-0 h-full min-h-0 max-lg:w-full">
 
-            <div className="absolute top-2 left-2">
+            {/* <div className="absolute top-2 left-2">
                 <button
                     type="button"
                     onClick={() => {
@@ -635,7 +635,7 @@ export default function InstantReceive() {
                 >
                     Choose Download Folder
                 </button>
-            </div>
+            </div> */}
 
             <div className="flex flex-col self-start">
                 <span className="text-4xl max-lg:text-2xl font-bold">

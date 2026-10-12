@@ -76,6 +76,8 @@ export class TransferManager {
         }, 1000);
 
         try {
+            const transferStartedAt = performance.now();
+
             if (this.cancelledFiles.has(fileId)) {
                 this.cancelledFiles.delete(fileId);
                 this.acked.delete(fileId);
@@ -231,6 +233,23 @@ export class TransferManager {
                 return;
             }
 
+            const elapsedSeconds = (performance.now() - transferStartedAt) / 1000;
+
+            console.log(
+                "[TransferManager] FILE TIMING:",
+                {
+                    fileName: file.name,
+                    fileSizeBytes: file.size,
+                    elapsedSeconds: Number(elapsedSeconds.toFixed(2)),
+                    averageMbps: Number(
+                        (
+                            (file.size * 8) /
+                            (elapsedSeconds * 1_000_000)
+                        ).toFixed(2)
+                    ),
+                }
+            );
+
             console.log(
                 "[TransferManager] FILE END:",
                 fileId
@@ -270,6 +289,10 @@ export class TransferManager {
                 // TransferManager.MAX_WINDOW,
                 this.config.maxWindow,
                 TransferManager.INITIAL_WINDOW + acked
+            );
+
+            console.log(
+                "Max Window Value: ", this.config.maxWindow, "Choosen Window value: ", window
             );
 
             if (offset - acked < window) return;

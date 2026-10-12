@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { FileIdDisplay } from "../components/FileIdDisplay";
 import InstantSend from "../components/Instant/InstantSend";
 import InstantReceive from "../components/Instant/InstantReceive";
-import DebugMenu from "../components/Instant/DebugMenu";
+import DebugMenu from "../components/Instant/Debug/DebugMenu";
 
 const Instant = () => {
     const fileRef = useRef<HTMLInputElement>(null);

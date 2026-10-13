@@ -40,6 +40,8 @@ export class InstantSession {
 
     private readonly peers = new Map<string, InstantPeer>();
 
+    private readonly pendingIceCandidates = new Map<string, RTCIceCandidateInit[]>();
+
     private readonly connectedPeers = new Set<string>();
 
     /**
@@ -449,24 +451,35 @@ export class InstantSession {
     private async handleIceCandidate(
         message: SignalMessage
     ): Promise<void> {
-        if (this.destroyed) {
+        if (this.destroyed || !message.candidate) {
             return;
         }
 
-        const peer = this.peers.get(
-            message.from
-        );
+        const remotePeerId = message.from;
+        const peer = this.peers.get(remotePeerId);
 
-        if (
-            !peer ||
-            !message.candidate
-        ) {
+        if (!peer) {
+            const pending = this.pendingIceCandidates.get(remotePeerId) ?? [];
+
+            pending.push(message.candidate);
+
+            this.pendingIceCandidates.set(
+                remotePeerId,
+                pending
+            );
+
+            console.log(
+                "[InstantSession] Queued ICE candidate; peer not ready:",
+                {
+                    remotePeerId,
+                    queuedCandidates: pending.length,
+                }
+            );
+
             return;
         }
 
-        await peer.handleIceCandidate(
-            message.candidate
-        );
+        await peer.handleIceCandidate(message.candidate);
     }
 
     private async handleLeave(
@@ -667,6 +680,25 @@ export class InstantSession {
             remotePeerId,
             peer
         );
+
+        // Candidates may arrive before createPeer() finishes.
+        const pendingCandidates = this.pendingIceCandidates.get(remotePeerId) ?? [];
+
+        this.pendingIceCandidates.delete(remotePeerId);
+
+        if (pendingCandidates.length > 0) {
+            console.log(
+                "[InstantSession] Flushing queued ICE candidates:",
+                {
+                    remotePeerId,
+                    count: pendingCandidates.length,
+                }
+            );
+
+            for (const candidate of pendingCandidates) {
+                await peer.handleIceCandidate(candidate);
+            }
+        }
 
         return peer;
     }
@@ -993,6 +1025,8 @@ export class InstantSession {
         }
 
         this.peers.clear();
+
+        this.pendingIceCandidates.clear();
 
         this.connectedPeers.clear();
 

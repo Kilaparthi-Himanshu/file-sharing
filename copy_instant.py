@@ -1,7 +1,14 @@
 from pathlib import Path
 import tkinter as tk
+import platform
+
+os_name = platform.system()
+print(f"Operating System: {os_name}")
 
 ROOTS = [
+    Path(r"/Users/himanshuk/01000011 01101111 01100100 01100101/BlinkShare/app/components/Instant"),
+    Path(r"/Users/himanshuk/01000011 01101111 01100100 01100101/BlinkShare/lib/instant"),
+] if os_name == "Darwin" else [
     Path(r"D:\VS Code Projects\File Sharing\file-sharing\app\components\Instant"),
     Path(r"D:\VS Code Projects\File Sharing\file-sharing\lib\instant"),
 ]

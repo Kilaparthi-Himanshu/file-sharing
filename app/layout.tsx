@@ -40,11 +40,11 @@ export default function RootLayout({
                         Please Use In Portrait Mode
                     </div>
                 </div>
-                <div className="pointer-coarse:hidden">
+                {/* <div className="pointer-coarse:hidden">
                     <AnimatedCursor 
                         color="255, 255, 255"
                     />
-                </div>
+                </div> */}
                 <ReactQueryProvider>
                     <StoreProvider>
                         {children}

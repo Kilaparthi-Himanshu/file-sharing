@@ -22,7 +22,7 @@ import {
 
 import { getIceServers } from "./IceConfig";
 import { store } from "@/app/Atoms/store";
-import { maxWindowAtom } from "@/app/Atoms/atoms";
+import { maxWindowAtom, chunkSizeAtom } from "@/app/Atoms/atoms";
 
 export class InstantSession {
     private static readonly IDLE_TIMEOUT_MS = 30 * 60 * 1000;
@@ -847,6 +847,7 @@ export class InstantSession {
                 },
                 {
                     maxWindow: store.get(maxWindowAtom),
+                    chunkSize: store.get(chunkSizeAtom)
                 }
             );
 

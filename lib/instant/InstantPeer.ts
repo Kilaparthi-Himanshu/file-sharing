@@ -148,10 +148,14 @@ export class InstantPeer {
                 this.remotePeerId
             );
 
-            console.log(
-                "[InstantPeer] SCTP MAX MESSAGE SIZE:",
-                this.connection.sctp?.maxMessageSize
-            );
+            console.log("[InstantPeer] SCTP CONFIG:", {
+                localPeerId: this.localPeerId,
+                remotePeerId: this.remotePeerId,
+                maxMessageSize: this.connection.sctp?.maxMessageSize,
+                dataChannelState: this.dataChannel?.readyState,
+                negotiated: this.dataChannel?.negotiated,
+                ordered: this.dataChannel?.ordered,
+            });
 
             this.notifyConnected();
         }
@@ -209,6 +213,16 @@ export class InstantPeer {
 
         await this.connection.setRemoteDescription(offer);
 
+        // TEMPORARY DIAGNOSTIC
+        // console.log("[InstantPeer] MESSAGE SIZE SDP:", {
+        //     local: this.connection.localDescription?.sdp
+        //         ?.split("\r\n")
+        //         .filter((line) => line.includes("max-message-size")),
+        //     remote: this.connection.remoteDescription?.sdp
+        //         ?.split("\r\n")
+        //         .filter((line) => line.includes("max-message-size")),
+        // });
+
         console.log(
             "[InstantPeer] REMOTE OFFER SET:",
             this.localPeerId,
@@ -248,6 +262,16 @@ export class InstantPeer {
             );
 
             await this.connection.setRemoteDescription(answer);
+
+            // TEMPORARY DIAGNOSTIC
+            // console.log("[InstantPeer] MESSAGE SIZE SDP:", {
+            //     local: this.connection.localDescription?.sdp
+            //         ?.split("\r\n")
+            //         .filter((line) => line.includes("max-message-size")),
+            //     remote: this.connection.remoteDescription?.sdp
+            //         ?.split("\r\n")
+            //         .filter((line) => line.includes("max-message-size")),
+            // });
 
             console.log(
                 "[InstantPeer] REMOTE ANSWER SET:",

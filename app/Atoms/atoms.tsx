@@ -23,3 +23,7 @@ export const profileAtom = atom<DeveloperProfileType | null>(null);
 export const DEFAULT_MAX_WINDOW = 512 * 1024;
 
 export const maxWindowAtom = atom(DEFAULT_MAX_WINDOW);
+
+export const DEFAULT_CHUNK_SIZE = 512 * 1024;
+
+export const chunkSizeAtom = atom(DEFAULT_CHUNK_SIZE);

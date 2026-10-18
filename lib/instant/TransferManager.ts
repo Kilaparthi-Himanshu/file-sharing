@@ -41,7 +41,7 @@ export class TransferManager {
     constructor(
         private readonly peer: InstantPeer,
         private readonly callbacks: TransferCallbacks = {},
-        private readonly config: { maxWindow: number },
+        private readonly config: { maxWindow: number, chunkSize: number },
     ) {}
 
     cancelFile(fileId: string): void {
@@ -98,16 +98,25 @@ export class TransferManager {
             const chunkSize =
                 maxMessageSize !== null
                     ? Math.min(
-                        TransferManager.DEFAULT_CHUNK_SIZE,
+                        // TransferManager.DEFAULT_CHUNK_SIZE,
+                        this.config.chunkSize,
                         maxMessageSize
                     )
-                    : TransferManager.DEFAULT_CHUNK_SIZE;
+                    // : TransferManager.DEFAULT_CHUNK_SIZE;
+                    : this.config.chunkSize;
 
             console.log(
                 "[TransferManager] CHUNK CONFIG:",
                 {
+                    selectedChunkSize: this.config.chunkSize,
+                    selectedChunkSizeKiB: (
+                        this.config.chunkSize / 1024
+                    ).toFixed(0),
                     maxMessageSize,
-                    chunkSize,
+                    effectiveChunkSize: chunkSize,
+                    effectiveChunkSizeKiB: (
+                        chunkSize / 1024
+                    ).toFixed(0),
                 }
             );
 

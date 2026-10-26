@@ -60,13 +60,13 @@ export class TransferManager {
         this.ackWaiter?.();
         this.ackWaiter = null;
 
-        console.log(
-            "[TransferManager] ACK:",
-            JSON.stringify({
-                fileId,
-                bytes,
-            })
-        );
+        // console.log(
+        //     "[TransferManager] ACK:",
+        //     JSON.stringify({
+        //         fileId,
+        //         bytes,
+        //     })
+        // );
     }
 
     async sendFile(fileId: string, file: File): Promise<void> {
@@ -300,9 +300,9 @@ export class TransferManager {
                 TransferManager.INITIAL_WINDOW + acked
             );
 
-            console.log(
-                "Max Window Value: ", this.config.maxWindow, "Choosen Window value: ", window
-            );
+            // console.log(
+            //     "Max Window Value: ", this.config.maxWindow, "Choosen Window value: ", window
+            // );
 
             if (offset - acked < window) return;
 
@@ -312,16 +312,16 @@ export class TransferManager {
                 throw new Error("Peer disconnected");
             }
 
-            console.log(
-                "[TransferManager] ACK WINDOW WAIT:",
-                JSON.stringify({
-                    fileId,
-                    offset,
-                    acked,
-                    inFlight: offset - acked,
-                    window,
-                })
-            );
+            // console.log(
+            //     "[TransferManager] ACK WINDOW WAIT:",
+            //     JSON.stringify({
+            //         fileId,
+            //         offset,
+            //         acked,
+            //         inFlight: offset - acked,
+            //         window,
+            //     })
+            // );
 
             await new Promise<void>((resolve) => {
                 this.ackWaiter = resolve;

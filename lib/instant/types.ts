@@ -20,6 +20,10 @@ export type SignalMessage = {
     from: string;
     to?: string;
 
+    // Identifies which RTCPeerConnection this signal belongs to.
+    // Lane 0 is the default for backward compatibility.
+    lane?: number;
+
     offer?: RTCSessionDescriptionInit;
     answer?: RTCSessionDescriptionInit;
     candidate?: RTCIceCandidateInit;

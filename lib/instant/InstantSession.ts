@@ -1,4 +1,4 @@
-import { InstantPeer } from "./InstantPeer";
+import { DEFAULT_LANE_COUNT, InstantPeer } from "./InstantPeer";
 import { SignalingClient } from "./SingalingClient";
 
 import {
@@ -40,7 +40,18 @@ export class InstantSession {
 
     private readonly peers = new Map<string, InstantPeer>();
 
-    private readonly pendingIceCandidates = new Map<string, RTCIceCandidateInit[]>();
+    private readonly pendingIceCandidates = new Map<
+        string, 
+        Array<{
+            lane: number;
+            candidate: RTCIceCandidateInit;
+        }>
+    >();
+
+    private readonly peerCreations = new Map<
+        string,
+        Promise<InstantPeer>
+    >();
 
     private readonly connectedPeers = new Set<string>();
 
@@ -378,15 +389,13 @@ export class InstantSession {
 
         const remotePeerId = message.from;
 
-        if (this.peers.has(remotePeerId)) {
-            return;
-        }
-
-        const peer = await this.createPeer(
+        const peer = await this.getOrCreatePeer(
             remotePeerId,
-            true
+            true,
         );
 
+        // Creates an offer for every configured lane.
+        // Each offer includes its lane ID.
         await peer.createOffer();
     }
 
@@ -395,30 +404,20 @@ export class InstantSession {
     ): Promise<void> {
         if (
             this.role !== "receiver" ||
-            this.destroyed
+            this.destroyed ||
+            !message.offer
         ) {
             return;
         }
 
-        const remotePeerId = message.from;
-
-        if (!message.offer) {
-            return;
-        }
-
-        let peer = this.peers.get(
-            remotePeerId
+        const peer = await this.getOrCreatePeer(
+            message.from,
+            false,
         );
 
-        if (!peer) {
-            peer = await this.createPeer(
-                remotePeerId,
-                false
-            );
-        }
-
         await peer.handleOffer(
-            message.offer
+            message.lane ?? 0,
+            message.offer,
         );
     }
 
@@ -432,19 +431,15 @@ export class InstantSession {
             return;
         }
 
-        const peer = this.peers.get(
-            message.from
-        );
+        const peer = this.peers.get(message.from);
 
-        if (
-            !peer ||
-            !message.answer
-        ) {
+        if (!peer || !message.answer) {
             return;
         }
 
         await peer.handleAnswer(
-            message.answer
+            message.lane ?? 0,
+            message.answer,
         );
     }
 
@@ -456,12 +451,16 @@ export class InstantSession {
         }
 
         const remotePeerId = message.from;
+        const lane = message.lane ?? 0;
         const peer = this.peers.get(remotePeerId);
 
         if (!peer) {
             const pending = this.pendingIceCandidates.get(remotePeerId) ?? [];
 
-            pending.push(message.candidate);
+            pending.push({
+                lane,
+                candidate: message.candidate
+            });
 
             this.pendingIceCandidates.set(
                 remotePeerId,
@@ -472,6 +471,7 @@ export class InstantSession {
                 "[InstantSession] Queued ICE candidate; peer not ready:",
                 {
                     remotePeerId,
+                    lane,
                     queuedCandidates: pending.length,
                 }
             );
@@ -479,7 +479,7 @@ export class InstantSession {
             return;
         }
 
-        await peer.handleIceCandidate(message.candidate);
+        await peer.handleIceCandidate(lane, message.candidate);
     }
 
     private async handleLeave(
@@ -495,17 +495,15 @@ export class InstantSession {
 
         peer.close();
 
-        this.peers.delete(
-            message.from
-        );
+        this.peers.delete(message.from);
 
-        this.connectedPeers.delete(
-            message.from
-        );
+        this.pendingIceCandidates.delete(message.from);
 
-        this.transferManagers.delete(
-            message.from
-        );
+        this.peerCreations.delete(message.from);
+
+        this.connectedPeers.delete(message.from);
+
+        this.transferManagers.delete(message.from);
 
         this.callbacks.onPeerDisconnected?.(
             message.from,
@@ -537,6 +535,41 @@ export class InstantSession {
         );
 
         return this.iceServers;
+    }
+
+    private getOrCreatePeer(
+        remotePeerId: string,
+        initiator: boolean,
+    ): Promise<InstantPeer> {
+        console.log("[InstantSession] getOrCreatePeer", {
+            remotePeerId,
+            initiator,
+            hasExistingPeer: this.peers.has(remotePeerId),
+            creationInProgress: this.peerCreations.has(remotePeerId),
+        });
+
+        const exisiting = this.peers.get(remotePeerId);
+
+        if (exisiting) {
+            return Promise.resolve(exisiting);
+        }
+
+        const inProgress = this.peerCreations.get(remotePeerId);
+
+        if (inProgress) {
+            return inProgress;
+        }
+
+        const creation = this.createPeer(
+            remotePeerId,
+            initiator,
+        ).finally(() => {
+            this.peerCreations.delete(remotePeerId);
+        });
+
+        this.peerCreations.set(remotePeerId, creation);
+
+        return creation;
     }
 
     private async createPeer(
@@ -673,7 +706,8 @@ export class InstantSession {
                     this.forceRelay
                         ? "relay"
                         : "all",
-            }
+            },
+            DEFAULT_LANE_COUNT,
         );
 
         this.peers.set(
@@ -695,8 +729,11 @@ export class InstantSession {
                 }
             );
 
-            for (const candidate of pendingCandidates) {
-                await peer.handleIceCandidate(candidate);
+            for (const pending of pendingCandidates) {
+                await peer.handleIceCandidate(
+                    pending.lane,
+                    pending.candidate
+                );
             }
         }
 
@@ -1028,6 +1065,8 @@ export class InstantSession {
         this.peers.clear();
 
         this.pendingIceCandidates.clear();
+
+        this.peerCreations.clear();
 
         this.connectedPeers.clear();
 

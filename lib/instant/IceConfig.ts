@@ -33,7 +33,7 @@ export async function getIceServers(): Promise<RTCIceServer[]> {
             return fallback;
         }
 
-        console.log("[ICE] SERVERS:\n", JSON.stringify(data.iceServers, null, 2));
+        // console.log("[ICE] SERVERS:\n", JSON.stringify(data.iceServers, null, 2));
 
         return [
             ...fallback,

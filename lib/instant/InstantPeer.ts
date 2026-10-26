@@ -20,7 +20,7 @@ type InstantPeerOptions = {
     iceTransportPolicy?: RTCIceTransportPolicy,
 };
 
-export class InstantPeer {
+export class InstantLane {
     private readonly connection: RTCPeerConnection;
     private dataChannel: RTCDataChannel | null = null;
 
@@ -34,6 +34,7 @@ export class InstantPeer {
         private readonly localPeerId: string,
         private readonly remotePeerId: string,
         private readonly initiator: boolean,
+        private readonly lane: number,
         private readonly callbacks: PeerCallbacks,
         options: InstantPeerOptions,
     ) {
@@ -53,17 +54,18 @@ export class InstantPeer {
         this.connection.onicecandidate = (event) => {
             if (!event.candidate) return;
 
-            console.log(
-                "[InstantPeer] Sending ICE candidate:",
-                this.localPeerId,
-                "→",
-                this.remotePeerId
-            );
+            // console.log(
+            //     "[InstantPeer] Sending ICE candidate:",
+            //     this.localPeerId,
+            //     "→",
+            //     this.remotePeerId
+            // );
 
             this.callbacks.onSignal({
                 type: "ice-candidate",
                 from: this.localPeerId,
                 to: this.remotePeerId,
+                lane: this.lane,
                 candidate: event.candidate.toJSON(),
             });
         }
@@ -114,19 +116,19 @@ export class InstantPeer {
         }
 
         this.connection.onicegatheringstatechange = () => {
-            console.log(
-                "[InstantPeer] ICE GATHERING:",
-                this.localPeerId,
-                "→",
-                this.remotePeerId,
-                this.connection.iceGatheringState
-            );
+            // console.log(
+            //     "[InstantPeer] ICE GATHERING:",
+            //     this.localPeerId,
+            //     "→",
+            //     this.remotePeerId,
+            //     this.connection.iceGatheringState
+            // );
         }
     }
 
     private createDataChannel(): void {
         const channel = this.connection.createDataChannel(
-            "blinkshare",
+            `blinkshare-${this.lane}`,
             {
                 ordered: true
             }
@@ -141,32 +143,32 @@ export class InstantPeer {
         channel.binaryType = "arraybuffer";
 
         channel.onopen = () => {
-            console.log(
-                "[InstantPeer] DATA CHANNEL OPEN:",
-                this.localPeerId,
-                "→",
-                this.remotePeerId
-            );
+            // console.log(
+            //     "[InstantPeer] DATA CHANNEL OPEN:",
+            //     this.localPeerId,
+            //     "→",
+            //     this.remotePeerId
+            // );
 
-            console.log("[InstantPeer] SCTP CONFIG:", {
-                localPeerId: this.localPeerId,
-                remotePeerId: this.remotePeerId,
-                maxMessageSize: this.connection.sctp?.maxMessageSize,
-                dataChannelState: this.dataChannel?.readyState,
-                negotiated: this.dataChannel?.negotiated,
-                ordered: this.dataChannel?.ordered,
-            });
+            // console.log("[InstantPeer] SCTP CONFIG:", {
+            //     localPeerId: this.localPeerId,
+            //     remotePeerId: this.remotePeerId,
+            //     maxMessageSize: this.connection.sctp?.maxMessageSize,
+            //     dataChannelState: this.dataChannel?.readyState,
+            //     negotiated: this.dataChannel?.negotiated,
+            //     ordered: this.dataChannel?.ordered,
+            // });
 
             this.notifyConnected();
         }
 
         channel.onclose = () => {
-            console.log(
-                "[InstantPeer] DATA CHANNEL CLOSED:",
-                this.localPeerId,
-                "→",
-                this.remotePeerId
-            );
+            // console.log(
+            //     "[InstantPeer] DATA CHANNEL CLOSED:",
+            //     this.localPeerId,
+            //     "→",
+            //     this.remotePeerId
+            // );
 
             this.notifyDisconnected();
         }
@@ -177,39 +179,40 @@ export class InstantPeer {
     }
 
     async createOffer(): Promise<void> {
-        console.log(
-            "[InstantPeer] CREATING OFFER:",
-            this.localPeerId,
-            "→",
-            this.remotePeerId
-        );
+        // console.log(
+        //     "[InstantPeer] CREATING OFFER:",
+        //     this.localPeerId,
+        //     "→",
+        //     this.remotePeerId
+        // );
 
         const offer = await this.connection.createOffer();
 
         await this.connection.setLocalDescription(offer);
 
-        console.log(
-            "[InstantPeer] OFFER READY:",
-            this.localPeerId,
-            "→",
-            this.remotePeerId
-        );
+        // console.log(
+        //     "[InstantPeer] OFFER READY:",
+        //     this.localPeerId,
+        //     "→",
+        //     this.remotePeerId
+        // );
 
         this.callbacks.onSignal({
             type: "offer",
             from: this.localPeerId,
             to: this.remotePeerId,
+            lane: this.lane,
             offer,
         });
     }
 
     async handleOffer(offer: RTCSessionDescriptionInit): Promise<void> {
-        console.log(
-            "[InstantPeer] OFFER RECEIVED:",
-            this.localPeerId,
-            "←",
-            this.remotePeerId
-        );
+        // console.log(
+        //     "[InstantPeer] OFFER RECEIVED:",
+        //     this.localPeerId,
+        //     "←",
+        //     this.remotePeerId
+        // );
 
         await this.connection.setRemoteDescription(offer);
 
@@ -223,12 +226,12 @@ export class InstantPeer {
         //         .filter((line) => line.includes("max-message-size")),
         // });
 
-        console.log(
-            "[InstantPeer] REMOTE OFFER SET:",
-            this.localPeerId,
-            "←",
-            this.remotePeerId
-        );
+        // console.log(
+        //     "[InstantPeer] REMOTE OFFER SET:",
+        //     this.localPeerId,
+        //     "←",
+        //     this.remotePeerId
+        // );
 
         this.remoteDescriptionSet = true;
 
@@ -238,47 +241,48 @@ export class InstantPeer {
 
         await this.connection.setLocalDescription(answer);
 
-        console.log(
-            "[InstantPeer] ANSWER READY:",
-            this.localPeerId,
-            "→",
-            this.remotePeerId
-        );
+        // console.log(
+        //     "[InstantPeer] ANSWER READY:",
+        //     this.localPeerId,
+        //     "→",
+        //     this.remotePeerId
+        // );
 
         this.callbacks.onSignal({
             type: "answer",
             from: this.localPeerId,
             to: this.remotePeerId,
+            lane: this.lane,
             answer,
         });
     }
 
     async handleAnswer(answer: RTCSessionDescriptionInit): Promise<void> {
-         console.log(
-                "[InstantPeer] ANSWER RECEIVED:",
-                this.localPeerId,
-                "←",
-                this.remotePeerId
-            );
+        // console.log(
+        //     "[InstantPeer] ANSWER RECEIVED:",
+        //     this.localPeerId,
+        //     "←",
+        //     this.remotePeerId
+        // );
 
-            await this.connection.setRemoteDescription(answer);
+        await this.connection.setRemoteDescription(answer);
 
-            // TEMPORARY DIAGNOSTIC
-            // console.log("[InstantPeer] MESSAGE SIZE SDP:", {
-            //     local: this.connection.localDescription?.sdp
-            //         ?.split("\r\n")
-            //         .filter((line) => line.includes("max-message-size")),
-            //     remote: this.connection.remoteDescription?.sdp
-            //         ?.split("\r\n")
-            //         .filter((line) => line.includes("max-message-size")),
-            // });
+        // TEMPORARY DIAGNOSTIC
+        // console.log("[InstantPeer] MESSAGE SIZE SDP:", {
+        //     local: this.connection.localDescription?.sdp
+        //         ?.split("\r\n")
+        //         .filter((line) => line.includes("max-message-size")),
+        //     remote: this.connection.remoteDescription?.sdp
+        //         ?.split("\r\n")
+        //         .filter((line) => line.includes("max-message-size")),
+        // });
 
-            console.log(
-                "[InstantPeer] REMOTE ANSWER SET:",
-                this.localPeerId,
-                "←",
-                this.remotePeerId
-            );
+        // console.log(
+        //     "[InstantPeer] REMOTE ANSWER SET:",
+        //     this.localPeerId,
+        //     "←",
+        //     this.remotePeerId
+        // );
 
         this.remoteDescriptionSet = true;
 
@@ -286,13 +290,13 @@ export class InstantPeer {
     }
 
     async handleIceCandidate(candidate: RTCIceCandidateInit): Promise<void> {
-        console.log(
-            "[InstantPeer] Received ICE candidate:",
-            this.localPeerId,
-            "←",
-            this.remotePeerId,
-            candidate
-        );
+        // console.log(
+        //     "[InstantPeer] Received ICE candidate:",
+        //     this.localPeerId,
+        //     "←",
+        //     this.remotePeerId,
+        //     candidate
+        // );
 
         if (!this.remoteDescriptionSet) {
             this.pendingCandidates.push(candidate);
@@ -502,59 +506,59 @@ export class InstantPeer {
                 selectedPair.remoteCandidateId
             ) as IceCandidateStats | undefined;
 
-            if (logPath) {
-                console.log(
-                    "[InstantPeer] SELECTED ICE PATH:",
-                    {
-                        localType: local?.candidateType,
-                        remoteType: remote?.candidateType,
-                        protocol: local?.protocol,
-                        relayProtocol: local?.relayProtocol,
-                    }
-                );
-            }
+            // if (logPath) {
+            //     console.log(
+            //         "[InstantPeer] SELECTED ICE PATH:",
+            //         {
+            //             localType: local?.candidateType,
+            //             remoteType: remote?.candidateType,
+            //             protocol: local?.protocol,
+            //             relayProtocol: local?.relayProtocol,
+            //         }
+            //     );
+            // }
 
-            console.log(
-                "[InstantPeer] ICE TRANSPORT STATS:",
-                JSON.stringify({
-                    availableOutgoingMbps:
-                        selectedPair.availableOutgoingBitrate
-                            ? (
-                                selectedPair.availableOutgoingBitrate / 1_000_000
-                            ).toFixed(2)
-                            : undefined,
+            // console.log(
+            //     "[InstantPeer] ICE TRANSPORT STATS:",
+            //     JSON.stringify({
+            //         availableOutgoingMbps:
+            //             selectedPair.availableOutgoingBitrate
+            //                 ? (
+            //                     selectedPair.availableOutgoingBitrate / 1_000_000
+            //                 ).toFixed(2)
+            //                 : undefined,
 
-                    availableIncomingMbps:
-                        selectedPair.availableIncomingBitrate
-                            ? (
-                                selectedPair.availableIncomingBitrate / 1_000_000
-                            ).toFixed(2)
-                            : undefined,
+            //         availableIncomingMbps:
+            //             selectedPair.availableIncomingBitrate
+            //                 ? (
+            //                     selectedPair.availableIncomingBitrate / 1_000_000
+            //                 ).toFixed(2)
+            //                 : undefined,
 
-                    currentRTT: selectedPair.currentRoundTripTime,
+            //         currentRTT: selectedPair.currentRoundTripTime,
 
-                    packetsSent: selectedPair.packetsSent,
-                    packetsReceived: selectedPair.packetsReceived,
-                    packetsLost: selectedPair.packetsLost,
+            //         packetsSent: selectedPair.packetsSent,
+            //         packetsReceived: selectedPair.packetsReceived,
+            //         packetsLost: selectedPair.packetsLost,
 
-                    bytesSent: selectedPair.bytesSent,
-                    bytesReceived: selectedPair.bytesReceived,
+            //         bytesSent: selectedPair.bytesSent,
+            //         bytesReceived: selectedPair.bytesReceived,
 
-                    // ICE connectivity / consent
-                    requestsSent: selectedPair.requestsSent,
-                    responsesReceived: selectedPair.responsesReceived,
-                    consentRequestsSent: selectedPair.consentRequestsSent,
+            //         // ICE connectivity / consent
+            //         requestsSent: selectedPair.requestsSent,
+            //         responsesReceived: selectedPair.responsesReceived,
+            //         consentRequestsSent: selectedPair.consentRequestsSent,
 
-                    // Selected ICE path
-                    localCandidateType: local?.candidateType,
-                    localProtocol: local?.protocol,
-                    localRelayProtocol: local?.relayProtocol,
+            //         // Selected ICE path
+            //         localCandidateType: local?.candidateType,
+            //         localProtocol: local?.protocol,
+            //         localRelayProtocol: local?.relayProtocol,
 
-                    remoteCandidateType: remote?.candidateType,
-                    remoteProtocol: remote?.protocol,
-                    remoteRelayProtocol: remote?.relayProtocol,
-                })
-            );
+            //         remoteCandidateType: remote?.candidateType,
+            //         remoteProtocol: remote?.protocol,
+            //         remoteRelayProtocol: remote?.relayProtocol,
+            //     })
+            // );
         } catch (error) {
             console.warn(
                 "[InstantPeer] Failed to inspect ICE stats:",
@@ -580,36 +584,253 @@ export class InstantPeer {
                 }
             }
 
-            console.log(
-                "[InstantPeer] DATACHANNEL STATS:",
-                JSON.stringify({
-                    bufferedAmount: this.dataChannel?.bufferedAmount,
-                    dataChannel: dataChannelStats,
-                })
-            );
+            // console.log(
+            //     "[InstantPeer] DATACHANNEL STATS:",
+            //     JSON.stringify({
+            //         bufferedAmount: this.dataChannel?.bufferedAmount,
+            //         dataChannel: dataChannelStats,
+            //     })
+            // );
 
-            console.log(
-                "[InstantPeer] SCTP STATS:",
-                sctpTransportStats
-            );
+            // console.log(
+            //     "[InstantPeer] SCTP STATS:",
+            //     sctpTransportStats
+            // );
 
-            for (const report of stats.values()) {
-                if (report.type === "data-channel") {
-                    console.log("[InstantPeer] DATACHANNEL RAW STATS:", JSON.stringify({
-                        state: report.state,
-                        messagesSent: report.messagesSent,
-                        bytesSent: report.bytesSent,
-                        messagesReceived: report.messagesReceived,
-                        bytesReceived: report.bytesReceived,
-                        bufferedAmount: this.dataChannel?.bufferedAmount,
-                    }));
-                }
-            }
+            // for (const report of stats.values()) {
+            //     if (report.type === "data-channel") {
+            //         console.log("[InstantPeer] DATACHANNEL RAW STATS:", JSON.stringify({
+            //             state: report.state,
+            //             messagesSent: report.messagesSent,
+            //             bytesSent: report.bytesSent,
+            //             messagesReceived: report.messagesReceived,
+            //             bytesReceived: report.bytesReceived,
+            //             bufferedAmount: this.dataChannel?.bufferedAmount,
+            //         }));
+            //     }
+            // }
         } catch (error) {
             console.warn(
                 "[InstantPeer] Failed to inspect DataChannel/SCTP stats:",
                 error
             );
         }
+    }
+}
+
+export const DEFAULT_LANE_COUNT = 2;
+
+export class InstantPeer {
+    private readonly lanes: Array<InstantLane | undefined> = [];
+    private readonly openLanes = new Set<number>();
+
+    private connectedNotified = false;
+    private disconnectedNotified = false;
+
+    constructor(
+        private readonly localPeerId: string,
+        private readonly remotePeerId: string,
+        private readonly initiator: boolean,
+        private readonly callbacks: PeerCallbacks,
+        private readonly options: InstantPeerOptions,
+        private readonly expectedLaneCount: number = DEFAULT_LANE_COUNT,
+    ) {
+        if (
+            !Number.isInteger(expectedLaneCount) ||
+            expectedLaneCount < 1
+        ) {
+            throw new Error("Lane count must be a positive integer");
+        }
+
+        // The sender creates all lanes. The receiver creates each lane
+        // when the corresponding offer arrives.
+        if (this.initiator) {
+            for (let lane = 0; lane < expectedLaneCount; lane++) {
+                this.getLane(lane);
+            }
+        }
+    }
+
+    private getLane(lane: number): InstantLane {
+        if (
+            !Number.isInteger(lane) ||
+            lane < 0 ||
+            lane >= this.expectedLaneCount
+        ) {
+            throw new Error(`Invalid lane index: ${lane}`);
+        }
+
+        // console.log("[BlinkShare] Lane created", {
+        //     remotePeerId: this.remotePeerId,
+        //     lane,
+        // });
+
+        const exisitng = this.lanes[lane];
+
+        if (exisitng) {
+            return exisitng;
+        }
+
+        const created = new InstantLane(
+            this.localPeerId,
+            this.remotePeerId,
+            this.initiator,
+            lane,
+            {
+                onSignal: (message) => {
+                    this.callbacks.onSignal({
+                        ...message,
+                        lane,
+                    });
+                },
+
+                onConnected: () => {
+                    // console.log("[BlinkShare] Lane connected", {
+                    //     remotePeerId: this.remotePeerId,
+                    //     lane,
+                    //     openLanes: [...this.openLanes],
+                    //     expectedLaneCount: this.expectedLaneCount,
+                    // });
+
+                    this.openLanes.add(lane);
+
+                    // Sender is ready only when every configured lane
+                    // is open. Receiver readiness is based on lane 0.
+                    const ready = this.initiator
+                        ? this.openLanes.size === this.expectedLaneCount
+                        : this.openLanes.has(0);
+
+                    if (ready) {
+                        this.notifyConnected();
+                    }
+                },
+
+                onDisconnected: () => {
+                    // console.log("[BlinkShare] Lane disconnected", {
+                    //     remotePeerId: this.remotePeerId,
+                    //     lane,
+                    // });
+
+                    this.openLanes.delete(lane);
+
+                    // Lane 0 carries the control channel. If it fails,
+                    // the logical connection cannot remain usable.
+                    // For the sender, all configured lanes are required
+                    // in this initial phase.
+                    const connectionLost = this.initiator || lane === 0;
+
+                    if (connectionLost) {
+                        this.notifyDisconnected();
+                    }
+                },
+
+                onData: (data) => {
+                    this.callbacks.onData(data);
+                },
+            },
+            this.options,
+        );
+
+        this.lanes[lane] = created;
+
+        return created;
+    }
+
+    async createOffer(): Promise<void> {
+        // Every lane produces its own offer and its own ICE candidates.
+        await Promise.all(
+            Array.from(
+                { length: this.expectedLaneCount },
+                (_, lane) => this.getLane(lane).createOffer(),
+            ),
+        );
+    }
+
+    async handleOffer(
+        lane: number,
+        offer: RTCSessionDescriptionInit,
+    ): Promise<void> {
+        await this.getLane(lane).handleOffer(offer);
+    }
+
+    async handleAnswer(
+        lane: number,
+        answer: RTCSessionDescriptionInit,
+    ): Promise<void> {
+        await this.getLane(lane).handleAnswer(answer);
+    }
+
+    async handleIceCandidate(
+        lane: number,
+        candidate: RTCIceCandidateInit,
+    ) {
+        await this.getLane(lane).handleIceCandidate(candidate);
+    }
+
+    // Phase 1: existing control messages and file data stay on lane 0.
+    send(data: string | ArrayBuffer | Blob): void {
+        this.getLane(0).send(data);
+    }
+
+    setBufferedAmountLowThreshold(threshold: number): void {
+        this.getLane(0).setBufferedAmountLowThreshold(threshold);
+    }
+
+    waitForBufferedAmountLow(): Promise<void> {
+        return this.getLane(0).waitForBufferedAmountLow();
+    }
+
+    get state(): RTCPeerConnectionState {
+        // Preserve the existing API used by InstantSession and
+        // TransferManager. Readiness notifications use the lane policy above.
+        return this.getLane(0).state;
+    }
+
+    get bufferedAmount(): number {
+        return this.getLane(0).bufferedAmount;
+    }
+
+    get maxMessageSize(): number | null {
+        return this.getLane(0).maxMessageSize;
+    }
+
+    logSelectedCandidatePair(logPath = true): Promise<void> {
+        return this.getLane(0).logSelectedCandidatePair(logPath);
+    }
+
+    logDataChannelStats(): Promise<void> {
+        return this.getLane(0).logDataChannelStats();
+    }
+
+    get laneCount(): number {
+        return this.lanes.filter(Boolean).length;
+    }
+
+    close(): void {
+        for (const lane of this.lanes) {
+            lane?.close();
+        }
+
+        this.openLanes.clear();
+    }
+
+    private notifyConnected(): void {
+        if (this.connectedNotified) {
+            return;
+        }
+
+        this.connectedNotified = true;
+        this.disconnectedNotified = false;
+        this.callbacks.onConnected();
+    }
+
+    private notifyDisconnected(): void {
+        if (this.disconnectedNotified) {
+            return;
+        }
+
+        this.disconnectedNotified = true;
+        this.connectedNotified = false;
+        this.callbacks.onDisconnected();
     }
 }

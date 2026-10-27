@@ -2,7 +2,9 @@ import {
     createFileStartMessage, 
     createFileEndMessage, 
     encodeControlMessage, 
-    TransferMessage
+    encodeChunkFrame,
+    TransferMessage,
+    FRAME_HEADER_BYTES
 } from "./protocol/TransferProtocol";
 
 import { InstantPeer } from "./InstantPeer";
@@ -23,20 +25,19 @@ export type TransferCallbacks = {
 
 export class TransferManager {
     private static readonly DEFAULT_CHUNK_SIZE = 512 * 1024;
-
     private static readonly BUFFER_HIGH_WATERMARK = 2 * 1024 * 1024;
-
     private static readonly BUFFER_LOW_WATERMARK = 512 * 1024;
 
     private readonly cancelledFiles = new Set<string>();
 
     private static readonly INITIAL_WINDOW = 256 * 1024;
-
     private static readonly MAX_WINDOW = 512 * 1024;
 
     private readonly acked = new Map<string, number>();
 
     private ackWaiter: (() => void) | null = null;
+
+    private nextFileSeq = 1;
 
     constructor(
         private readonly peer: InstantPeer,
@@ -91,7 +92,15 @@ export class TransferManager {
                 file.size
             );
 
-            this.sendControl(createFileStartMessage(fileId, file));
+            const seq = this.nextFileSeq++;
+
+            if (this.nextFileSeq > 0xffffffff) {
+                throw new Error("File sequence number exhausted");
+            }
+
+            this.sendControl(
+                createFileStartMessage(fileId, file, seq),
+            );
 
             const maxMessageSize = this.peer.maxMessageSize;
 
@@ -100,7 +109,7 @@ export class TransferManager {
                     ? Math.min(
                         // TransferManager.DEFAULT_CHUNK_SIZE,
                         this.config.chunkSize,
-                        maxMessageSize
+                        maxMessageSize - FRAME_HEADER_BYTES
                     )
                     // : TransferManager.DEFAULT_CHUNK_SIZE;
                     : this.config.chunkSize;
@@ -167,7 +176,7 @@ export class TransferManager {
                     return;
                 }
 
-                this.peer.send(chunk);
+                this.peer.send(encodeChunkFrame(seq, offset, chunk));
 
                 // console.log(
                 //     "[TransferManager] CHUNK SENT:",

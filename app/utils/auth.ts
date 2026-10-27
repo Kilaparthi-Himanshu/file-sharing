@@ -8,7 +8,7 @@ export type SignUpDetailsTypes = {
 }
 
 export async function signUpUser({ full_name, username, email, password } : SignUpDetailsTypes) {
-   const res = await fetch('/api/auth/signUp', {
+    const res = await fetch('/api/auth/signUp', {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ full_name, username, email, password })

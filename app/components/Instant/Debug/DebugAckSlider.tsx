@@ -5,10 +5,11 @@ import { maxWindowAtom } from '@/app/Atoms/atoms';
 
 const steps = [
     { label: '512 KiB', value: 512 * 1024 },
-    { label: '768 KiB', value: 768 * 1024 },
     { label: '1 MiB', value: 1024 * 1024 },
     { label: '1.5 MiB', value: 1536 * 1024 },
     { label: '2 MiB', value: 2 * 1024 * 1024 },
+    { label: '3 MiB', value: 3 * 1024 * 1024 },
+    { label: '4 MiB', value: 4 * 1024 * 1024 },
 ];
 
 const DebugAckSlider = () => {

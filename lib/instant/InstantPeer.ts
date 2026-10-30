@@ -571,48 +571,68 @@ export class InstantLane {
         try {
             const stats = await this.connection.getStats();
 
-            let dataChannelStats: RTCStats | undefined;
-            let sctpTransportStats: RTCStats | undefined;
+            let dataChannelStats: any = null;
+            let selectedPair: any = null;
 
+            // Find this lane's DataChannel statistics.
             for (const report of stats.values()) {
                 if (report.type === "data-channel") {
                     dataChannelStats = report;
                 }
+            }
 
-                if (report.type === "sctp-transport") {
-                    sctpTransportStats = report;
+            // Find the selected ICE candidate pair.
+            for (const report of stats.values()) {
+                if (
+                    report.type === "candidate-pair" &&
+                    report.state === "succeeded" &&
+                    report.nominated
+                ) {
+                    selectedPair = report;
+                    break;
                 }
             }
 
-            // console.log(
-            //     "[InstantPeer] DATACHANNEL STATS:",
-            //     JSON.stringify({
-            //         bufferedAmount: this.dataChannel?.bufferedAmount,
-            //         dataChannel: dataChannelStats,
-            //     })
-            // );
+            const localCandidate = selectedPair
+                ? stats.get(selectedPair.localCandidateId) as any
+                : null;
 
-            // console.log(
-            //     "[InstantPeer] SCTP STATS:",
-            //     sctpTransportStats
-            // );
+            const remoteCandidate = selectedPair
+                ? stats.get(selectedPair.remoteCandidateId) as any
+                : null;
 
-            // for (const report of stats.values()) {
-            //     if (report.type === "data-channel") {
-            //         console.log("[InstantPeer] DATACHANNEL RAW STATS:", JSON.stringify({
-            //             state: report.state,
-            //             messagesSent: report.messagesSent,
-            //             bytesSent: report.bytesSent,
-            //             messagesReceived: report.messagesReceived,
-            //             bytesReceived: report.bytesReceived,
-            //             bufferedAmount: this.dataChannel?.bufferedAmount,
-            //         }));
-            //     }
-            // }
+            console.log("[BlinkShare] LANE STATS", {
+                lane: this.lane,
+                channel: this.dataChannel?.label,
+                channelState: this.dataChannel?.readyState,
+                bufferedAmount: this.dataChannel?.bufferedAmount ?? 0,
+
+                messagesSent: dataChannelStats?.messagesSent ?? 0,
+                bytesSent: dataChannelStats?.bytesSent ?? 0,
+
+                messagesReceived: dataChannelStats?.messagesReceived ?? 0,
+                bytesReceived: dataChannelStats?.bytesReceived ?? 0,
+
+                iceState: this.connection.iceConnectionState,
+                connectionState: this.connection.connectionState,
+
+                localCandidateType: localCandidate?.candidateType ?? "unknown",
+                remoteCandidateType: remoteCandidate?.candidateType ?? "unknown",
+                protocol: localCandidate?.protocol ?? "unknown",
+                relayProtocol: localCandidate?.relayProtocol ?? "unknown",
+
+                availableOutgoingMbps: selectedPair?.availableOutgoingBitrate
+                    ? (
+                        selectedPair.availableOutgoingBitrate / 1_000_000
+                    ).toFixed(2)
+                    : null,
+
+                currentRTT: selectedPair?.currentRoundTripTime ?? null,
+            });
         } catch (error) {
             console.warn(
-                "[InstantPeer] Failed to inspect DataChannel/SCTP stats:",
-                error
+                `[BlinkShare] Failed to inspect lane ${this.lane} stats:`,
+                error,
             );
         }
     }
@@ -767,9 +787,17 @@ export class InstantPeer {
         await this.getLane(lane).handleIceCandidate(candidate);
     }
 
-    // Phase 1: existing control messages and file data stay on lane 0.
+    // Control messages continue to use lane 0.
     send(data: string | ArrayBuffer | Blob): void {
         this.getLane(0).send(data);
+    }
+
+    // File data can be sent through a specific lane.
+    sendOnLane(
+        lane: number,
+        data: string | ArrayBuffer | Blob,
+    ): void {
+        this.getLane(lane).send(data);
     }
 
     setBufferedAmountLowThreshold(threshold: number): void {
@@ -778,6 +806,34 @@ export class InstantPeer {
 
     waitForBufferedAmountLow(): Promise<void> {
         return this.getLane(0).waitForBufferedAmountLow();
+    }
+
+    // Lane-specific backpressure APIs.
+    setLaneBufferedAmountLowThreshold(
+        lane: number,
+        threshold: number,
+    ): void {
+        this.getLane(lane).setBufferedAmountLowThreshold(threshold);
+    }
+
+    waitForLaneBufferedAmountLow(lane: number): Promise<void> {
+        return this.getLane(lane).waitForBufferedAmountLow();
+    }
+
+    getLaneBufferedAmount(lane: number): number {
+        return this.getLane(lane).bufferedAmount;
+    }
+
+    waitForLaneDrain(lane: number): Promise<void> {
+        const peer = this.getLane(lane);
+
+        peer.setBufferedAmountLowThreshold(0);
+
+        if (peer.bufferedAmount === 0) {
+            return Promise.resolve();
+        }
+
+        return peer.waitForBufferedAmountLow();
     }
 
     get state(): RTCPeerConnectionState {
@@ -798,8 +854,12 @@ export class InstantPeer {
         return this.getLane(0).logSelectedCandidatePair(logPath);
     }
 
-    logDataChannelStats(): Promise<void> {
-        return this.getLane(0).logDataChannelStats();
+    async logDataChannelStats(): Promise<void> {
+        await Promise.all(
+            this.lanes
+                .filter((lane): lane is InstantLane => lane !== undefined)
+                .map((lane) => lane.logDataChannelStats()),
+        );
     }
 
     get laneCount(): number {

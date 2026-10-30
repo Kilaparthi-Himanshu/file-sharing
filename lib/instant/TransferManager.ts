@@ -30,14 +30,14 @@ export class TransferManager {
 
     private readonly cancelledFiles = new Set<string>();
 
-    private static readonly INITIAL_WINDOW = 256 * 1024;
-    private static readonly MAX_WINDOW = 512 * 1024;
+    private static readonly INITIAL_WINDOW = 1 * 1024 * 1024;
 
     private readonly acked = new Map<string, number>();
 
     private ackWaiter: (() => void) | null = null;
 
     private nextFileSeq = 1;
+    private nextLane = 0;
 
     constructor(
         private readonly peer: InstantPeer,
@@ -72,7 +72,6 @@ export class TransferManager {
 
     async sendFile(fileId: string, file: File): Promise<void> {
         const statsInterval = window.setInterval(() => {
-            void this.peer.logSelectedCandidatePair(false);
             void this.peer.logDataChannelStats();
         }, 1000);
 
@@ -151,7 +150,7 @@ export class TransferManager {
                     return;
                 }
 
-                await this.waitForBuffer();
+                const lane = await this.waitForAvailableLane();
 
                 if (this.cancelledFiles.has(fileId)) {
                     this.cancelledFiles.delete(fileId);
@@ -176,7 +175,7 @@ export class TransferManager {
                     return;
                 }
 
-                this.peer.send(encodeChunkFrame(seq, offset, chunk));
+                this.peer.sendOnLane(lane, encodeChunkFrame(seq, offset, chunk));
 
                 // console.log(
                 //     "[TransferManager] CHUNK SENT:",
@@ -209,8 +208,13 @@ export class TransferManager {
                         "[TransferManager] RATE:",
                         {
                             mbps: mbps.toFixed(2),
-                            bufferedMB: (
-                                this.peer.bufferedAmount /
+                            lane0BufferedMB: (
+                                this.peer.getLaneBufferedAmount(0) /
+                                1024 /
+                                1024
+                            ).toFixed(2),
+                            lane1BufferedMB: (
+                                this.peer.getLaneBufferedAmount(1) /
                                 1024 /
                                 1024
                             ).toFixed(2),
@@ -242,7 +246,12 @@ export class TransferManager {
                 return;
             }
 
-            await this.waitForBuffer();
+            await Promise.all(
+                Array.from(
+                    { length: this.peer.laneCount },
+                    (_, lane) => this.peer.waitForLaneDrain(lane),
+                )
+            );
 
             if (this.cancelledFiles.has(fileId)) {
                 this.cancelledFiles.delete(fileId);
@@ -340,31 +349,50 @@ export class TransferManager {
         }
     }
 
-    private async waitForBuffer(): Promise<void> {
-        if (this.peer.bufferedAmount <= TransferManager.BUFFER_HIGH_WATERMARK) {
-            return;
+    private async waitForAvailableLane(): Promise<number> {
+        const laneCount = this.peer.laneCount;
+
+        if (laneCount < 1) {
+            throw new Error("No available DataChannels");
         }
 
-        this.peer.setBufferedAmountLowThreshold(TransferManager.BUFFER_LOW_WATERMARK);
+        while (true) {
+            const preferredLane = this.nextLane % laneCount;
 
-        console.log(
-            "[TransferManager] BACKPRESSURE START",
-            {
-                bufferedAmount: this.peer.bufferedAmount,
-                highWatermark: TransferManager.BUFFER_HIGH_WATERMARK,
+            // Check lanes in round-robin order.
+            for (let i = 0; i < laneCount; i++) {
+                const lane = (preferredLane + i) % laneCount;
+
+                const bufferedAmount = this.peer.getLaneBufferedAmount(lane);
+
+                if (bufferedAmount < TransferManager.BUFFER_HIGH_WATERMARK) {
+                    this.nextLane = (lane + 1) % laneCount;
+
+                    return lane;
+                }
             }
-        );
 
-        const start = performance.now();
+            // Every lane is congested. Wait until at least one
+            // lane's buffered amount drops below its low watermark.
+            const start = performance.now();
 
-        await this.peer.waitForBufferedAmountLow();
+            await Promise.race(
+                Array.from(
+                    { length: laneCount },
+                    (_, lane) => {
+                        this.peer.setLaneBufferedAmountLowThreshold(
+                            lane,
+                            TransferManager.BUFFER_LOW_WATERMARK,
+                        );
 
-        console.log(
-            "[TransferManager] BACKPRESSURE END",
-            {
-                bufferedAmount: this.peer.bufferedAmount,
-                durationMs: Math.round(performance.now() - start)
-            }
-        );
+                        return this.peer.waitForLaneBufferedAmountLow(lane);
+                    },
+                )
+            );
+
+            console.log("[TransferManager] LANE BACKPRESSURE RELEASED", {
+                durationMs: Math.round(performance.now() - start),
+            });
+        }
     }
 }

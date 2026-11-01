@@ -1,4 +1,4 @@
-import { SignalMessage } from "./types";
+import { SignalMessage } from "../../types";
 
 type PeerCallbacks = {
     onSignal: (message: SignalMessage) => void;

@@ -64,12 +64,12 @@ for file in files:
     try:
         content = file.read_text(encoding="utf-8")
 
-        # output.append(
-        #     f"\n{'=' * 80}\n"
-        #     f"FILE: {file}\n"
-        #     f"{'=' * 80}\n\n"
-        #     f"{content}\n"
-        # ) # With file names
+        output.append(
+            f"\n{'=' * 80}\n"
+            f"FILE: {file}\n"
+            f"{'=' * 80}\n\n"
+            f"{content}\n"
+        ) # With file names
 
         output.append(content) # Without file names
 

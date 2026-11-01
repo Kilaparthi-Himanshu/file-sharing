@@ -8,9 +8,9 @@ import {
     InstantSessionCallbacks,
     InstantSessionStatus,
     SignalMessage,
-} from "./types";
+} from "../../types";
 
-import { Transfer } from "./Transfer";
+import { Transfer } from "../../shared/Transfer";
 import { TransferManager } from "./TransferManager";
 import { TransferReceiver } from "./TransferReceiver";
 
@@ -18,7 +18,7 @@ import {
     FileCancelMessage,
     encodeControlMessage,
     createTransferEndMessage
-} from "./protocol/TransferProtocol";
+} from "../../shared/TransferProtocol";
 
 import { getIceServers } from "./IceConfig";
 import { store } from "@/app/Atoms/store";

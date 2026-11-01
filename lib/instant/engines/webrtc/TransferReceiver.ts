@@ -5,9 +5,9 @@ import {
     FileEndMessage,
     FileStartMessage,
     FileCancelMessage,
-} from "./protocol/TransferProtocol";
+} from "../../shared/TransferProtocol";
 
-import { ReceivedFile } from "./types";
+import { ReceivedFile } from "../../types";
 
 export type TransferReceiverCallbacks = {
     onFileStart?: (receptionId: string, file: FileStartMessage) => void;

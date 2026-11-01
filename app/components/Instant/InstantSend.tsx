@@ -8,7 +8,7 @@ import { FaRegFile } from "react-icons/fa6";
 
 import {
     InstantSession
-} from "@/lib/instant/InstantSession";
+} from "@/lib/instant/engines/webrtc/InstantSession";
 
 type ActiveTransfer = {
     id: string;

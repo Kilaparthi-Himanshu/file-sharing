@@ -5,9 +5,9 @@ import React, {
 } from "react";
 
 import ShinyText from "../misc/ShinyText";
-import { InstantSession } from "@/lib/instant/InstantSession";
+import { InstantSession } from "@/lib/instant/engines/webrtc/InstantSession";
 import { ReceivedFile } from "@/lib/instant/types";
-import { DownloadManager } from "@/lib/instant/DownloadManager";
+import { DownloadManager } from "@/lib/instant/shared/DownloadManager";
 import { Spinner } from "../Spinner";
 import { FaDownload, FaFolderOpen } from "react-icons/fa6";
 

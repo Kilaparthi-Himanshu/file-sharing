@@ -5,7 +5,7 @@ import {
     encodeChunkFrame,
     TransferMessage,
     FRAME_HEADER_BYTES
-} from "./protocol/TransferProtocol";
+} from "../../shared/TransferProtocol";
 
 import { InstantPeer } from "./InstantPeer";
 

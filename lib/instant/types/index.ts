@@ -1,10 +1,10 @@
 import type {
     FileStartMessage,
-} from "./protocol/TransferProtocol";
+} from "../shared/TransferProtocol";
 
 import type {
     TransferProgress as SendTransferProgress,
-} from "./TransferManager";
+} from "../engines/webrtc/TransferManager";
 
 export type InstantRole = "sender" | "receiver";
 

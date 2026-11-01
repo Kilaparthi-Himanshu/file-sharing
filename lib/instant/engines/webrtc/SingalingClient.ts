@@ -1,6 +1,6 @@
 import { RealtimeChannel } from "@supabase/supabase-js";
 import { createClient } from "@/app/utils/supabase/client";
-import { SignalMessage } from "./types";
+import { SignalMessage } from "../../types";
 
 type SignalHandler = (message: SignalMessage) => void;
 

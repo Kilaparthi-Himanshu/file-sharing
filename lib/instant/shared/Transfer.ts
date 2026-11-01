@@ -1,4 +1,4 @@
-import { generateTransferId } from "./types";
+import { generateTransferId } from "../types";
 
 export type TransferFile = {
     id: string;

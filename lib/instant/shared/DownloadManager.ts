@@ -1,4 +1,4 @@
-import { ReceivedFile } from "./types";
+import { ReceivedFile } from "../types";
 
 export type DownloadProgressCallback = (
     bytesWritten: number,

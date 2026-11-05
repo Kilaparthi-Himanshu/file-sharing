@@ -3,6 +3,8 @@ import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify
 import { ConfigService } from '@nestjs/config';
 import { Logger } from 'nestjs-pino';
 
+import { GlobalValidationPipe } from './common/pipes/validation.pipe';
+
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -15,6 +17,7 @@ async function bootstrap() {
     );
 
     app.useLogger(app.get(Logger));
+    app.useGlobalPipes(GlobalValidationPipe);
 
     const configService = app.get(ConfigService);
     const port = configService.get<number>('PORT', 3001);

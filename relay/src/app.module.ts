@@ -9,6 +9,7 @@ import { loggerConfig } from './config/logger.config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
     imports: [
@@ -25,6 +26,8 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
         }),
 
         LoggerModule.forRoot(loggerConfig),
+
+        HealthModule,
     ],
     controllers: [AppController],
     providers: [

@@ -10,6 +10,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { HealthModule } from './modules/health/health.module';
+import { TransfersModule } from './modules/transfers/transfers.module';
 
 @Module({
     imports: [
@@ -28,6 +29,8 @@ import { HealthModule } from './modules/health/health.module';
         LoggerModule.forRoot(loggerConfig),
 
         HealthModule,
+
+        TransfersModule,
     ],
     controllers: [AppController],
     providers: [

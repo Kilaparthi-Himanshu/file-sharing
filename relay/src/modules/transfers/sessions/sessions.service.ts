@@ -21,11 +21,12 @@ export class SessionsService {
         private readonly repository: SessionsRepository,
     ) {}
 
-    async createSession(): Promise<TransferSession> {
+    async createSession(senderParticipantId: string): Promise<TransferSession> {
         const now = new Date();
 
         const session: TransferSession = {
             id: randomUUID(),
+            senderParticipantId,
             status: 'active',
             createdAt: now,
             updatedAt: now,
@@ -73,5 +74,10 @@ export class SessionsService {
         session.closedAt = new Date();
 
         return this.repository.update(session);
+    }
+
+    async deleteSession(id: string): Promise<void> {
+        await this.getSession(id);
+        await this.repository.delete(id);
     }
 }

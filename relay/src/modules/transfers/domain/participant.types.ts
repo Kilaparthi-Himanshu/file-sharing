@@ -1,3 +1,5 @@
+export type ParticipantRole = 'sender' | 'receiver';
+
 export type ParticipantStatus =
     | 'active'
     | 'disconnected'
@@ -13,9 +15,10 @@ export interface Participant {
     id: string;
     sessionId: string;
 
+    role: ParticipantRole;
     status: ParticipantStatus;
 
-    permission: ParticipantPermissions;
+    permissions: ParticipantPermissions;
 
     joinedAt: Date;
     lastSeenAt: Date;

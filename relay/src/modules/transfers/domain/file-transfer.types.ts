@@ -7,8 +7,8 @@ export type FileUploadStatus =
 
 export interface FileTransfer {
     id: string;
-    sessionId: string;
 
+    sessionId: string;
     senderId: string;
 
     name: string;
@@ -17,9 +17,9 @@ export interface FileTransfer {
 
     uploadStatus: FileUploadStatus;
 
-    checkSum?: string;
+    checksum?: string;
 
-    createdAt?: Date;
-    updatedAt?: Date;
+    createdAt: Date;
+    updatedAt: Date;
     uploadedAt?: Date;
 }

@@ -1,4 +1,4 @@
-import { FileTransfer } from "../domain";
+import type { FileTransfer } from '../domain';
 
 export const FILES_REPOSITORY = Symbol('FILES_REPOSITORY');
 

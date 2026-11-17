@@ -14,6 +14,8 @@ export interface StreamConnection {
     fileId: string;
     participantId: string;
 
+    deliveryId?: string;
+
     direction: StreamDirection;
 
     status: StreamConnectionStatus;

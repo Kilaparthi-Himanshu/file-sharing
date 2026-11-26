@@ -35,13 +35,15 @@ export class InMemoryDeliveriesRepository implements DeliveriesRepository {
     }
 
     async findByFileAndReceiver(fileId: string, receiverId: string): Promise<FileDelivery | null> {
-        const delivery = Array.from(this.deliveries.values()).find(
-            (item) =>
-                item.fileId === fileId &&
-                item.receiverId === receiverId
+        const matchingDeliveries = Array.from(this.deliveries.values()).filter(
+            (delivery) =>
+                delivery.fileId === fileId &&
+                delivery.receiverId === receiverId,
         );
 
-        return delivery ? this.copy(delivery) : null;
+        const latestDelivery = matchingDeliveries[matchingDeliveries.length - 1];
+
+        return latestDelivery ? this.copy(latestDelivery) : null;
     }
 
     async update(delivery: FileDelivery): Promise<FileDelivery> {

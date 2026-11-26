@@ -82,7 +82,16 @@ export class DeliveriesService {
                 return existingDelivery;
             }
 
-            throw new ConflictException('A delivery record already exists for this receiver and file');
+            if (
+                existingDelivery.status === 'completed' ||
+                existingDelivery.status === 'cancelled'
+            ) {
+                throw new ConflictException(
+                    'This receiver has already completed or cancelled this delivery',
+                );
+            }
+
+            // A failed delivery can be retried as a new attempt.
         }
 
         const now = new Date();

@@ -294,4 +294,32 @@ it('should reject progress updates that decrease bytes sent', async () => {
             service.getFileDeliveries(fileId, anotherTransfer.senderParticipant.id),
         ).rejects.toThrow();
     });
+
+    it('should create a new delivery attempt after a previous attempt failed', async () => {
+        const firstDelivery = await service.createDelivery(
+            fileId,
+            receiverOneId,
+        );
+
+        await service.startDelivery(firstDelivery.id, receiverOneId);
+        await service.updateProgress(firstDelivery.id, receiverOneId, 256);
+        await service.failDelivery(firstDelivery.id, receiverOneId);
+
+        const retryDelivery = await service.createDelivery(
+            fileId,
+            receiverOneId,
+        );
+
+        expect(retryDelivery.id).not.toBe(firstDelivery.id);
+        expect(retryDelivery.status).toBe('pending');
+        expect(retryDelivery.bytesSent).toBe(0);
+
+        const attempts = await service.getReceiverDeliveries(receiverOneId);
+
+        expect(attempts).toHaveLength(2);
+        expect(attempts.map((delivery) => delivery.status)).toEqual([
+            'failed',
+            'pending',
+        ]);
+    });
 });

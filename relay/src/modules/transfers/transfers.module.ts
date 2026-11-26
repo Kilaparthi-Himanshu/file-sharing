@@ -6,13 +6,15 @@ import { TransfersController } from "./transfers.controller";
 import { TransfersService } from "./transfers.service";
 import { FilesModule } from "./files/files.module";
 import { DeliveriesModule } from './deliveries/deliveries.module';
+import { StreamConnectionsModule } from './stream-connections/stream-connections.module';
 
 @Module({
     imports: [
         SessionsModule,
         ParticipantsModule,
         FilesModule,
-        DeliveriesModule
+        DeliveriesModule,
+        StreamConnectionsModule
     ],
     controllers: [
         TransfersController,
@@ -22,6 +24,7 @@ import { DeliveriesModule } from './deliveries/deliveries.module';
     ],
     exports: [
         TransfersService,
+        StreamConnectionsModule,
     ],
 })
 export class TransfersModule {}
